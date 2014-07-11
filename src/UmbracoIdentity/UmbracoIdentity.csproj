@@ -224,6 +224,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppBuilderExtensions.cs" />
+    <Compile Include="FixAsyncActionInvokerStartupHandler.cs" />
+    <Compile Include="FixedAsyncRenderActionInvoker.cs" />
+    <Compile Include="FixedAsyncRenderControllerFactory.cs" />
+    <Compile Include="FixedAsyncRenderMvcController.cs" />
     <Compile Include="IdentityEnabledMembersMembershipProvider.cs" />
     <Compile Include="MembershipPasswordHasher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
