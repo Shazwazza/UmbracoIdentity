@@ -1,4 +1,4 @@
-UmbracoIdentity
+ASP.Net Identity for Umbraco
 ===============
 
 Allows for using OWIN &amp; ASP.Net Identity in Umbraco
@@ -86,3 +86,74 @@ If you are familiar then here's what to do... In your OWIN startup class:
 
 Because this is using a different authentication mechanism than Umbraco normally uses, it means that a few of the MembershipHelper methods will not work, such as sign in/out. You will need to use OWIN to perform these methods. With this setup you should be able to use the code that you'll find in the VS template's AccountController.
     
+Here's an example controller that lets you log in and out, this is the same code that is found in Umbraco's built in `UmbLoginController` and `UmbLoginStatusController` except that this is using OWIN and the UmbracoMembersUserManager to perform the authentication issue the auth ticket.
+
+    [Authorize]
+    public class MyAccountController : SurfaceController
+    {
+        private UmbracoMembersUserManager<ApplicationUser> _userManager;
+
+
+        protected IOwinContext OwinContext
+        {
+            get { return HttpContext.GetOwinContext(); }
+        }
+
+        public UmbracoMembersUserManager<ApplicationUser> UserManager
+        {
+            get
+            {
+                return _userManager ?? (_userManager = HttpContext.GetOwinContext()
+                    .GetUserManager<UmbracoMembersUserManager<ApplicationUser>>());
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<ActionResult> HandleLogin([Bind(Prefix = "loginModel")] LoginModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await UserManager.FindAsync(model.Username, model.Password);
+                if (user != null)
+                {
+                    await SignInAsync(user, true);
+                    return RedirectToCurrentUmbracoPage();
+                }
+                ModelState.AddModelError("loginModel", "Invalid username or password");
+            }
+
+            return CurrentUmbracoPage();
+        }
+
+        [HttpPost]
+        public ActionResult HandleLogout([Bind(Prefix = "logoutModel")]PostRedirectModel model)
+        {
+            if (ModelState.IsValid == false)
+            {
+                return CurrentUmbracoPage();
+            }
+
+            if (Members.IsLoggedIn())
+            {
+                OwinContext.Authentication.SignOut();
+            }
+
+            //if there is a specified path to redirect to then use it
+            if (model.RedirectUrl.IsNullOrWhiteSpace() == false)
+            {
+                return Redirect(model.RedirectUrl);
+            }
+
+            //redirect to current page by default
+            TempData["LogoutSuccess"] = true;
+            return RedirectToCurrentUmbracoPage();
+        }
+
+        private async Task SignInAsync(ApplicationUser user, bool isPersistent)
+        {
+            OwinContext.Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
+            OwinContext.Authentication.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent },
+                await user.GenerateUserIdentityAsync(UserManager));
+        }
+    }
