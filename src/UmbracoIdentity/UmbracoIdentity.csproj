@@ -234,6 +234,7 @@
     <Compile Include="UmbracoBackOfficeAuthenticationHandler.cs" />
     <Compile Include="UmbracoBackOfficeAuthenticationMiddleware.cs" />
     <Compile Include="UmbracoBackOfficeAuthenticationOptions.cs" />
+    <Compile Include="UmbracoIdentityUser.cs" />
     <Compile Include="UmbracoMembersUserManager.cs" />
     <Compile Include="UmbracoMembersUserStore.cs" />
   </ItemGroup>

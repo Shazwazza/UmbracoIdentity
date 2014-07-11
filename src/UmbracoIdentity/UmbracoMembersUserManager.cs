@@ -1,7 +1,6 @@
 using System;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Umbraco.Core.Services;
@@ -11,10 +10,10 @@ namespace UmbracoIdentity
     /// <summary>
     /// A custom user manager that uses the UmbracoMembersUserStore
     /// </summary>
-    public class UmbracoMembersUserManager<T> : UserManager<T>
-        where T : IdentityUser, IUser<string>, new()
+    public class UmbracoMembersUserManager<T> : UserManager<T, int>
+        where T : UmbracoIdentityUser, IUser<int>, new()
     {
-        public UmbracoMembersUserManager(IUserStore<T> store)
+        public UmbracoMembersUserManager(IUserStore<T, int> store)
             : base(store)
         {
         }
@@ -71,7 +70,7 @@ namespace UmbracoIdentity
             var manager = new UmbracoMembersUserManager<T>(new UmbracoMembersUserStore<T>(memberService, provider));
 
             // Configure validation logic for usernames
-            manager.UserValidator = new UserValidator<T>(manager)
+            manager.UserValidator = new UserValidator<T, int>(manager)
             {
                 AllowOnlyAlphanumericUserNames = false,
                 RequireUniqueEmail = true
@@ -110,7 +109,7 @@ namespace UmbracoIdentity
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = new DataProtectorTokenProvider<T>(dataProtectionProvider.Create("ASP.NET Identity"));
+                manager.UserTokenProvider = new DataProtectorTokenProvider<T, int>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
             return manager;
         }
