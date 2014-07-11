@@ -82,5 +82,7 @@ If you are familiar then here's what to do... In your OWIN startup class:
 
         app.UseUmbracoBackAuthentication();
         
+## Usage
 
+Because this is using a different authentication mechanism than Umbraco normally uses, it means that a few of the MembershipHelper methods will not work, such as sign in/out. You will need to use OWIN to perform these methods. With this setup you should be able to use the code that you'll find in the VS template's AccountController.
     
