@@ -45,7 +45,7 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
 
 If you are familiar then here's what to do... In your OWIN startup class:
 
-* Create an ApplicationUser class - just like the one that is created in the VS templates. It just needs to inherit from `Microsoft.AspNet.Identity.EntityFramework.IdentityUser`
+* Create an ApplicationUser class - just like the one that is created in the VS templates. It just needs to inherit from `UmbracoIdentity.UmbracoIdentityUser`
 * Register an `UmbracoMembersUserManager<T>` in the OWIN context:
 
         app.CreatePerOwinContext<UmbracoMembersUserManager<ApplicationUser>>(
