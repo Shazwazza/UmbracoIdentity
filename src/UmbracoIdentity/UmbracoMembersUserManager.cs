@@ -4,7 +4,6 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
-using Umbraco.Core;
 using Umbraco.Core.Services;
 
 namespace UmbracoIdentity
@@ -19,7 +18,32 @@ namespace UmbracoIdentity
             : base(store)
         {
         }
-        
+
+        //TODO: Support this
+        public override bool SupportsUserRole
+        {
+            get { return false; }
+        }
+
+        //TODO: Support this
+        public override bool SupportsQueryableUsers
+        {
+            get { return false; }
+        }
+
+        //TODO: Support this
+        public override bool SupportsUserLockout
+        {
+            get { return false;  }
+        }
+
+        //TODO: Support this
+        public override bool SupportsUserSecurityStamp
+        {
+            get { return false; }
+        }
+
+
         public override bool SupportsUserTwoFactor
         {
             get { return false; }
@@ -31,7 +55,7 @@ namespace UmbracoIdentity
         }
 
         public static UmbracoMembersUserManager<T> Create(
-            IdentityFactoryOptions<UmbracoMembersUserManager<T>> options,
+            IdentityFactoryOptions<UmbracoMembersUserManager<T>> options, 
             IOwinContext context,
             IMemberService memberService)
         {
@@ -52,7 +76,7 @@ namespace UmbracoIdentity
                 AllowOnlyAlphanumericUserNames = false,
                 RequireUniqueEmail = true
             };
-
+            
             // Configure validation logic for passwords
             manager.PasswordValidator = new PasswordValidator
             {
@@ -60,7 +84,7 @@ namespace UmbracoIdentity
                 RequireNonLetterOrDigit = provider.MinRequiredNonAlphanumericCharacters > 0,
                 RequireDigit = false,
                 RequireLowercase = false,
-                RequireUppercase = false
+                RequireUppercase = false                
             };
 
             //use a custom hasher based on our membership provider
@@ -79,7 +103,7 @@ namespace UmbracoIdentity
             //    Subject = "Security Code",
             //    BodyFormat = "Your security code is: {0}"
             //});
-
+            
             //manager.EmailService = new EmailService();
             //manager.SmsService = new SmsService();
 
