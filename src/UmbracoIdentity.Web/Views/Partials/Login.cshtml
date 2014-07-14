@@ -1,0 +1,37 @@
+@using System.Web.Mvc.Html
+@using ClientDependency.Core.Mvc
+@using Controllers
+@using Umbraco.Web
+@using Umbraco.Web.Models
+@using Umbraco.Web.Controllers
+
+@{
+    var loginModel = new LoginModel();
+    
+    Html.EnableClientValidation();
+    Html.EnableUnobtrusiveJavaScript();
+    
+}
+
+
+
+@using (Html.BeginUmbracoForm<MyAccountController>("HandleLogin"))
+{
+    <fieldset>
+        <legend>Login</legend>
+        
+        @Html.ValidationSummary("loginModel", true)
+
+        @Html.LabelFor(m => loginModel.Username)
+        @Html.TextBoxFor(m => loginModel.Username)
+        @Html.ValidationMessageFor(m => loginModel.Username)
+        <br />
+
+        @Html.LabelFor(m => loginModel.Password)
+        @Html.PasswordFor(m => loginModel.Password)
+        @Html.ValidationMessageFor(m => loginModel.Password)
+        <br />
+
+        <button>Login</button>
+    </fieldset>  
+}

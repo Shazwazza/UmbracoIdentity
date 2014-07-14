@@ -12,6 +12,28 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{784E20
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "UmbracoIdentity.Web", "http://localhost:45678", "{773160D5-E5A8-49C2-BC71-D09FE4808E80}"
+	ProjectSection(WebsiteProperties) = preProject
+		UseIISExpress = "true"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_45678"
+		Debug.AspNetCompiler.PhysicalPath = "UmbracoIdentity.Web\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_45678\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_45678"
+		Release.AspNetCompiler.PhysicalPath = "UmbracoIdentity.Web\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_45678\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		SlnRelativePath = "UmbracoIdentity.Web\"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +44,10 @@ Global
 		{FF225509-B1E9-41C0-BB9E-1A5DDBEA87F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF225509-B1E9-41C0-BB9E-1A5DDBEA87F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF225509-B1E9-41C0-BB9E-1A5DDBEA87F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{773160D5-E5A8-49C2-BC71-D09FE4808E80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{773160D5-E5A8-49C2-BC71-D09FE4808E80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{773160D5-E5A8-49C2-BC71-D09FE4808E80}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{773160D5-E5A8-49C2-BC71-D09FE4808E80}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

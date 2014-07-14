@@ -155,3 +155,22 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 src/packages/*
+src/UmbracoIdentity.Web/App_Data/TEMP/*
+src/UmbracoIdentity.Web/App_Data/Logs/*
+src/UmbracoIdentity.Web/App_Data/access.config
+src/UmbracoIdentity.Web/App_Data/packages/*
+src/UmbracoIdentity.Web/App_Data/umbraco.config
+src/UmbracoIdentity.Web/App_Plugins/*
+src/UmbracoIdentity.Web/Config/*
+src/UmbracoIdentity.Web/Css/*
+src/UmbracoIdentity.Web/default.aspx
+src/UmbracoIdentity.Web/Global.asax
+src/UmbracoIdentity.Web/images/*
+src/UmbracoIdentity.Web/js/*
+src/UmbracoIdentity.Web/Media/*
+src/UmbracoIdentity.Web/packages/*
+src/UmbracoIdentity.Web/Umbraco/*
+src/UmbracoIdentity.Web/Umbraco_Client/*
+src/UmbracoIdentity.Web/Xslt/Web.config
+src/UmbracoIdentity.Web/App_Browsers/*
+src/UmbracoIdentity.Web/MacroScripts/Web.config
