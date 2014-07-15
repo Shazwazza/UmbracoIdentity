@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>UmbracoIdentity</id>
+    <title>ASP.Net Identity for Umbraco</title>
+    <version>0.0.0.0</version>
+    <authors>Shannon Deminick</authors>
+    <description>A library for enabling ASP.Net Identity to work with Umbraco</description>
+    <summary>A library for enabling ASP.Net Identity to work with Umbraco</summary>
+    <language>en-US</language>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/Shandem/UmbracoIdentity/</projectUrl>
+    <tags>asp.net identity umbraco security authentication authorization owin</tags>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  </metadata>
+  <files>
+
+    <file src="*.dll" target="lib\net451" />
+    <file src="*.pdb" target="lib\net451" />
+
+    <!--<file src="nuget-transforms\web.config.transform" target="Content" />-->
+  </files>
+</package>
