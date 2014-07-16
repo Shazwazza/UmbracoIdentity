@@ -1,9 +1,9 @@
-﻿@model Models.ExternalLoginListViewModel
-@using Controllers
+﻿@model UmbracoIdentity.Web.Models.ExternalLoginListViewModel
+@using UmbracoIdentity.Web.Controllers
 @using Microsoft.Owin.Security
 
 <h4>Use another service to log in.</h4>
-<hr />
+
 @{
     var loginProviders = Context.GetOwinContext().Authentication.GetExternalAuthenticationTypes();
     if (!loginProviders.Any())
@@ -17,7 +17,7 @@
     }
     else
     {
-        using (Html.BeginUmbracoForm<MyAccountController>(Model.Action, new { ReturnUrl = Model.ReturnUrl }))
+        using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>(Model.Action, new { ReturnUrl = Model.ReturnUrl }))
         {
             @Html.AntiForgeryToken()
             <div id="socialLoginList">

@@ -5,22 +5,22 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
-using Models;
-using MyProject;
+using Umbraco.Web;
+using UmbracoIdentity.Web.Models;
+using UmbracoIdentity.Web;
 using Umbraco.Core;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 using UmbracoIdentity;
 using IdentityExtensions = UmbracoIdentity.IdentityExtensions;
 
-namespace Controllers
+namespace UmbracoIdentity.Web.Controllers
 {
     [Authorize]
-    public class MyAccountController : SurfaceController
+    public class UmbracoIdentityAccountController : SurfaceController
     {
         private UmbracoMembersUserManager<ApplicationUser> _userManager;
-
-
+        
         protected IOwinContext OwinContext
         {
             get { return HttpContext.GetOwinContext(); }
@@ -35,27 +35,27 @@ namespace Controllers
             }
         }
 
-        //
-        // POST: /Account/ExternalLogin
+        #region External login and registration
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult ExternalLogin(string provider, string returnUrl)
         {
             // Request a redirect to the external login provider
-            return new ChallengeResult(provider, Url.Action("ExternalLoginCallback", "MyAccount", new { ReturnUrl = returnUrl }));
+            return new ChallengeResult(provider,
+                Url.SurfaceAction<UmbracoIdentityAccountController>("ExternalLoginCallback", new { ReturnUrl = returnUrl }));
         }
 
-        //
-        // GET: /Account/ExternalLoginCallback
+        [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
         {
             var loginInfo = await OwinContext.Authentication.GetExternalLoginInfoAsync();
             if (loginInfo == null)
             {
+                //go home, invalid callback
                 return RedirectToLocal("/");
-                //return RedirectToAction("Login");
             }
 
             // Sign in the user with this external login provider if the user already has a login
@@ -70,22 +70,22 @@ namespace Controllers
                 // If the user does not have an account, then prompt the user to create an account
                 ViewBag.ReturnUrl = returnUrl;
                 ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
+
                 return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
             }
         }
 
-        //
-        // POST: /Account/LinkLogin
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult LinkLogin(string provider)
         {
             // Request a redirect to the external login provider to link a login for the current user
-            return new ChallengeResult(provider, Url.Action("LinkLoginCallback", "MyAccount"), User.Identity.GetUserId());
+            return new ChallengeResult(provider,
+                Url.SurfaceAction<UmbracoIdentityAccountController>("LinkLoginCallback"),
+                User.Identity.GetUserId());
         }
 
-        //
-        // GET: /Account/LinkLoginCallback
+        [HttpGet]
         public async Task<ActionResult> LinkLoginCallback()
         {
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.GetUserId());
@@ -93,7 +93,7 @@ namespace Controllers
             {
                 return RedirectToAction("Manage", new { Message = ManageMessageId.Error });
             }
-            IdentityResult result = await UserManager.AddLoginAsync(IdentityExtensions.GetUserId<int>(User.Identity), loginInfo.Login);
+            var result = await UserManager.AddLoginAsync(User.Identity.GetUserId<int>(), loginInfo.Login);
             if (result.Succeeded)
             {
                 return RedirectToAction("Manage");
@@ -101,8 +101,6 @@ namespace Controllers
             return RedirectToAction("Manage", new { Message = ManageMessageId.Error });
         }
 
-        //
-        // POST: /Account/ExternalLoginConfirmation
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -110,7 +108,8 @@ namespace Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Manage");
+                //go home, already authenticated
+                return RedirectToLocal("/");
             }
 
             if (ModelState.IsValid)
@@ -121,15 +120,15 @@ namespace Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                
 
                 var user = new ApplicationUser()
                 {
                     Name = info.ExternalIdentity.Name,
-                    UserName = model.Email, 
+                    UserName = model.Email,
                     Email = model.Email
                 };
-                IdentityResult result = await UserManager.CreateAsync(user);
+
+                var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     result = await UserManager.AddLoginAsync(user.Id, info.Login);
@@ -151,7 +150,11 @@ namespace Controllers
 
             ViewBag.ReturnUrl = returnUrl;
             return View(model);
-        }
+        } 
+
+        #endregion
+
+        #region Standard login and registration
 
         [HttpPost]
         [AllowAnonymous]
@@ -207,7 +210,7 @@ namespace Controllers
 
             var user = new ApplicationUser()
             {
-                UserName = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username, 
+                UserName = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username,
                 Email = model.Email
             };
 
@@ -237,19 +240,12 @@ namespace Controllers
             }
 
             return CurrentUmbracoPage();
-        }
+        } 
 
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && UserManager != null)
-            {
-                UserManager.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        #endregion
 
         #region Helpers
+
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
 
@@ -276,21 +272,6 @@ namespace Controllers
             }
         }
 
-        //private bool HasPassword()
-        //{
-        //    var user = UserManager.FindById(User.Identity.GetUserId());
-        //    if (user != null)
-        //    {
-        //        return user.PasswordHash != null;
-        //    }
-        //    return false;
-        //}
-
-        //private void SendEmail(string email, string callbackUrl, string subject, string message)
-        //{
-        //    // For information on sending mail, please visit http://go.microsoft.com/fwlink/?LinkID=320771
-        //}
-
         public enum ManageMessageId
         {
             ChangePasswordSuccess,
@@ -305,29 +286,21 @@ namespace Controllers
             {
                 return Redirect(returnUrl);
             }
-            else
-            {
-                return Redirect("/");
-            }
+            return Redirect("/");
         }
 
         private class ChallengeResult : HttpUnauthorizedResult
         {
-            public ChallengeResult(string provider, string redirectUri)
-                : this(provider, redirectUri, null)
-            {
-            }
-
-            public ChallengeResult(string provider, string redirectUri, string userId)
+            public ChallengeResult(string provider, string redirectUri, string userId = null)
             {
                 LoginProvider = provider;
                 RedirectUri = redirectUri;
                 UserId = userId;
             }
 
-            public string LoginProvider { get; set; }
-            public string RedirectUri { get; set; }
-            public string UserId { get; set; }
+            private string LoginProvider { get; set; }
+            private string RedirectUri { get; set; }
+            private string UserId { get; set; }
 
             public override void ExecuteResult(ControllerContext context)
             {
@@ -339,7 +312,17 @@ namespace Controllers
                 context.HttpContext.GetOwinContext().Authentication.Challenge(properties, LoginProvider);
             }
         }
+
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && UserManager != null)
+            {
+                UserManager.Dispose();
+            }
+            base.Dispose(disposing);
+        }
     }
 
 }

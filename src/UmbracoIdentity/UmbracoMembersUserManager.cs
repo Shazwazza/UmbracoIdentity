@@ -56,7 +56,8 @@ namespace UmbracoIdentity
         public static UmbracoMembersUserManager<T> Create(
             IdentityFactoryOptions<UmbracoMembersUserManager<T>> options, 
             IOwinContext context,
-            IMemberService memberService)
+            IMemberService memberService,
+            IExternalLoginStore externalLoginStore = null)
         {
 
             //we'll grab some settings from the membership provider
@@ -67,7 +68,13 @@ namespace UmbracoIdentity
                 throw new InvalidOperationException("In order to use " + typeof(UmbracoMembersUserManager<>) + " the Umbraco members membership provider must be of type " + typeof(IdentityEnabledMembersMembershipProvider));
             }
 
-            var manager = new UmbracoMembersUserManager<T>(new UmbracoMembersUserStore<T>(memberService, provider));
+            if (externalLoginStore == null)
+            {
+                //use the default
+                externalLoginStore = new ExternalLoginStore();
+            }
+
+            var manager = new UmbracoMembersUserManager<T>(new UmbracoMembersUserStore<T>(memberService, provider, externalLoginStore));
 
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<T, int>(manager)

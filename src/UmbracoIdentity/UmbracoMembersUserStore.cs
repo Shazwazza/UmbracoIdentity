@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlServerCe;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Umbraco.Core;
-using Umbraco.Core.IO;
 using Umbraco.Core.Models;
-using Umbraco.Core.Persistence;
-using Umbraco.Core.Persistence.DatabaseAnnotations;
 using Umbraco.Core.Services;
 using Task = System.Threading.Tasks.Task;
 
@@ -24,12 +20,17 @@ namespace UmbracoIdentity
     {
         private readonly IMemberService _memberService;
         private readonly IdentityEnabledMembersMembershipProvider _membershipProvider;
-        private readonly ExternalLoginStore _externalLoginStore = new ExternalLoginStore();
+        private readonly IExternalLoginStore _externalLoginStore;
 
-        public UmbracoMembersUserStore(IMemberService memberService, IdentityEnabledMembersMembershipProvider membershipProvider)
+        public UmbracoMembersUserStore(IMemberService memberService, IdentityEnabledMembersMembershipProvider membershipProvider, IExternalLoginStore externalLoginStore)
         {
+            if (memberService == null) throw new ArgumentNullException("memberService");
+            if (membershipProvider == null) throw new ArgumentNullException("membershipProvider");
+            if (externalLoginStore == null) throw new ArgumentNullException("externalLoginStore");
+
             _memberService = memberService;
             _membershipProvider = membershipProvider;
+            _externalLoginStore = externalLoginStore;
 
             if (_membershipProvider.PasswordFormat != MembershipPasswordFormat.Hashed)
             {
@@ -121,7 +122,8 @@ namespace UmbracoIdentity
                     LockoutEnabled = member.IsLockedOut,
                     LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                     UserName = member.Username,
-                    PasswordHash = member.RawPasswordValue
+                    PasswordHash = member.RawPasswordValue,
+                    Name = member.Name
                 };
             });
         }
@@ -143,7 +145,8 @@ namespace UmbracoIdentity
                     LockoutEnabled = member.IsLockedOut,
                     LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                     UserName = member.Username,
-                    PasswordHash = member.RawPasswordValue
+                    PasswordHash = member.RawPasswordValue,
+                    Name = member.Name
                 };
             });
         }
@@ -269,16 +272,18 @@ namespace UmbracoIdentity
                 if (result != null)
                 {
                     var member = _memberService.GetById(result.Value);
-
-                    return new T
+                    if (member != null)
                     {
-                        Email = member.Email,
-                        Id = member.Id,
-                        LockoutEnabled = member.IsLockedOut,
-                        LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                        UserName = member.Username,
-                        PasswordHash = member.RawPasswordValue
-                    };
+                        return new T
+                        {
+                            Email = member.Email,
+                            Id = member.Id,
+                            LockoutEnabled = member.IsLockedOut,
+                            LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
+                            UserName = member.Username,
+                            PasswordHash = member.RawPasswordValue
+                        };   
+                    }
                 }
 
                 return null;
@@ -295,12 +300,12 @@ namespace UmbracoIdentity
             var anythingChanged = false;
             //don't assign anything if nothing has changed as this will trigger
             //the track changes of the model
-            if (member.Name != user.Name)
+            if (member.Name != user.Name && user.Name.IsNullOrWhiteSpace() == false)
             {
                 anythingChanged = true;
                 member.Name = user.Name;
             }
-            if (member.Email != user.Email)
+            if (member.Email != user.Email && user.Email.IsNullOrWhiteSpace() == false)
             {
                 anythingChanged = true;
                 member.Email = user.Email;
@@ -315,111 +320,17 @@ namespace UmbracoIdentity
                 anythingChanged = true;
                 member.IsLockedOut = user.LockoutEnabled;
             }
-            if (member.Username != user.UserName)
+            if (member.Username != user.UserName && user.UserName.IsNullOrWhiteSpace() == false)
             {
                 anythingChanged = true;
                 member.Username = user.UserName;
             }
-            if (member.RawPasswordValue != user.PasswordHash)
+            if (member.RawPasswordValue != user.PasswordHash && user.PasswordHash.IsNullOrWhiteSpace() == false)
             {
                 anythingChanged = true;
                 member.RawPasswordValue = user.PasswordHash;
             }
             return anythingChanged;
-        }
-    }
-
-    /// <summary>
-    /// Currently we're storing external logins in files in App_Data/TEMP/UmbracoIdentity - 
-    /// TODO: this should be handled in the db, we'll end up with a ton of files if there's lots of members!
-    /// </summary>
-    internal class ExternalLoginStore : DisposableObject
-    {
-        //TODO: What is the OWIN form of MapPath??
-
-        public static readonly object Locker = new object();
-        private readonly UmbracoDatabase _db;
-
-        private const string ConnString = @"Data Source=|DataDirectory|\UmbracoIdentity.sdf;Flush Interval=1;";
-
-        public ExternalLoginStore()
-        {
-            if (!System.IO.File.Exists(IOHelper.MapPath("~/App_Data/UmbracoIdentity.sdf")))
-            {
-                using (var en = new SqlCeEngine(ConnString))
-                {
-                    en.CreateDatabase();
-                }    
-            }
-            _db = new UmbracoDatabase(ConnString, "System.Data.SqlServerCe.4.0");
-            if (!_db.TableExist("ExternalIdentities"))
-            {
-                _db.CreateTable<ExternalLoginDto>();
-            }
-        }
-
-        public int? Find(UserLoginInfo login)
-        {
-            var sql = new Sql() 
-                .Select("*")
-                .From<ExternalLoginDto>()
-                .Where<ExternalLoginDto>(dto => dto.LoginProvider == login.LoginProvider && dto.ProviderKey == login.ProviderKey);
-
-            var found = _db.Fetch<ExternalLoginDto>(sql);
-
-            return found.Any()
-                ? found.First().UserId
-                : (int?) null;
-        }
-
-        public void SaveUserLogins(int memberId, IEnumerable<UserLoginInfo> logins)
-        {
-            using (var t = _db.GetTransaction())
-            {
-                //clear out logins for member
-                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new {userId = memberId});
-
-                //add them all
-                foreach (var l in logins)
-                {
-                    _db.Insert(new ExternalLoginDto
-                    {
-                        LoginProvider = l.LoginProvider,
-                        ProviderKey = l.ProviderKey,
-                        UserId = memberId
-                    });
-                }
-
-                t.Complete();
-            }
-        }
-
-        protected override void DisposeResources()
-        {
-            _db.Dispose();
-        }
-
-        [TableName("ExternalLogins")]
-        [ExplicitColumns]
-        [PrimaryKey("ExternalLoginId")]
-        internal class ExternalLoginDto
-        {
-            [Column("ExternalLoginId")]
-            [PrimaryKeyColumn(Name = "PK_ExternalLoginId")]
-            public int ExternalLoginId { get; set; }
-
-            [Column("UserId")]
-            public int UserId { get; set; }
-
-            [Column("LoginProvider")]
-            [Length(4000)]
-            [NullSetting(NullSetting = NullSettings.NotNull)]
-            public string LoginProvider { get; set; }
-
-            [Column("ProviderKey")]
-            [Length(4000)]
-            [NullSetting(NullSetting = NullSettings.NotNull)]
-            public string ProviderKey { get; set; }
         }
     }
 }

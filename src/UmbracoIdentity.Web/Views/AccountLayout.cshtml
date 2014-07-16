@@ -1,0 +1,28 @@
+﻿@using ClientDependency.Core.Mvc
+@inherits UmbracoViewPage<dynamic>
+@{
+    Layout = null;
+
+    Html
+        .RequiresJs("/umbraco_client/ui/jquery.js")
+        .RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.min.js")
+        .RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.unobtrusive.min.js")
+        .RequiresCss("http://cdnjs.cloudflare.com/ajax/libs/foundation/5.3.0/css/foundation.min.css");
+
+}<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    @Html.RenderCssHere()
+
+</head>
+<body>
+
+    @RenderBody()
+
+    @Html.RenderJsHere()
+
+</body>
+</html>

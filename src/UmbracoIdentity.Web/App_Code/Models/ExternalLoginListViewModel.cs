@@ -1,4 +1,4 @@
-namespace Models
+namespace UmbracoIdentity.Web.Models
 {
     public class ExternalLoginListViewModel
     {

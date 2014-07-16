@@ -1,10 +1,9 @@
 @inherits Umbraco.Web.Mvc.UmbracoViewPage
 
-
 @using System.Web.Mvc.Html
 @using ClientDependency.Core.Mvc
-@using Controllers
-@using MyProject
+@using UmbracoIdentity.Web.Controllers
+@using UmbracoIdentity.Web
 @using Umbraco.Web
 @using Umbraco.Web.Controllers
 
@@ -37,6 +36,10 @@
   
     Html.EnableClientValidation();
     Html.EnableUnobtrusiveJavaScript();
+
+    Html
+        .RequiresJs("~/js/jquery.validate.hooks.js", 200)
+        .RequiresJs("~/js/foundation.form.validation.js", 201);
     
     var success = TempData["FormSuccess"] != null;
 }
@@ -48,43 +51,66 @@
 }
 else
 {
-    using (Html.BeginUmbracoForm<MyAccountController>("HandleRegisterMember"))
+    using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>("HandleRegisterMember", null, new { @class = "foundationForm" }))
     {
         <fieldset>
-            <legend>Register Member</legend>
+            <legend>Register</legend>
 
             @Html.ValidationSummary("registerModel", true)
 
-            @Html.LabelFor(m => registerModel.Name)
-            @Html.TextBoxFor(m => registerModel.Name)
-            @Html.ValidationMessageFor(m => registerModel.Name)
-            <br />
+            <div class="row">
+                <div class="small-12 columns">
+                    <label for="@Html.IdFor(m => registerModel.Name)">
+                        @Html.DisplayNameFor(m => registerModel.Name)
+                        @Html.TextBoxFor(m => registerModel.Name)
+                    </label>
+                    @Html.ValidationMessageFor(m => registerModel.Name)
+                </div>
+            </div>
 
-            @Html.LabelFor(m => registerModel.Email)
-            @Html.TextBoxFor(m => registerModel.Email)
-            @Html.ValidationMessageFor(m => registerModel.Email)
-            <br />
+            <div class="row">
+                <div class="small-12 columns">
+                    <label for="@Html.IdFor(m => registerModel.Email)">
+                        @Html.DisplayNameFor(m => registerModel.Email)
+                        @Html.TextBoxFor(m => registerModel.Email)
+                    </label>
+                    @Html.ValidationMessageFor(m => registerModel.Email)
+                </div>
+            </div>
 
-            @Html.LabelFor(m => registerModel.Password)
-            @Html.PasswordFor(m => registerModel.Password)
-            @Html.ValidationMessageFor(m => registerModel.Password)
-            <br />
+            <div class="row">
+                <div class="small-12 columns">
+                    <label for="@Html.IdFor(m => registerModel.Password)">
+                        @Html.DisplayNameFor(m => registerModel.Password)
+                        @Html.PasswordFor(m => registerModel.Password)
+                    </label>
+                    @Html.ValidationMessageFor(m => registerModel.Password)
+                </div>
+            </div>
+
 
             @if (registerModel.MemberProperties != null)
             {
                 for (var i = 0; i < registerModel.MemberProperties.Count; i++)
                 {
-                    @Html.LabelFor(m => registerModel.MemberProperties[i].Value, registerModel.MemberProperties[i].Name)
-                    @* 
-                        By default this will render a textbox but if you want to change the editor template for this property you can 
-                        easily change it. For example, if you wanted to render a custom editor for this field called "MyEditor" you would
-                        create a file at ~/Views/Shared/EditorTemplates/MyEditor.cshtml", then you will change the next line of code to 
-                        render your specific editor template like:
-                        @Html.EditorFor(m => profileModel.MemberProperties[i].Value, "MyEditor")
-                    *@
-                    @Html.EditorFor(m => registerModel.MemberProperties[i].Value)
-                    @Html.HiddenFor(m => registerModel.MemberProperties[i].Alias)
-                    <br />
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <label for="@Html.IdFor(m => registerModel.MemberProperties[i].Value)">
+                                @Html.DisplayNameFor(m => registerModel.MemberProperties[i].Name)
+
+                                @*
+                                    By default this will render a textbox but if you want to change the editor template for this property you can
+                                    easily change it. For example, if you wanted to render a custom editor for this field called "MyEditor" you would
+                                    create a file at ~/Views/Shared/EditorTemplates/MyEditor.cshtml", then you will change the next line of code to
+                                    render your specific editor template like:
+                                    @Html.EditorFor(m => profileModel.MemberProperties[i].Value, "MyEditor")
+                                *@
+
+                                @Html.EditorFor(m => registerModel.MemberProperties[i].Value)
+                                @Html.HiddenFor(m => registerModel.MemberProperties[i].Alias)
+                            </label>
+                        </div>
+                    </div>
                 }
             }
 

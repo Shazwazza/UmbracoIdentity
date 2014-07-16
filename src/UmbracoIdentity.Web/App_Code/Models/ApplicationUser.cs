@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
-using MyProject;
+using UmbracoIdentity.Web;
 using UmbracoIdentity;
 
-namespace Models
+namespace UmbracoIdentity.Web.Models
 {
     public class ApplicationUser : UmbracoIdentityUser
     {

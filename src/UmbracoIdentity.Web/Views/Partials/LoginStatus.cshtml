@@ -2,7 +2,7 @@
 
 @using System.Web.Mvc.Html
 @using ClientDependency.Core.Mvc
-@using Controllers
+@using UmbracoIdentity.Web.Controllers
 @using Umbraco.Web
 @using Umbraco.Web.Models
 @using Umbraco.Web.Controllers
@@ -23,14 +23,11 @@
     *@
 }
 
-@User.Identity.IsAuthenticated
-
-@*@if (loginStatusModel.IsLoggedIn)*@
 @if(User.Identity.IsAuthenticated)
 {
     <p>You are currently logged in as @loginStatusModel.Name</p>
 
-    using (Html.BeginUmbracoForm<MyAccountController>("HandleLogout"))
+    using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>("HandleLogout"))
     {
          <fieldset>
              <legend>Logout</legend>

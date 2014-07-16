@@ -6,8 +6,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
-using Models;
-using MyProject;
+using UmbracoIdentity.Web.Models;
+using UmbracoIdentity.Web;
 using Owin;
 
 //NOTE: Here's most of the info I had to read to get all this done: https://delicious.com/shandem/owin
@@ -17,7 +17,7 @@ using UmbracoIdentity;
 
 [assembly: OwinStartup(typeof(Startup))]
 
-namespace MyProject
+namespace UmbracoIdentity.Web
 {
     /// <summary>
     /// Summary description for Startup

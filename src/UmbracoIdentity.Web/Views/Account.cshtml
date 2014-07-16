@@ -1,0 +1,36 @@
+﻿@using UmbracoIdentity.Web.Models
+@inherits UmbracoTemplatePage
+@{
+    Layout = "AccountLayout.cshtml";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="row">
+        <div class="small-12 columns">
+            @Html.Partial("LoginStatus", Model)
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="small-12 columns">
+            @Html.Partial("Profile", Model)
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="small-6 columns">
+            @Html.Partial("Login", Model)
+        </div>
+        <div class="small-6 columns">
+            @Html.Partial("ExternalLoginsList", new ExternalLoginListViewModel { Action = "ExternalLogin", ReturnUrl = ViewBag.ReturnUrl })
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-12 columns">
+            @Html.Partial("Register", Model)
+        </div>
+    </div>
+}
