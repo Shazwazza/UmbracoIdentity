@@ -10,7 +10,7 @@ namespace UmbracoIdentity
     /// <remarks>
     /// Used as a work around for issue: http://issues.umbraco.org/issue/U4-5208
     /// </remarks>
-    public class FixAsyncActionInvokerStartupHandler : ApplicationEventHandler
+    public sealed class FixAsyncActionInvokerStartupHandler : ApplicationEventHandler
     {
         protected override void ApplicationStarting(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
