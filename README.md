@@ -1,13 +1,15 @@
-![ASP.Net Identity for Umbraco](logo.png?raw=true)ASP.Net Identity for Umbraco
+![ASP.Net Identity for Umbraco](logo.png?raw=true)
 ===============
 
-Allows for using OWIN &amp; ASP.Net Identity in Umbraco
+Allows for using OWIN &amp; ASP.Net Identity in Umbraco (currently only for the front-end)
 
-Currently this is a test project and will allow the use of ASP.Net Identity and OWIN to work for Umbraco members on your front-end website. Eventually I'll try to add support for back office users too (depending on how possible that is with the current forms-auth tickets). 
+This project will allow the use of ASP.Net Identity and OWIN to work for Umbraco members on your front-end website. It is compatible with your current members and how passwords are currently hashed - so long as your membership provider is configured for hashing passwords (default) and not encrypting them.
 
 Some light reading - This is the majority of articles that had to be read and understood to achieve this:
 
 https://delicious.com/shandem/owin
+
+There are some [known issues and limitations](https://github.com/Shandem/UmbracoIdentity/wiki/Known-Issues)
 
 ## Minimum Requirements:
 
@@ -25,7 +27,13 @@ This project is built against .Net 4.5.1
 
 First, read the minimum requirements above as you might need to enable the work around.
 
+### Nuget
+
+    PM> Install-Package UmbracoIdentity
+
 ### Config updates
+
+These config updates 'should' be taken care of by the nuget install, but you should double check to be sure.
 
 Remove FormsAuthentication from your web.config, this should be the last entry in your httpmodules lists:
 
@@ -43,117 +51,21 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
 
 **STOP!!** If you are not familiar with OWIN or ASP.Net Identity you will need to stop here and familiarize yourself with these things. If you are running the latest version of Visual Studio 2013, then you can create a new web project and create a site that has authentication. This will give you a good example of how to setup OWIN and Authentication. The 'light reading' link above also has tons of information.
 
-If you are familiar then here's what to do... In your OWIN startup class:
+If you are familiar then here's what to do... 
 
-* Create an ApplicationUser class - just like the one that is created in the VS templates. It just needs to inherit from `UmbracoIdentity.UmbracoIdentityUser`
-* Register an `UmbracoMembersUserManager<T>` in the OWIN context:
+Once you've installed the Nuget package, you will see some classes added to your App_Startup folder:
 
-        app.CreatePerOwinContext<UmbracoMembersUserManager<ApplicationUser>>(
-            (o, c) => UmbracoMembersUserManager<ApplicationUser>
-                .Create(o, c, ApplicationContext.Current.Services.MemberService));
-                
-* Setup the default cookie authentication, this is basically the same as the VS template but you'll use an UmbracoMembersUserManager instead with your ApplicationUser:
+* UmbracoApplicationUser - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityUser. You can customize this how you like.
+* UmbracoStartup - this is basically the same as the Startup class that comes with the the VS 2013 template, except that it is named UmbracoStartup and contains some slightly different extension method calls:
 
-        // Enable the application to use a cookie to store information for the 
-        // signed in user and to use a cookie to temporarily store information 
-        // about a user logging in with a third party login provider 
-        // Configure the sign in cookie
-        app.UseCookieAuthentication(new CookieAuthenticationOptions
-        {
-            AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
-
-            //TODO: You'd adjust your cookie settings accordingly
-            //LoginPath = new PathString("/Account/Login"),
-
-            Provider = new CookieAuthenticationProvider
-            {
-                // Enables the application to validate the security stamp when the user 
-                // logs in. This is a security feature which is used when you 
-                // change a password or add an external login to your account.  
-                OnValidateIdentity = SecurityStampValidator
-                    .OnValidateIdentity<UmbracoMembersUserManager<ApplicationUser>, ApplicationUser>(
-                        validateInterval: TimeSpan.FromMinutes(30),
-                        regenerateIdentity: (manager, user)
-                            => user.GenerateUserIdentityAsync(manager))
-            }
-        });
+        //Single method to configure the Identity user manager for use with Umbraco
+        app.ConfigureUserManagerForUmbraco<UmbracoApplicationUser>();
         
-* Next you need to enable Umbraco back office authentication, otherwise the default cookie authorization above will try to auth the back office user which we don't want
-
+        //Ensure owin is configured for Umbraco back office authentication
         app.UseUmbracoBackAuthentication();
-        
-## Usage
 
-Because this is using a different authentication mechanism than Umbraco normally uses, it means that a few of the MembershipHelper methods will not work, such as sign in/out. You will need to use OWIN to perform these methods. With this setup you should be able to use the code that you'll find in the VS template's AccountController.
-    
-Here's an example controller that lets you log in and out, this is the same code that is found in Umbraco's built in `UmbLoginController` and `UmbLoginStatusController` except that this is using OWIN and the UmbracoMembersUserManager to perform the authentication issue the auth ticket.
+    * The rest of the startup class is pretty much the same as the VS 2013 template except that you are using your UmbracoApplicationUser type and the UmbracoMembersUserManager class.
 
-    [Authorize]
-    public class MyAccountController : SurfaceController
-    {
-        private UmbracoMembersUserManager<ApplicationUser> _userManager;
+## [Documentation](https://github.com/Shandem/UmbracoIdentity/wiki)
 
-
-        protected IOwinContext OwinContext
-        {
-            get { return HttpContext.GetOwinContext(); }
-        }
-
-        public UmbracoMembersUserManager<ApplicationUser> UserManager
-        {
-            get
-            {
-                return _userManager ?? (_userManager = HttpContext.GetOwinContext()
-                    .GetUserManager<UmbracoMembersUserManager<ApplicationUser>>());
-            }
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<ActionResult> HandleLogin([Bind(Prefix = "loginModel")] LoginModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await UserManager.FindAsync(model.Username, model.Password);
-                if (user != null)
-                {
-                    await SignInAsync(user, true);
-                    return RedirectToCurrentUmbracoPage();
-                }
-                ModelState.AddModelError("loginModel", "Invalid username or password");
-            }
-
-            return CurrentUmbracoPage();
-        }
-
-        [HttpPost]
-        public ActionResult HandleLogout([Bind(Prefix = "logoutModel")]PostRedirectModel model)
-        {
-            if (ModelState.IsValid == false)
-            {
-                return CurrentUmbracoPage();
-            }
-
-            if (Members.IsLoggedIn())
-            {
-                OwinContext.Authentication.SignOut();
-            }
-
-            //if there is a specified path to redirect to then use it
-            if (model.RedirectUrl.IsNullOrWhiteSpace() == false)
-            {
-                return Redirect(model.RedirectUrl);
-            }
-
-            //redirect to current page by default
-            TempData["LogoutSuccess"] = true;
-            return RedirectToCurrentUmbracoPage();
-        }
-
-        private async Task SignInAsync(ApplicationUser user, bool isPersistent)
-        {
-            OwinContext.Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
-            OwinContext.Authentication.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent },
-                await user.GenerateUserIdentityAsync(UserManager));
-        }
-    }
+See docs for examples, usage, etc...
