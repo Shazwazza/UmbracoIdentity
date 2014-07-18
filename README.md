@@ -43,45 +43,21 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
 
 **STOP!!** If you are not familiar with OWIN or ASP.Net Identity you will need to stop here and familiarize yourself with these things. If you are running the latest version of Visual Studio 2013, then you can create a new web project and create a site that has authentication. This will give you a good example of how to setup OWIN and Authentication. The 'light reading' link above also has tons of information.
 
-If you are familiar then here's what to do... In your OWIN startup class:
+If you are familiar then here's what to do... 
 
-* Create an ApplicationUser class - just like the one that is created in the VS templates. It just needs to inherit from `UmbracoIdentity.UmbracoIdentityUser`
-* Register an `UmbracoMembersUserManager<T>` in the OWIN context:
+Once you've installed the Nuget package, you will see some classes added to your App_Startup folder:
 
-        app.CreatePerOwinContext<UmbracoMembersUserManager<ApplicationUser>>(
-            (o, c) => UmbracoMembersUserManager<ApplicationUser>
-                .Create(o, c, ApplicationContext.Current.Services.MemberService));
-                
-* Setup the default cookie authentication, this is basically the same as the VS template but you'll use an UmbracoMembersUserManager instead with your ApplicationUser:
+* UmbracoApplicationUser - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityUser. You can customize this how you like.
+* UmbracoStartup - this is basically the same as the Startup class that comes with the the VS 2013 template, except that it is named UmbracoStartup and contains some slightly different extension method calls:
 
-        // Enable the application to use a cookie to store information for the 
-        // signed in user and to use a cookie to temporarily store information 
-        // about a user logging in with a third party login provider 
-        // Configure the sign in cookie
-        app.UseCookieAuthentication(new CookieAuthenticationOptions
-        {
-            AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
-
-            //TODO: You'd adjust your cookie settings accordingly
-            //LoginPath = new PathString("/Account/Login"),
-
-            Provider = new CookieAuthenticationProvider
-            {
-                // Enables the application to validate the security stamp when the user 
-                // logs in. This is a security feature which is used when you 
-                // change a password or add an external login to your account.  
-                OnValidateIdentity = SecurityStampValidator
-                    .OnValidateIdentity<UmbracoMembersUserManager<ApplicationUser>, ApplicationUser>(
-                        validateInterval: TimeSpan.FromMinutes(30),
-                        regenerateIdentity: (manager, user)
-                            => user.GenerateUserIdentityAsync(manager))
-            }
-        });
+        //Single method to configure the Identity user manager for use with Umbraco
+        app.ConfigureUserManagerForUmbraco<UmbracoApplicationUser>();
         
-* Next you need to enable Umbraco back office authentication, otherwise the default cookie authorization above will try to auth the back office user which we don't want
-
+        //Ensure owin is configured for Umbraco back office authentication
         app.UseUmbracoBackAuthentication();
-        
+
+    * The rest of the startup class is pretty much the same as the VS 2013 template except that you are using your UmbracoApplicationUser type and the UmbracoMembersUserManager class.
+
 ## [Documentation](https://github.com/Shandem/UmbracoIdentity/wiki)
 
 See docs for examples, usage, etc...
