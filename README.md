@@ -25,7 +25,13 @@ This project is built against .Net 4.5.1
 
 First, read the minimum requirements above as you might need to enable the work around.
 
+### Nuget
+
+    PM> Install-Package UmbracoIdentity
+
 ### Config updates
+
+These config updates 'should' be taken care of by the nuget install, but you should double check to be sure.
 
 Remove FormsAuthentication from your web.config, this should be the last entry in your httpmodules lists:
 
