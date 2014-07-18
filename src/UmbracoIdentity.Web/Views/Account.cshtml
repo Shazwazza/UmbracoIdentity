@@ -4,6 +4,13 @@
     Layout = "AccountLayout.cshtml";
 }
 
+<div class="row">
+    <div class="small-12 columns">
+        <h2>Account</h2>
+    </div>
+</div>
+
+
 @if (User.Identity.IsAuthenticated)
 {
     <div class="row">
@@ -25,7 +32,7 @@ else
             @Html.Partial("Login", Model)
         </div>
         <div class="small-6 columns">
-            @Html.Partial("ExternalLoginsList", new ExternalLoginListViewModel { Action = "ExternalLogin", ReturnUrl = ViewBag.ReturnUrl })
+            @Html.Partial("~/Views/UmbracoIdentityAccount/ExternalLoginsList.cshtml", new ExternalLoginListViewModel { Action = "ExternalLogin" })
         </div>
     </div>
     <div class="row">

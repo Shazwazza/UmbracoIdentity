@@ -5,6 +5,7 @@
 @using ClientDependency.Core.Mvc
 @using Umbraco.Web
 @using Umbraco.Web.Controllers
+@using UmbracoIdentity.Web.Models
 
 @{
     var profileModel = Members.GetCurrentMemberProfileModel();
@@ -27,6 +28,8 @@
         <p>Profile updated</p>
     }
 
+    @Html.Action("SetupLocalPassword", "UmbracoIdentityAccount")
+    
     using (Html.BeginUmbracoForm<UmbProfileController>("HandleUpdateProfile", null, new { @class = "foundationForm" }))
     {
         <fieldset>
@@ -52,8 +55,7 @@
                     </label>
                     @Html.ValidationMessageFor(m => profileModel.Email)
                 </div>
-            </div>
-
+            </div>           
 
             @for (var i = 0; i < profileModel.MemberProperties.Count; i++)
             {
@@ -79,5 +81,9 @@
 
             <button>Save</button>
         </fieldset>
-    }       
+    }
+
+    @Html.Action("RemoveAccountList", "UmbracoIdentityAccount")
+    
+    @Html.Partial("~/Views/UmbracoIdentityAccount/ExternalLoginsList.cshtml", new ExternalLoginListViewModel { Action = "LinkLogin" })
 }

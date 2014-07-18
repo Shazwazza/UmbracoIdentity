@@ -17,7 +17,7 @@
     }
     else
     {
-        using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>(Model.Action, new { ReturnUrl = Model.ReturnUrl }))
+        using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>(Model.Action))
         {
             @Html.AntiForgeryToken()
             <div id="socialLoginList">

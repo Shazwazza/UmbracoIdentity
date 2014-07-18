@@ -51,10 +51,15 @@ namespace UmbracoIdentity
                 UpdateMemberProperties(member, user);
 
                 //the password must be 'something' it could be empty if authenticating
-                // with an external provider so we'll just guid it
+                // with an external provider so we'll just generate one and prefix it, the 
+                // prefix will help us determine if the password hasn't actually been specified yet.
                 if (member.RawPasswordValue.IsNullOrWhiteSpace())
                 {
-                    member.RawPasswordValue = Guid.NewGuid().ToString("N");
+                    //this will hash the guid with a salt so should be nicely random
+                    var aspHasher = new Microsoft.AspNet.Identity.PasswordHasher();
+                    member.RawPasswordValue = "___UIDEMPTYPWORD__" + 
+                        aspHasher.HashPassword(Guid.NewGuid().ToString("N"));
+
                 }
                 _memberService.Save(member);    
 
@@ -102,7 +107,11 @@ namespace UmbracoIdentity
                 }
 
                 var found = _memberService.GetById(asInt.Result);
-                _memberService.Delete(found);
+                if (found != null)
+                {
+                    _memberService.Delete(found);    
+                }
+                _externalLoginStore.DeleteUserLogins(asInt.Result);
             });
         }
 
@@ -122,7 +131,7 @@ namespace UmbracoIdentity
                     LockoutEnabled = member.IsLockedOut,
                     LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                     UserName = member.Username,
-                    PasswordHash = member.RawPasswordValue,
+                    PasswordHash = GetPasswordHash(member.RawPasswordValue),
                     Name = member.Name
                 };
             });
@@ -145,7 +154,7 @@ namespace UmbracoIdentity
                     LockoutEnabled = member.IsLockedOut,
                     LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                     UserName = member.Username,
-                    PasswordHash = member.RawPasswordValue,
+                    PasswordHash = GetPasswordHash(member.RawPasswordValue),
                     Name = member.Name
                 };
             });
@@ -217,7 +226,7 @@ namespace UmbracoIdentity
                         LockoutEnabled = member.IsLockedOut,
                         LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                         UserName = member.Username,
-                        PasswordHash = member.RawPasswordValue
+                        PasswordHash = GetPasswordHash(member.RawPasswordValue)
                     };
             });
         }
@@ -268,22 +277,24 @@ namespace UmbracoIdentity
         {
             return Task.Run(() =>
             {
-                var result = _externalLoginStore.Find(login);
-                if (result != null)
+                //get all logins associated with the login id
+                var result = _externalLoginStore.Find(login).ToArray();
+                if (result.Any())
                 {
-                    var member = _memberService.GetById(result.Value);
-                    if (member != null)
-                    {
-                        return new T
+                    //return the first member that matches the result
+                    return (from id in result
+                        select _memberService.GetById(id)
+                        into member
+                        where member != null
+                        select new T
                         {
                             Email = member.Email,
                             Id = member.Id,
                             LockoutEnabled = member.IsLockedOut,
                             LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                             UserName = member.Username,
-                            PasswordHash = member.RawPasswordValue
-                        };   
-                    }
+                            PasswordHash = GetPasswordHash(member.RawPasswordValue)
+                        }).FirstOrDefault();
                 }
 
                 return null;
@@ -331,6 +342,11 @@ namespace UmbracoIdentity
                 member.RawPasswordValue = user.PasswordHash;
             }
             return anythingChanged;
+        }
+
+        private string GetPasswordHash(string storedPass)
+        {
+            return storedPass.StartsWith("___UIDEMPTYPWORD__") ? "" : storedPass;
         }
     }
 }

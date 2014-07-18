@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace UmbracoIdentity.Web.Models
 {
-    public class ManageUserViewModel
+    public class UserPasswordModel
     {
         [Required]
         [DataType(DataType.Password)]
@@ -17,6 +17,7 @@ namespace UmbracoIdentity.Web.Models
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm new password")]
+        //TODO: Fix this, we'll have to remove it since it's mucking up the JS, will have ot manually validate it.
         [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
     }

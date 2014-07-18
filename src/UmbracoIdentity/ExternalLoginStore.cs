@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 using System.Data.SqlServerCe;
 using System.Linq;
+using System.Web;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin;
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Persistence;
 using Umbraco.Core.Persistence.DatabaseAnnotations;
+using Umbraco.Core.Services;
 
 namespace UmbracoIdentity
 {
@@ -37,7 +41,7 @@ namespace UmbracoIdentity
             }
         }
 
-        public int? Find(UserLoginInfo login)
+        public IEnumerable<int> Find(UserLoginInfo login)
         {
             var sql = new Sql() 
                 .Select("*")
@@ -46,9 +50,7 @@ namespace UmbracoIdentity
 
             var found = _db.Fetch<ExternalLoginDto>(sql);
 
-            return found.Any()
-                ? found.First().UserId
-                : (int?) null;
+            return found.Select(x => x.UserId);
         }
 
         public void SaveUserLogins(int memberId, IEnumerable<UserLoginInfo> logins)
@@ -68,6 +70,16 @@ namespace UmbracoIdentity
                         UserId = memberId
                     });
                 }
+
+                t.Complete();
+            }
+        }
+
+        public void DeleteUserLogins(int memberId)
+        {
+            using (var t = _db.GetTransaction())
+            {
+                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new {userId = memberId});
 
                 t.Complete();
             }

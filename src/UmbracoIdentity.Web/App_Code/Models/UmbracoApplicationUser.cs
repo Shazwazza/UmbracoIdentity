@@ -6,9 +6,9 @@ using UmbracoIdentity;
 
 namespace UmbracoIdentity.Web.Models
 {
-    public class ApplicationUser : UmbracoIdentityUser
+    public class UmbracoApplicationUser : UmbracoIdentityUser
     {
-        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser, int> manager)
+        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<UmbracoApplicationUser, int> manager)
         {
             // Note the authenticationType must match the one 
             // defined in CookieAuthenticationOptions.AuthenticationType

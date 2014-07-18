@@ -9,7 +9,25 @@ namespace UmbracoIdentity
     /// </summary>
     public interface IExternalLoginStore : IDisposable
     {
-        int? Find(UserLoginInfo login);
+        /// <summary>
+        /// Returns all logins matching the login info - generally there should only be one but in some cases 
+        /// there might be more than one depending on if an adminstrator has been editing/removing members
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        IEnumerable<int> Find(UserLoginInfo login);
+
+        /// <summary>
+        /// Save user logins
+        /// </summary>
+        /// <param name="memberId"></param>
+        /// <param name="logins"></param>
         void SaveUserLogins(int memberId, IEnumerable<UserLoginInfo> logins);
+
+        /// <summary>
+        /// Deletes all user logins - normally used when a member is deleted
+        /// </summary>
+        /// <param name="memberId"></param>
+        void DeleteUserLogins(int memberId);
     }
 }

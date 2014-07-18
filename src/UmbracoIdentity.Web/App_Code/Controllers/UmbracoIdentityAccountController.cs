@@ -19,19 +19,19 @@ namespace UmbracoIdentity.Web.Controllers
     [Authorize]
     public class UmbracoIdentityAccountController : SurfaceController
     {
-        private UmbracoMembersUserManager<ApplicationUser> _userManager;
+        private UmbracoMembersUserManager<UmbracoApplicationUser> _userManager;
         
         protected IOwinContext OwinContext
         {
-            get { return HttpContext.GetOwinContext(); }
+            get { return Request.GetOwinContext(); }
         }
 
-        public UmbracoMembersUserManager<ApplicationUser> UserManager
+        public UmbracoMembersUserManager<UmbracoApplicationUser> UserManager
         {
             get
             {
-                return _userManager ?? (_userManager = HttpContext.GetOwinContext()
-                    .GetUserManager<UmbracoMembersUserManager<ApplicationUser>>());
+                return _userManager ?? (_userManager = OwinContext
+                    .GetUserManager<UmbracoMembersUserManager<UmbracoApplicationUser>>());
             }
         }
 
@@ -40,8 +40,13 @@ namespace UmbracoIdentity.Web.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult ExternalLogin(string provider, string returnUrl)
+        public ActionResult ExternalLogin(string provider, string returnUrl = null)
         {
+            if (returnUrl.IsNullOrWhiteSpace())
+            {
+                returnUrl = Request.RawUrl;
+            }
+
             // Request a redirect to the external login provider
             return new ChallengeResult(provider,
                 Url.SurfaceAction<UmbracoIdentityAccountController>("ExternalLoginCallback", new { ReturnUrl = returnUrl }));
@@ -55,7 +60,7 @@ namespace UmbracoIdentity.Web.Controllers
             if (loginInfo == null)
             {
                 //go home, invalid callback
-                return RedirectToLocal("/");
+                return RedirectToLocal(returnUrl);
             }
 
             // Sign in the user with this external login provider if the user already has a login
@@ -76,32 +81,6 @@ namespace UmbracoIdentity.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult LinkLogin(string provider)
-        {
-            // Request a redirect to the external login provider to link a login for the current user
-            return new ChallengeResult(provider,
-                Url.SurfaceAction<UmbracoIdentityAccountController>("LinkLoginCallback"),
-                User.Identity.GetUserId());
-        }
-
-        [HttpGet]
-        public async Task<ActionResult> LinkLoginCallback()
-        {
-            var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.GetUserId());
-            if (loginInfo == null)
-            {
-                return RedirectToAction("Manage", new { Message = ManageMessageId.Error });
-            }
-            var result = await UserManager.AddLoginAsync(User.Identity.GetUserId<int>(), loginInfo.Login);
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Manage");
-            }
-            return RedirectToAction("Manage", new { Message = ManageMessageId.Error });
-        }
-
-        [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel model, string returnUrl)
@@ -109,7 +88,7 @@ namespace UmbracoIdentity.Web.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 //go home, already authenticated
-                return RedirectToLocal("/");
+                return RedirectToLocal(returnUrl);
             }
 
             if (ModelState.IsValid)
@@ -121,7 +100,7 @@ namespace UmbracoIdentity.Web.Controllers
                     return View("ExternalLoginFailure");
                 }
 
-                var user = new ApplicationUser()
+                var user = new UmbracoApplicationUser()
                 {
                     Name = info.ExternalIdentity.Name,
                     UserName = model.Email,
@@ -150,9 +129,134 @@ namespace UmbracoIdentity.Web.Controllers
 
             ViewBag.ReturnUrl = returnUrl;
             return View(model);
-        } 
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult LinkLogin(string provider, string returnUrl = null)
+        {
+            if (returnUrl.IsNullOrWhiteSpace())
+            {
+                returnUrl = Request.RawUrl;
+            }
+
+            // Request a redirect to the external login provider to link a login for the current user
+            return new ChallengeResult(provider,
+                Url.SurfaceAction<UmbracoIdentityAccountController>("LinkLoginCallback", new { ReturnUrl = returnUrl }),
+                User.Identity.GetUserId());
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> LinkLoginCallback(string returnUrl)
+        {
+            var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.GetUserId());
+            if (loginInfo == null)
+            {
+                ViewBag.LinkLoginError = "An error occurred, could not get external login info";
+                return RedirectToLocal(returnUrl);
+            }
+            var result = await UserManager.AddLoginAsync(User.Identity.GetUserId<int>(), loginInfo.Login);
+            if (result.Succeeded)
+            {
+                return RedirectToLocal(returnUrl);
+            }
+
+            ViewBag.LinkLoginError = "An error occurred, could not add external login info";
+            return RedirectToLocal(returnUrl);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Disassociate(string loginProvider, string providerKey)
+        {
+            ManageMessageId? message = null;
+            IdentityResult result = await UserManager.RemoveLoginAsync(User.Identity.GetUserId<int>(), new UserLoginInfo(loginProvider, providerKey));
+            if (result.Succeeded)
+            {
+                var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+                await SignInAsync(user, isPersistent: false);
+                message = ManageMessageId.RemoveLoginSuccess;
+            }
+            else
+            {
+                message = ManageMessageId.Error;
+            }
+            return RedirectToAction("Manage", new { Message = message });
+        }
+
+        [AllowAnonymous]
+        public ActionResult ExternalLoginFailure()
+        {
+            return View();
+        }
+
+        [ChildActionOnly]
+        public ActionResult RemoveAccountList()
+        {
+            var linkedAccounts = UserManager.GetLogins(User.Identity.GetUserId<int>());
+            ViewBag.ShowRemoveButton = HasPassword() || linkedAccounts.Count > 1;
+            return (ActionResult)PartialView("RemoveAccount", linkedAccounts);
+        }
 
         #endregion
+
+        [ChildActionOnly]
+        public ActionResult SetupLocalPassword()
+        {
+            ViewBag.HasLocalPassword = HasPassword();
+            return View();
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Manage([Bind(Prefix = "localPasswordModel")] UserPasswordModel model)
+        {
+            bool hasPassword = HasPassword();
+            ViewBag.HasLocalPassword = hasPassword;
+            ViewBag.ReturnUrl = Url.Action("Manage");
+            if (hasPassword)
+            {
+                if (ModelState.IsValid)
+                {
+                    IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId<int>(), model.OldPassword, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+                        await SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("Manage", new { Message = ManageMessageId.ChangePasswordSuccess });
+                    }
+                    else
+                    {
+                        AddErrors(result);
+                    }
+                }
+            }
+            else
+            {
+                // User does not have a password so remove any validation errors caused by a missing OldPassword field
+                ModelState state = ModelState["OldPassword"];
+                if (state != null)
+                {
+                    state.Errors.Clear();
+                }
+
+                if (ModelState.IsValid)
+                {
+                    IdentityResult result = await UserManager.AddPasswordAsync(User.Identity.GetUserId<int>(), model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("Manage", new { Message = ManageMessageId.SetPasswordSuccess });
+                    }
+                    else
+                    {
+                        AddErrors(result);
+                    }
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
 
         #region Standard login and registration
 
@@ -208,7 +312,7 @@ namespace UmbracoIdentity.Web.Controllers
                 return CurrentUmbracoPage();
             }
 
-            var user = new ApplicationUser()
+            var user = new UmbracoApplicationUser()
             {
                 UserName = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username,
                 Email = model.Email
@@ -257,7 +361,7 @@ namespace UmbracoIdentity.Web.Controllers
             }
         }
 
-        private async Task SignInAsync(ApplicationUser user, bool isPersistent)
+        private async Task SignInAsync(UmbracoApplicationUser user, bool isPersistent)
         {
             OwinContext.Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
             OwinContext.Authentication.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent },
@@ -270,6 +374,16 @@ namespace UmbracoIdentity.Web.Controllers
             {
                 ModelState.AddModelError(prefix, error);
             }
+        }
+
+        private bool HasPassword()
+        {
+            var user = UserManager.FindById(User.Identity.GetUserId<int>());
+            if (user != null)
+            {
+                return user.PasswordHash != null;
+            }
+            return false;
         }
 
         public enum ManageMessageId
@@ -315,14 +429,6 @@ namespace UmbracoIdentity.Web.Controllers
 
         #endregion
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && UserManager != null)
-            {
-                UserManager.Dispose();
-            }
-            base.Dispose(disposing);
-        }
     }
 
 }
