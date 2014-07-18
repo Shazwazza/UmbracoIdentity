@@ -3,11 +3,13 @@
 
 Allows for using OWIN &amp; ASP.Net Identity in Umbraco (currently only for the front-end)
 
-Currently this is a test project and will allow the use of ASP.Net Identity and OWIN to work for Umbraco members on your front-end website. Eventually I'll try to add support for back office users too (depending on how possible that is with the current forms-auth tickets). 
+This project will allow the use of ASP.Net Identity and OWIN to work for Umbraco members on your front-end website. It is compatible with your current members and how passwords are currently hashed - so long as your membership provider is configured for hashing passwords (default) and not encrypting them.
 
 Some light reading - This is the majority of articles that had to be read and understood to achieve this:
 
 https://delicious.com/shandem/owin
+
+There are some [known issues and limitations](https://github.com/Shandem/UmbracoIdentity/wiki/Known-Issues)
 
 ## Minimum Requirements:
 
