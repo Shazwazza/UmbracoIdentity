@@ -1,7 +1,7 @@
 ![ASP.Net Identity for Umbraco](logo.png?raw=true)
 ===============
 
-Allows for using OWIN &amp; ASP.Net Identity in Umbraco
+Allows for using OWIN &amp; ASP.Net Identity in Umbraco (currently only for the front-end)
 
 Currently this is a test project and will allow the use of ASP.Net Identity and OWIN to work for Umbraco members on your front-end website. Eventually I'll try to add support for back office users too (depending on how possible that is with the current forms-auth tickets). 
 
