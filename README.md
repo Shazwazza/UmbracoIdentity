@@ -29,6 +29,8 @@ First, read the minimum requirements above as you might need to enable the work 
 
 ### Nuget
 
+NOTE: This is **NOT** active yet!!!! coming soon..........
+
     PM> Install-Package UmbracoIdentity
 
 ### Config updates
