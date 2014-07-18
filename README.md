@@ -1,4 +1,4 @@
-![ASP.Net Identity for Umbraco](logo.png?raw=true)ASP.Net Identity for Umbraco
+![ASP.Net Identity for Umbraco](logo.png?raw=true)
 ===============
 
 Allows for using OWIN &amp; ASP.Net Identity in Umbraco
