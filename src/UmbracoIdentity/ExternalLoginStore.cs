@@ -3,6 +3,7 @@ using System.Data.SqlServerCe;
 using System.Linq;
 using System.Web;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Umbraco.Core;
@@ -39,6 +40,23 @@ namespace UmbracoIdentity
             {
                 _db.CreateTable<ExternalLoginDto>();
             }
+        }
+
+        public IEnumerable<IdentityUserLogin<int>> GetAll(int userId)
+        {
+            var sql = new Sql()
+                .Select("*")
+                .From<ExternalLoginDto>()
+                .Where<ExternalLoginDto>(dto => dto.UserId == userId);
+
+            var found = _db.Fetch<ExternalLoginDto>(sql);
+
+            return found.Select(x => new IdentityUserLogin<int>
+            {
+                LoginProvider = x.LoginProvider,
+                ProviderKey = x.ProviderKey,
+                UserId = x.UserId
+            });
         }
 
         public IEnumerable<int> Find(UserLoginInfo login)

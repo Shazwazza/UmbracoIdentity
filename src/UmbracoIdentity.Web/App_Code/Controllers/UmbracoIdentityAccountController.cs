@@ -5,8 +5,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
+using Models.UmbracoIdentity;
 using Umbraco.Web;
-using UmbracoIdentity.Web.Models;
 using UmbracoIdentity.Web;
 using Umbraco.Core;
 using Umbraco.Web.Models;
@@ -169,19 +169,21 @@ namespace UmbracoIdentity.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Disassociate(string loginProvider, string providerKey)
         {
-            ManageMessageId? message = null;
-            IdentityResult result = await UserManager.RemoveLoginAsync(User.Identity.GetUserId<int>(), new UserLoginInfo(loginProvider, providerKey));
+            var result = await UserManager.RemoveLoginAsync(
+                User.Identity.GetUserId<int>(), 
+                new UserLoginInfo(loginProvider, providerKey));
+
             if (result.Succeeded)
             {
                 var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
                 await SignInAsync(user, isPersistent: false);
-                message = ManageMessageId.RemoveLoginSuccess;
+                return RedirectToCurrentUmbracoPage();
             }
             else
             {
-                message = ManageMessageId.Error;
+                AddErrors(result);
+                return CurrentUmbracoPage();
             }
-            return RedirectToAction("Manage", new { Message = message });
         }
 
         [AllowAnonymous]
@@ -195,25 +197,32 @@ namespace UmbracoIdentity.Web.Controllers
         {
             var linkedAccounts = UserManager.GetLogins(User.Identity.GetUserId<int>());
             ViewBag.ShowRemoveButton = HasPassword() || linkedAccounts.Count > 1;
-            return (ActionResult)PartialView("RemoveAccount", linkedAccounts);
+            return PartialView(linkedAccounts);
         }
 
         #endregion
 
         [ChildActionOnly]
-        public ActionResult SetupLocalPassword()
+        public ActionResult ManagePassword()
         {
             ViewBag.HasLocalPassword = HasPassword();
             return View();
         }
-        
+
+        [NotChildAction]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Manage([Bind(Prefix = "localPasswordModel")] UserPasswordModel model)
+        public async Task<ActionResult> ManagePassword([Bind(Prefix = "managePasswordModel")] UserPasswordModel model)
         {
             bool hasPassword = HasPassword();
             ViewBag.HasLocalPassword = hasPassword;
-            ViewBag.ReturnUrl = Url.Action("Manage");
+
+            //vaidate their passwords match
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("managePasswordModel.ConfirmPassword", "Passwords do not match");
+            }
+
             if (hasPassword)
             {
                 if (ModelState.IsValid)
@@ -223,18 +232,19 @@ namespace UmbracoIdentity.Web.Controllers
                     {
                         var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
                         await SignInAsync(user, isPersistent: false);
-                        return RedirectToAction("Manage", new { Message = ManageMessageId.ChangePasswordSuccess });
+                        TempData["ChangePasswordSuccess"] = true;
+                        return RedirectToCurrentUmbracoPage();
                     }
                     else
                     {
-                        AddErrors(result);
+                        AddErrors(result, "managePasswordModel");
                     }
                 }
             }
             else
             {
                 // User does not have a password so remove any validation errors caused by a missing OldPassword field
-                ModelState state = ModelState["OldPassword"];
+                ModelState state = ModelState["localPasswordModel.OldPassword"];
                 if (state != null)
                 {
                     state.Errors.Clear();
@@ -245,17 +255,18 @@ namespace UmbracoIdentity.Web.Controllers
                     IdentityResult result = await UserManager.AddPasswordAsync(User.Identity.GetUserId<int>(), model.NewPassword);
                     if (result.Succeeded)
                     {
-                        return RedirectToAction("Manage", new { Message = ManageMessageId.SetPasswordSuccess });
+                        TempData["ChangePasswordSuccess"] = true;
+                        return RedirectToCurrentUmbracoPage();
                     }
                     else
                     {
-                        AddErrors(result);
+                        AddErrors(result, "managePasswordModel");
                     }
                 }
             }
 
             // If we got this far, something failed, redisplay form
-            return View(model);
+            return CurrentUmbracoPage();
         }
 
         #region Standard login and registration
@@ -381,17 +392,9 @@ namespace UmbracoIdentity.Web.Controllers
             var user = UserManager.FindById(User.Identity.GetUserId<int>());
             if (user != null)
             {
-                return user.PasswordHash != null;
+                return !user.PasswordHash.IsNullOrWhiteSpace();
             }
             return false;
-        }
-
-        public enum ManageMessageId
-        {
-            ChangePasswordSuccess,
-            SetPasswordSuccess,
-            RemoveLoginSuccess,
-            Error
         }
 
         private ActionResult RedirectToLocal(string returnUrl)

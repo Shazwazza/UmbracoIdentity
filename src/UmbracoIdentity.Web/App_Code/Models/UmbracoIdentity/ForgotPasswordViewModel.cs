@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace UmbracoIdentity.Web.Models
+namespace Models.UmbracoIdentity
 {
     public class ForgotPasswordViewModel
     {

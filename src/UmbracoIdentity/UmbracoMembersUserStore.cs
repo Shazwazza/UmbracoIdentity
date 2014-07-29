@@ -12,6 +12,8 @@ using Task = System.Threading.Tasks.Task;
 
 namespace UmbracoIdentity
 {
+
+
     /// <summary>
     /// A custom user store that uses Umbraco member data
     /// </summary>
@@ -56,7 +58,7 @@ namespace UmbracoIdentity
                 if (member.RawPasswordValue.IsNullOrWhiteSpace())
                 {
                     //this will hash the guid with a salt so should be nicely random
-                    var aspHasher = new Microsoft.AspNet.Identity.PasswordHasher();
+                    var aspHasher = new PasswordHasher();
                     member.RawPasswordValue = "___UIDEMPTYPWORD__" + 
                         aspHasher.HashPassword(Guid.NewGuid().ToString("N"));
 
@@ -124,7 +126,7 @@ namespace UmbracoIdentity
                 {
                     return null;
                 }
-                return new T
+                return AssignLoginsCallback(new T
                 {
                     Email = member.Email,
                     Id = member.Id,
@@ -133,7 +135,7 @@ namespace UmbracoIdentity
                     UserName = member.Username,
                     PasswordHash = GetPasswordHash(member.RawPasswordValue),
                     Name = member.Name
-                };
+                });
             });
         }
 
@@ -147,7 +149,7 @@ namespace UmbracoIdentity
                     return null;
                 }
 
-                return new T
+                return AssignLoginsCallback(new T
                 {
                     Email = member.Email,
                     Id = member.Id,
@@ -156,7 +158,7 @@ namespace UmbracoIdentity
                     UserName = member.Username,
                     PasswordHash = GetPasswordHash(member.RawPasswordValue),
                     Name = member.Name
-                };
+                });
             });
         }
 
@@ -217,7 +219,7 @@ namespace UmbracoIdentity
             return Task.Run(() =>
             {
                 var member = _memberService.GetByEmail(email);
-                return member == null
+                var result = member == null
                     ? null
                     : new T
                     {
@@ -228,6 +230,7 @@ namespace UmbracoIdentity
                         UserName = member.Username,
                         PasswordHash = GetPasswordHash(member.RawPasswordValue)
                     };
+                return AssignLoginsCallback(result);
             });
         }
 
@@ -269,7 +272,7 @@ namespace UmbracoIdentity
         {
             if (user == null) throw new ArgumentNullException("user");
 
-            return Task.Run(() => (IList<UserLoginInfo>) 
+            return Task.Run(() => (IList<UserLoginInfo>)
                 user.Logins.Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey)).ToList());
         }
 
@@ -282,7 +285,7 @@ namespace UmbracoIdentity
                 if (result.Any())
                 {
                     //return the first member that matches the result
-                    return (from id in result
+                    var user = (from id in result
                         select _memberService.GetById(id)
                         into member
                         where member != null
@@ -295,6 +298,8 @@ namespace UmbracoIdentity
                             UserName = member.Username,
                             PasswordHash = GetPasswordHash(member.RawPasswordValue)
                         }).FirstOrDefault();
+
+                    return AssignLoginsCallback(user);
                 }
 
                 return null;
@@ -346,7 +351,17 @@ namespace UmbracoIdentity
 
         private string GetPasswordHash(string storedPass)
         {
-            return storedPass.StartsWith("___UIDEMPTYPWORD__") ? "" : storedPass;
+            return storedPass.StartsWith("___UIDEMPTYPWORD__") ? null : storedPass;
+        }
+
+        private T AssignLoginsCallback(T user)
+        {
+            if (user != null)
+            {
+                user.SetLoginsCallback(new Lazy<IEnumerable<IdentityUserLogin<int>>>(() =>
+                            _externalLoginStore.GetAll(user.Id)));
+            }
+            return user;
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace UmbracoIdentity
 {
@@ -9,6 +10,13 @@ namespace UmbracoIdentity
     /// </summary>
     public interface IExternalLoginStore : IDisposable
     {
+        /// <summary>
+        /// Returns all user logins assigned
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        IEnumerable<IdentityUserLogin<int>> GetAll(int userId);
+        
         /// <summary>
         /// Returns all logins matching the login info - generally there should only be one but in some cases 
         /// there might be more than one depending on if an adminstrator has been editing/removing members

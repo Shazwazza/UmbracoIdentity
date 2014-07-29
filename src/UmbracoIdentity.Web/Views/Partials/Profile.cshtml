@@ -3,9 +3,9 @@
 
 @using System.Web.Mvc.Html
 @using ClientDependency.Core.Mvc
+@using Models.UmbracoIdentity
 @using Umbraco.Web
 @using Umbraco.Web.Controllers
-@using UmbracoIdentity.Web.Models
 
 @{
     var profileModel = Members.GetCurrentMemberProfileModel();
@@ -28,7 +28,7 @@
         <p>Profile updated</p>
     }
 
-    @Html.Action("SetupLocalPassword", "UmbracoIdentityAccount")
+    @Html.Action("ManagePassword", "UmbracoIdentityAccount")
     
     using (Html.BeginUmbracoForm<UmbProfileController>("HandleUpdateProfile", null, new { @class = "foundationForm" }))
     {
