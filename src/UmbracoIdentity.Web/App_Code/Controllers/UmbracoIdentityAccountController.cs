@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
@@ -124,7 +125,7 @@ namespace UmbracoIdentity.Web.Controllers
                         return RedirectToLocal(returnUrl);
                     }
                 }
-                AddErrors(result);
+                AddModelErrors(result);
             }
 
             ViewBag.ReturnUrl = returnUrl;
@@ -152,7 +153,7 @@ namespace UmbracoIdentity.Web.Controllers
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.GetUserId());
             if (loginInfo == null)
             {
-                ViewBag.LinkLoginError = "An error occurred, could not get external login info";
+                TempData["LinkLoginError"] = new[] {"An error occurred, could not get external login info"};
                 return RedirectToLocal(returnUrl);
             }
             var result = await UserManager.AddLoginAsync(User.Identity.GetUserId<int>(), loginInfo.Login);
@@ -161,7 +162,7 @@ namespace UmbracoIdentity.Web.Controllers
                 return RedirectToLocal(returnUrl);
             }
 
-            ViewBag.LinkLoginError = "An error occurred, could not add external login info";
+            TempData["LinkLoginError"] = result.Errors.ToArray();
             return RedirectToLocal(returnUrl);
         }
 
@@ -181,7 +182,7 @@ namespace UmbracoIdentity.Web.Controllers
             }
             else
             {
-                AddErrors(result);
+                AddModelErrors(result);
                 return CurrentUmbracoPage();
             }
         }
@@ -237,14 +238,14 @@ namespace UmbracoIdentity.Web.Controllers
                     }
                     else
                     {
-                        AddErrors(result, "managePasswordModel");
+                        AddModelErrors(result, "managePasswordModel");
                     }
                 }
             }
             else
             {
                 // User does not have a password so remove any validation errors caused by a missing OldPassword field
-                ModelState state = ModelState["localPasswordModel.OldPassword"];
+                var state = ModelState["managePasswordModel.OldPassword"];
                 if (state != null)
                 {
                     state.Errors.Clear();
@@ -260,7 +261,7 @@ namespace UmbracoIdentity.Web.Controllers
                     }
                     else
                     {
-                        AddErrors(result, "managePasswordModel");
+                        AddModelErrors(result, "managePasswordModel");
                     }
                 }
             }
@@ -351,7 +352,7 @@ namespace UmbracoIdentity.Web.Controllers
             }
             else
             {
-                AddErrors(result, "registerModel");
+                AddModelErrors(result, "registerModel");
             }
 
             return CurrentUmbracoPage();
@@ -379,14 +380,14 @@ namespace UmbracoIdentity.Web.Controllers
                 await user.GenerateUserIdentityAsync(UserManager));
         }
 
-        private void AddErrors(IdentityResult result, string prefix = "")
+        private void AddModelErrors(IdentityResult result, string prefix = "")
         {
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(prefix, error);
             }
         }
-
+        
         private bool HasPassword()
         {
             var user = UserManager.FindById(User.Identity.GetUserId<int>());

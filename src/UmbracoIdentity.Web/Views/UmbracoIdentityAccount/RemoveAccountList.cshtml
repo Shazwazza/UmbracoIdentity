@@ -10,25 +10,27 @@
             Click on a provider to dissacociate them from your account
         </p>
 
-        @foreach (var account in Model)
-        {
-            using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>("Disassociate", null,
-                new { style = "display:inline-block;margin:2px;" }))
+        <ul class="inline-list">
+            @foreach (var account in Model)
             {
-                @Html.AntiForgeryToken()
+                <li>
+                    @using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>("Disassociate"))
+                    {
+                        @Html.AntiForgeryToken()
 
-                <button type="submit" class="btn btn-default"
-                        title="Remove the @account.LoginProvider provider from your account"
-                        onclick="return confirm('Are you sure you want to remove the @account.LoginProvider provider from your available logins?');">
+                        <button type="submit" class="btn btn-default"
+                                title="Remove the @account.LoginProvider provider from your account"
+                                onclick="return confirm('Are you sure you want to remove the @account.LoginProvider provider from your available logins?');">
 
-                    @account.LoginProvider
-                </button>
+                            @account.LoginProvider
+                        </button>
 
-                @Html.Hidden("loginProvider", account.LoginProvider)
-                @Html.Hidden("providerKey", account.ProviderKey)
+                        @Html.Hidden("loginProvider", account.LoginProvider)
+                        @Html.Hidden("providerKey", account.ProviderKey)
+                    }
+                </li>
             }
-        }
-
+        </ul>
 
     </fieldset>
 }

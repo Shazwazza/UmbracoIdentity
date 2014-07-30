@@ -19,20 +19,34 @@
         {
             @Html.AntiForgeryToken()
 
-            <fieldset>
-                <legend>Use another service to log in</legend>
-                
-                <div id="socialLoginList">
-                    <p>
-                        @foreach (AuthenticationDescription p in loginProviders)
-                        {
-                            <button type="submit" class="btn btn-default" id="@p.AuthenticationType" name="provider" value="@p.AuthenticationType" title="Log in using your @p.Caption account">@p.AuthenticationType</button>
-                        }
-                    </p>
-                </div>
+    <fieldset>
+        <legend>Use another service to log in</legend>
 
-            </fieldset>
-            
+        @if (TempData["LinkLoginError"] != null)
+        {
+            <div data-alert class="alert-box alert radius">
+                <ul>
+                    @foreach (var err in (string[])TempData["LinkLoginError"])
+                    {
+                        <li>@err</li>
+                    }                    
+                </ul>
+            </div>
+        }
+
+        <ul class="inline-list">
+
+            @foreach (AuthenticationDescription p in loginProviders)
+            {
+                <li>
+                    <button type="submit" class="btn btn-default" id="@p.AuthenticationType" name="provider" value="@p.AuthenticationType" title="Log in using your @p.Caption account">@p.AuthenticationType</button>
+                </li>
+            }
+
+        </ul>
+
+    </fieldset>
+
         }
     }
 }

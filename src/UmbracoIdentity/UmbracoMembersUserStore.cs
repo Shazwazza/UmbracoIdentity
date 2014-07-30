@@ -88,7 +88,7 @@ namespace UmbracoIdentity
                     _memberService.Save(found);
                 }
 
-                if (user.Logins.Any())
+                if (user.LoginsChanged)
                 {
                     var logins = await GetLoginsAsync(user);
                     _externalLoginStore.SaveUserLogins(found.Id, logins);

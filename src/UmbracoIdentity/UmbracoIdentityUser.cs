@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using Microsoft.AspNet.Identity.EntityFramework;
 
@@ -19,17 +21,28 @@ namespace UmbracoIdentity
         {
             get
             {
-                if (_getLogins != null && !base.Logins.Any())
+                if (_getLogins != null && !_getLogins.IsValueCreated)
                 {
+                    _logins = new ObservableCollection<IdentityUserLogin<int>>();
                     foreach (var l in _getLogins.Value)
                     {
-                        base.Logins.Add(l);
+                        _logins.Add(l);
                     }
+                    //now assign events
+                    _logins.CollectionChanged += Logins_CollectionChanged;
                 }
-                return base.Logins;
+                return _logins;
             }
         }
 
+        public bool LoginsChanged { get; private set; }
+
+        void Logins_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            LoginsChanged = true;
+        }
+
+        private ObservableCollection<IdentityUserLogin<int>> _logins;
         private Lazy<IEnumerable<IdentityUserLogin<int>>> _getLogins;
 
         /// <summary>
