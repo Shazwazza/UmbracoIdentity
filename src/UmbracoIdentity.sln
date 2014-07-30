@@ -41,6 +41,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{12D5F68D
 		..\build\UmbracoIdentity.nuspec = ..\build\UmbracoIdentity.nuspec
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget-transforms", "nuget-transforms", "{29C8E9D9-B30E-4EDA-AF5F-4899A1CFDFFD}"
+	ProjectSection(SolutionItems) = preProject
+		..\build\nuget-transforms\Web.config.install.xdt = ..\build\nuget-transforms\Web.config.install.xdt
+		..\build\nuget-transforms\Web.config.uninstall.xdt = ..\build\nuget-transforms\Web.config.uninstall.xdt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,5 +62,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{29C8E9D9-B30E-4EDA-AF5F-4899A1CFDFFD} = {12D5F68D-7BD0-444A-9D3B-D2FB833CDD64}
 	EndGlobalSection
 EndGlobal

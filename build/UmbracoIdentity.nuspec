@@ -12,12 +12,30 @@
     <projectUrl>https://github.com/Shandem/UmbracoIdentity/</projectUrl>
     <tags>asp.net identity umbraco security authentication authorization owin</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <dependencies>
+
+      <dependency id="UmbracoCms.Core" version="7.1.4" />
+      <dependency id="Microsoft.Owin" version="2.1.0" />
+      <dependency id="Microsoft.Owin.Security" version="2.1.0" />
+      <dependency id="Microsoft.Owin.Security.Cookies" version="2.1.0" />
+      <dependency id="Microsoft.Owin.Security.OAuth" version="2.1.0" />
+      <dependency id="Microsoft.AspNet.Identity.Core" version="2.0.1" />
+      <dependency id="Microsoft.AspNet.Identity.Owin" version="2.0.1" />
+      <dependency id="Microsoft.AspNet.Identity.EntityFramework" version="2.0.1" />
+
+    </dependencies>
   </metadata>
   <files>
 
     <file src="*.dll" target="lib\net451" />
     <file src="*.pdb" target="lib\net451" />
 
-    <!--<file src="nuget-transforms\web.config.transform" target="Content" />-->
+    <file src="nuget-transforms\web.config.install.xdt" target="Content" />
+    <file src="nuget-transforms\web.config.uninstall.xdt" target="Content" />
+
+    <file src="Controllers\*.pp" target="content\Controllers" />
+    <file src="Models\**\*.pp" target="content\Models" />
+    <file src="App_Startup\**\*.pp" target="content\App_Startup" />
+    
   </files>
 </package>
