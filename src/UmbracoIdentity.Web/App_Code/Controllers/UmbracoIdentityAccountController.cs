@@ -6,7 +6,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
-using Models.UmbracoIdentity;
+using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using Umbraco.Web;
 using UmbracoIdentity.Web;
 using Umbraco.Core;

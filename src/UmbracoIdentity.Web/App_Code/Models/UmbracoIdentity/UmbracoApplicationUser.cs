@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using UmbracoIdentity;
 
-namespace Models.UmbracoIdentity
+namespace UmbracoIdentity.Web.Models.UmbracoIdentity
 {
     public class UmbracoApplicationUser : UmbracoIdentityUser
     {

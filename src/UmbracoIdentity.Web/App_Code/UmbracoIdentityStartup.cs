@@ -7,11 +7,11 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Facebook;
-using Models.UmbracoIdentity;
+using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using UmbracoIdentity.Web;
 using Owin;
 
-[assembly: OwinStartup(typeof(Startup))]
+[assembly: OwinStartup(typeof(UmbracoIdentityStartup))]
 
 namespace UmbracoIdentity.Web
 {
@@ -19,7 +19,7 @@ namespace UmbracoIdentity.Web
     /// <summary>
     /// Summary description for Startup
     /// </summary>
-    public class Startup
+    public class UmbracoIdentityStartup
     {
  
         public void Configuration(IAppBuilder app)
