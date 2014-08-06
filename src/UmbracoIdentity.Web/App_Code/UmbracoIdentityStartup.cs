@@ -65,12 +65,12 @@ namespace UmbracoIdentity.Web
             //  consumerSecret: "");
 
             //app.UseFacebookAuthentication(
-            //  appId: "296106450571102",
-            //  appSecret: "bde97767dee96e743cbc364bbb39852d");
+            //  appId: "",
+            //  appSecret: "");
 
             //app.UseGoogleAuthentication(
-            //  clientId: "1072120697051-3hqomjgqnqnra9vt4gr129qr6tfud0fn.apps.googleusercontent.com",
-            //  clientSecret: "QoF1YzsbRXZ-gwbB2fHidcXR"); 
+            //  clientId: "",
+            //  clientSecret: ""); 
 
 #if DEBUG
 

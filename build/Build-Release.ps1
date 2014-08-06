@@ -88,6 +88,9 @@ Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Views\" -Destination $ReleaseFolder
 $AppCodeDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "App_Startup";
 Copy-Item "$AppCodeFolder\UmbracoIdentityStartup.cs" -Destination (New-Item ($AppCodeDestFolder) -Type directory);
 
+# COPY THE JS OVER
+Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Js\" -Destination $ReleaseFolder -recurse -Container -Filter *.js;
+
 # Remove the DEGUB code from the startup class since we don't want to ship that
 # NOTE: We're using the .Net constructs to do this because I could not get this to work with the powershell regex even with the (?s) prefix switch
 $regex = New-Object System.Text.RegularExpressions.Regex ('#if\sDEBUG\s.*#endif', [System.Text.RegularExpressions.RegexOptions]::Singleline)
