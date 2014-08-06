@@ -46,6 +46,10 @@ Remove FormsAuthentication from your web.config, this should be the last entry i
 
     <remove name="FormsAuthenticationModule" />
     
+The entry is slightly different for the system.webServer/modules list:
+
+    <remove name="FormsAuthentication" />
+    
 You then need to disable FormsAuthentication as the authentication provider, change the authentication element to:
 
     <authentication mode="None" />
