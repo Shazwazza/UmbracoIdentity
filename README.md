@@ -13,7 +13,7 @@ There are some **[known issues and limitations](https://github.com/Shandem/Umbra
 
 ## Minimum Requirements:
 
-Ideally this should be run against Umbraco 7.1.5 or 6.2.2. I realize these versions are not out (based on today's date 11/07/14) yet but in order for this to work, this issue needs to be resolved:
+Ideally this should be run against Umbraco 7.1.5 or 6.2.2. I realize these versions are not out (based on today's date 06/08/14) yet but in order for this to work, this issue needs to be resolved:
 
 http://issues.umbraco.org/issue/U4-5208
 
