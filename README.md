@@ -9,7 +9,7 @@ Some light reading - This is the majority of articles that had to be read and un
 
 https://delicious.com/shandem/owin
 
-There are some [known issues and limitations](https://github.com/Shandem/UmbracoIdentity/wiki/Known-Issues)
+There are some **[known issues and limitations](https://github.com/Shandem/UmbracoIdentity/wiki/Known-Issues)**
 
 ## Minimum Requirements:
 
