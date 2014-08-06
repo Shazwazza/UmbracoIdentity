@@ -21,7 +21,7 @@ There is a work around in this project which you will need to enable with an App
 
     <add key="UmbracoIdentity:UseAsyncActionInvokerFix" value="true"/>
 
-This project is built against .Net 4.5.1
+This project is built against .Net 4.5.1 and ASP.Net Identity 2.0.1
 
 
 ## Installation
