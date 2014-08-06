@@ -73,33 +73,43 @@ Copy-Item "$BuildFolder\nuget-transforms\web.config.uninstall.xdt" -Destination 
 $AppCodeFolder = Join-Path -Path $SolutionRoot -ChildPath "UmbracoIdentity.Web\App_Code";
 
 # COPY THE CONTROLLERS OVER
-$ControllersFolder = Join-Path -Path $AppCodeFolder -ChildPath "Controllers";
 $ControllerDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "Controllers";
-Copy-Item "$ControllersFolder\*.cs" -Destination (New-Item ($ControllerDestFolder) -Type directory);
+Copy-Item "$AppCodeFolder\Controllers\*.cs" -Destination (New-Item ($ControllerDestFolder) -Type directory);
 
 # COPY THE MODELS OVER
-$ModelsFolder = Join-Path -Path $AppCodeFolder -ChildPath "Models";
 $ModelsDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "Models";
-Copy-Item $ModelsFolder -Destination $ReleaseFolder -recurse -Container;
+Copy-Item "$AppCodeFolder\Models" -Destination $ReleaseFolder -recurse -Container;
+
+# COPY THE VIEWS OVER
+$ViewsDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "Views";
+Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Views\" -Destination $ReleaseFolder -recurse -Container -Filter *.cshtml;
 
 # COPY THE APP_STARTUP OVER
 $AppCodeDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "App_Startup";
 Copy-Item "$AppCodeFolder\UmbracoIdentityStartup.cs" -Destination (New-Item ($AppCodeDestFolder) -Type directory);
 
+# Remove the DEGUB code from the startup class since we don't want to ship that
+# NOTE: We're using the .Net constructs to do this because I could not get this to work with the powershell regex even with the (?s) prefix switch
+$regex = New-Object System.Text.RegularExpressions.Regex ('#if\sDEBUG\s.*#endif', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+Set-Content -Path "$AppCodeDestFolder\UmbracoIdentityStartup.cs" $regex.Replace(([System.IO.File]::ReadAllText("$AppCodeDestFolder\UmbracoIdentityStartup.cs")), "") -Encoding UTF8;
+
 # Rename all .cs files to .cs.pp
 Get-ChildItem $AppCodeDestFolder, $ControllerDestFolder, $ModelsDestFolder -Recurse -Filter *.cs | Rename-Item -newname {  $_.name  -Replace '\.cs$','.cs.pp'  }
+Get-ChildItem $ViewsDestFolder -Recurse -Filter *.cshtml | Rename-Item -newname {  $_.name  -Replace '\.cshtml$','.cshtml.pp'  }
 
 # Replace the namespace with the token in each file
-Get-ChildItem $AppCodeDestFolder, $ControllerDestFolder, $ModelsDestFolder -Recurse -Filter *.pp |
+Get-ChildItem $AppCodeDestFolder, $ControllerDestFolder, $ModelsDestFolder, $ViewsDestFolder -Recurse -Filter *.pp |
 Foreach-Object {
 	(Get-Content $_.FullName) `
 	-replace " UmbracoIdentity\.Web", " `$rootnamespace`$" |
 	Set-Content $_.FullName -Encoding UTF8;
 }
 
+# COPY THE README OVER
+Copy-Item "$BuildFolder\Readme.txt" -Destination $ReleaseFolder
+
 # COPY OVER THE CORE NUSPEC AND BUILD THE NUGET PACKAGE
-$CoreNuSpecSource = Join-Path -Path $BuildFolder -ChildPath "UmbracoIdentity.nuspec";
-Copy-Item $CoreNuSpecSource -Destination $ReleaseFolder
+Copy-Item "$BuildFolder\UmbracoIdentity.nuspec" -Destination $ReleaseFolder
 $CoreNuSpec = Join-Path -Path $ReleaseFolder -ChildPath "UmbracoIdentity.nuspec";
 $NuGet = Join-Path $SolutionRoot -ChildPath ".nuget\NuGet.exe"
 Write-Output "DEBUGGING: " $CoreNuSpec -OutputDirectory $ReleaseFolder -Version $ReleaseVersionNumber$PreReleaseName

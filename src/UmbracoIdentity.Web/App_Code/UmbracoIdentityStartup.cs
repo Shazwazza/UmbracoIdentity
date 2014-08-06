@@ -6,7 +6,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
-using Microsoft.Owin.Security.Facebook;
+using UmbracoIdentity;
 using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using UmbracoIdentity.Web;
 using Owin;
@@ -54,6 +54,28 @@ namespace UmbracoIdentity.Web
 
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
+            // Uncomment the following lines to enable logging in with third party login providers
+
+            //app.UseMicrosoftAccountAuthentication(
+            //  clientId: "",
+            //  clientSecret: "");
+
+            //app.UseTwitterAuthentication(
+            //  consumerKey: "",
+            //  consumerSecret: "");
+
+            //app.UseFacebookAuthentication(
+            //  appId: "296106450571102",
+            //  appSecret: "bde97767dee96e743cbc364bbb39852d");
+
+            //app.UseGoogleAuthentication(
+            //  clientId: "1072120697051-3hqomjgqnqnra9vt4gr129qr6tfud0fn.apps.googleusercontent.com",
+            //  clientSecret: "QoF1YzsbRXZ-gwbB2fHidcXR"); 
+
+#if DEBUG
+
+            //NOTE: THIS block gets removed during the build process, this is for internal dev purposes
+
             //// Enables the application to temporarily store user information when 
             //// they are verifying the second factor in the two-factor authentication process.
             //app.UseTwoFactorSignInCookie(
@@ -67,23 +89,14 @@ namespace UmbracoIdentity.Web
             //app.UseTwoFactorRememberBrowserCookie(
             //    DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
 
-            // Uncomment the following lines to enable logging in 
-            // with third party login providers
-            //app.UseMicrosoftAccountAuthentication(
-            //    clientId: "",
-            //    clientSecret: "");
-
-            //app.UseTwitterAuthentication(
-            //   consumerKey: "",
-            //   consumerSecret: "");
-
             app.UseFacebookAuthentication(
-               appId: "296106450571102",
-               appSecret: "bde97767dee96e743cbc364bbb39852d");
-            
+                   appId: "296106450571102",
+                   appSecret: "bde97767dee96e743cbc364bbb39852d");
+
             app.UseGoogleAuthentication(
              clientId: "1072120697051-3hqomjgqnqnra9vt4gr129qr6tfud0fn.apps.googleusercontent.com",
-             clientSecret: "QoF1YzsbRXZ-gwbB2fHidcXR");
+             clientSecret: "QoF1YzsbRXZ-gwbB2fHidcXR"); 
+#endif
 
         }
 

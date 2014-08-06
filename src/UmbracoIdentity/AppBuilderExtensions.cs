@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Web;
 using Microsoft.Owin;
 using Microsoft.Owin.Extensions;
@@ -19,6 +20,12 @@ namespace UmbracoIdentity
         public static void ConfigureUserManagerForUmbraco<T>(this IAppBuilder app)
             where T : UmbracoIdentityUser, new()
         {
+
+            //Don't proceed if the app is not ready
+            if (!ApplicationContext.Current.IsConfigured
+                || ApplicationContext.Current.DatabaseContext == null
+                || !ApplicationContext.Current.DatabaseContext.IsDatabaseConfigured) return;
+
             //Configure Umbraco user manager to be created per request
             app.CreatePerOwinContext<UmbracoMembersUserManager<T>>(
                 (o, c) => UmbracoMembersUserManager<T>.Create(

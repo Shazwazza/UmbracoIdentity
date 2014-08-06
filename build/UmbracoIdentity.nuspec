@@ -19,10 +19,11 @@
       <dependency id="Microsoft.Owin.Security" version="2.1.0" />
       <dependency id="Microsoft.Owin.Security.Cookies" version="2.1.0" />
       <dependency id="Microsoft.Owin.Security.OAuth" version="2.1.0" />
+      <dependency id="Microsoft.Owin.Host.SystemWeb" version="2.1.0" />
       <dependency id="Microsoft.AspNet.Identity.Core" version="2.0.1" />
       <dependency id="Microsoft.AspNet.Identity.Owin" version="2.0.1" />
       <dependency id="Microsoft.AspNet.Identity.EntityFramework" version="2.0.1" />
-
+      
     </dependencies>
   </metadata>
   <files>
@@ -35,7 +36,10 @@
 
     <file src="Controllers\*.pp" target="content\Controllers" />
     <file src="Models\**\*.pp" target="content\Models" />
+    <file src="Views\**\*.pp" target="content\Views" />
     <file src="App_Startup\**\*.pp" target="content\App_Startup" />
-    
+
+    <file src="Readme.txt" target="" />
+
   </files>
 </package>
