@@ -36,7 +36,7 @@ The Nuget package targets **.Net 4.5.1** ONLY, if you are not running 4.5.1 it w
 
 *NOTE: When targetting ASP.Net 'Web sites' even when the target framework in the web.config is specified to be 4.5.1 I haven't had much success with Nuget installing correctly, so it's best to stick with Web Applications.*
 
-    PM> Install-Package UmbracoIdentity -Pre
+    PM> Install-Package UmbracoIdentity
 
 ### Config updates
 
