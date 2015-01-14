@@ -36,7 +36,7 @@ namespace UmbracoIdentity
                 }    
             }
             _db = new UmbracoDatabase(ConnString, "System.Data.SqlServerCe.4.0");
-            if (!_db.TableExist("ExternalIdentities"))
+            if (!_db.TableExist("ExternalLogins"))
             {
                 _db.CreateTable<ExternalLoginDto>();
             }
