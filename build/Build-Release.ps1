@@ -85,7 +85,7 @@ $ViewsDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "Views";
 Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Views\" -Destination $ReleaseFolder -recurse -Container -Filter *.cshtml;
 
 # COPY THE APP_STARTUP OVER
-$AppCodeDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "App_Startup";
+$AppCodeDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "App_Start";
 Copy-Item "$AppCodeFolder\UmbracoIdentityStartup.cs" -Destination (New-Item ($AppCodeDestFolder) -Type directory);
 
 # COPY THE JS OVER

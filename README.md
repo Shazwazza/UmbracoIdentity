@@ -64,7 +64,7 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
 
 If you are familiar then here's what to do... 
 
-Once you've installed the Nuget package, you will see some classes added to your App_Startup folder:
+Once you've installed the Nuget package, you will see some classes added to your App_Start folder:
 
 * UmbracoApplicationUser - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityUser. You can customize this how you like.
 * UmbracoStartup - this is basically the same as the Startup class that comes with the the VS 2013 template, except that it is named UmbracoStartup and contains some slightly different extension method calls:

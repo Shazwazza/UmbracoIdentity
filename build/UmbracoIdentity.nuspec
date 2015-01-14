@@ -38,7 +38,7 @@
     <file src="Models\**\*.pp" target="content\Models" />
     <file src="Views\**\*.pp" target="content\Views" />
     <file src="Js\**\*.js" target="content\Js" />
-    <file src="App_Startup\**\*.pp" target="content\App_Startup" />
+    <file src="App_Start\**\*.pp" target="content\App_Start" />
 
     <file src="Readme.txt" target="" />
 
