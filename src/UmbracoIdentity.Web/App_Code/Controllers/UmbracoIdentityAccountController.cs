@@ -21,7 +21,7 @@ namespace UmbracoIdentity.Web.Controllers
     public class UmbracoIdentityAccountController : SurfaceController
     {
         private UmbracoMembersUserManager<UmbracoApplicationUser> _userManager;
-        
+
         protected IOwinContext OwinContext
         {
             get { return Request.GetOwinContext(); }
@@ -153,10 +153,10 @@ namespace UmbracoIdentity.Web.Controllers
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.GetUserId());
             if (loginInfo == null)
             {
-                TempData["LinkLoginError"] = new[] {"An error occurred, could not get external login info"};
+                TempData["LinkLoginError"] = new[] { "An error occurred, could not get external login info" };
                 return RedirectToLocal(returnUrl);
             }
-            var result = await UserManager.AddLoginAsync(User.Identity.GetUserId<int>(), loginInfo.Login);
+            var result = await UserManager.AddLoginAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity), loginInfo.Login);
             if (result.Succeeded)
             {
                 return RedirectToLocal(returnUrl);
@@ -171,12 +171,12 @@ namespace UmbracoIdentity.Web.Controllers
         public async Task<ActionResult> Disassociate(string loginProvider, string providerKey)
         {
             var result = await UserManager.RemoveLoginAsync(
-                User.Identity.GetUserId<int>(), 
+                UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity),
                 new UserLoginInfo(loginProvider, providerKey));
 
             if (result.Succeeded)
             {
-                var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+                var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
                 await SignInAsync(user, isPersistent: false);
                 return RedirectToCurrentUmbracoPage();
             }
@@ -196,7 +196,7 @@ namespace UmbracoIdentity.Web.Controllers
         [ChildActionOnly]
         public ActionResult RemoveAccountList()
         {
-            var linkedAccounts = UserManager.GetLogins(User.Identity.GetUserId<int>());
+            var linkedAccounts = UserManager.GetLogins(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
             ViewBag.ShowRemoveButton = HasPassword() || linkedAccounts.Count > 1;
             return PartialView(linkedAccounts);
         }
@@ -228,10 +228,10 @@ namespace UmbracoIdentity.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId<int>(), model.OldPassword, model.NewPassword);
+                    IdentityResult result = await UserManager.ChangePasswordAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity), model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
-                        var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+                        var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
                         await SignInAsync(user, isPersistent: false);
                         TempData["ChangePasswordSuccess"] = true;
                         return RedirectToCurrentUmbracoPage();
@@ -253,7 +253,7 @@ namespace UmbracoIdentity.Web.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    IdentityResult result = await UserManager.AddPasswordAsync(User.Identity.GetUserId<int>(), model.NewPassword);
+                    IdentityResult result = await UserManager.AddPasswordAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity), model.NewPassword);
                     if (result.Succeeded)
                     {
                         TempData["ChangePasswordSuccess"] = true;
@@ -356,7 +356,7 @@ namespace UmbracoIdentity.Web.Controllers
             }
 
             return CurrentUmbracoPage();
-        } 
+        }
 
         #endregion
 
@@ -387,10 +387,10 @@ namespace UmbracoIdentity.Web.Controllers
                 ModelState.AddModelError(prefix, error);
             }
         }
-        
+
         private bool HasPassword()
         {
-            var user = UserManager.FindById(User.Identity.GetUserId<int>());
+            var user = UserManager.FindById(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
             if (user != null)
             {
                 return !user.PasswordHash.IsNullOrWhiteSpace();
