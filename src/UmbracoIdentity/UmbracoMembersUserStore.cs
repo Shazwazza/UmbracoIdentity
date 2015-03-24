@@ -143,7 +143,7 @@ namespace UmbracoIdentity
         {            
             return Task.Run(() =>
             {
-                var member = ApplicationContext.Current.Services.MemberService.GetByUsername(userName);
+                var member = _memberService.GetByUsername(userName);
                 if (member == null)
                 {
                     return null;

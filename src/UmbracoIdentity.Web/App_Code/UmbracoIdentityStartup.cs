@@ -44,7 +44,7 @@ namespace UmbracoIdentity.Web
                         .OnValidateIdentity<UmbracoMembersUserManager<UmbracoApplicationUser>, UmbracoApplicationUser, int>(
                             TimeSpan.FromMinutes(30),
                             (manager, user) => user.GenerateUserIdentityAsync(manager),
-                            identity => identity.GetUserId<int>())                            
+                            UmbracoIdentity.IdentityExtensions.GetUserId<int>)
                 }
             });
 
