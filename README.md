@@ -11,10 +11,6 @@ There are some **[known issues and limitations](https://github.com/Shandem/Umbra
 
 This package is built against Umbraco 7.2.4 and the Nuget dependency is also for that version though it will probably work with umbraco versions 7.1.6+ or 6.2.2+
 
-## Minimum Requirements:
-
-This package is built against Umbraco 7.2.4 and the Nuget dependency is also for that version though it will probably work with umbraco versions 7.1.6+ or 6.2.2+
-
 If you are running previous versions to 7.1.6 or 6.2.2 then in order for this to work you will need to apply a work around and enable this AppSetting:
 
     <add key="UmbracoIdentity:UseAsyncActionInvokerFix" value="true"/>
