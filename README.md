@@ -1,40 +1,29 @@
 ![ASP.Net Identity for Umbraco](logo.png?raw=true)
 ===============
 
-Allows for using OWIN &amp; ASP.Net Identity in Umbraco (currently only for the front-end)
+Allows for using OWIN &amp; ASP.Net Identity in Umbraco for front-end members
 
 This project will allow the use of ASP.Net Identity and OWIN to work for Umbraco members on your front-end website. It is compatible with your current members and how passwords are currently hashed - so long as your membership provider is configured for hashing passwords (default) and not encrypting them.
-
-Some light reading - This is the majority of articles that had to be read and understood to achieve this:
-
-https://delicious.com/shandem/owin
 
 There are some **[known issues and limitations](https://github.com/Shandem/UmbracoIdentity/wiki/Known-Issues)**
 
 ## Minimum Requirements:
 
-Ideally this should be run against Umbraco 7.1.6 or 6.2.2. 
+This package is built against Umbraco 7.2.4 and the Nuget dependency is also for that version though it will probably work with umbraco versions 7.1.6+ or 6.2.2+
 
-If you are running previous versions to these ones, in order for this to work, this issue needs to be resolved:
+## Minimum Requirements:
 
-http://issues.umbraco.org/issue/U4-5208
+This package is built against Umbraco 7.2.4 and the Nuget dependency is also for that version though it will probably work with umbraco versions 7.1.6+ or 6.2.2+
 
-There is a work around in this project which you will need to enable with an AppSetting if you are not using 7.1.5+ or 6.2.2+
+If you are running previous versions to 7.1.6 or 6.2.2 then in order for this to work you will need to apply a work around and enable this AppSetting:
 
     <add key="UmbracoIdentity:UseAsyncActionInvokerFix" value="true"/>
-
-This project is built against **.Net 4.5.1** and ASP.Net Identity 2.0.1 (but will work with newer version of ASP.Net Identity too)
-
 
 ## Installation
 
 First, read the minimum requirements above as you might need to enable the work around.
 
 ### Nuget
-
-The Nuget package targets **.Net 4.5.1** ONLY, if you are not running 4.5.1 it will not work. 
-
-*NOTE: When targetting ASP.Net 'Web sites' even when the target framework in the web.config is specified to be 4.5.1 I haven't had much success with Nuget installing correctly, so it's best to stick with Web Applications.*
 
     PM> Install-Package UmbracoIdentity
 
@@ -60,22 +49,22 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
     
 ### Owin setup
 
-**STOP!!** If you are not familiar with OWIN or ASP.Net Identity you will need to stop here and familiarize yourself with these things. If you are running the latest version of Visual Studio 2013, then you can create a new web project and create a site that has authentication. This will give you a good example of how to setup OWIN and Authentication. The 'light reading' link above also has tons of information.
+**STOP!!** If you are not familiar with OWIN or ASP.Net Identity you will need to stop here and familiarize yourself with these things. If you are running the latest version of Visual Studio 2013, then you can create a new web project and create a site that has authentication. This will give you a good example of how to setup OWIN and Authentication. The following link above also has tons of information for you to start leaning with: https://delicious.com/shandem/owin
 
 If you are familiar then here's what to do... 
 
 Once you've installed the Nuget package, you will see some classes added to your App_Start folder:
 
-* UmbracoApplicationUser - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityUser. You can customize this how you like.
+* UmbracoApplicationUser - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityMember. You can customize this how you like.
 * UmbracoStartup - this is basically the same as the Startup class that comes with the the VS 2013 template, except that it is named UmbracoStartup and contains some slightly different extension method calls:
 
         //Single method to configure the Identity user manager for use with Umbraco
-        app.ConfigureUserManagerForUmbraco<UmbracoApplicationUser>();
+        app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
         
         //Ensure owin is configured for Umbraco back office authentication
         app.UseUmbracoBackAuthentication();
 
-    * The rest of the startup class is pretty much the same as the VS 2013 template except that you are using your UmbracoApplicationUser type and the UmbracoMembersUserManager class.
+    * The rest of the startup class is pretty much the same as the VS 2013 template except that you are using your UmbracoApplicationMember type and the UmbracoMembersUserManager class.
 
 ## [Documentation](https://github.com/Shandem/UmbracoIdentity/wiki)
 
