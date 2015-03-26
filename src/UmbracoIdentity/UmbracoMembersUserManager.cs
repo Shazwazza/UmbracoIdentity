@@ -53,15 +53,23 @@ namespace UmbracoIdentity
             get { return false; }
         }
 
+        /// <summary>
+        /// Default method to create a user store
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="memberService"></param>
+        /// <param name="externalLoginStore"></param>
+        /// <param name="membershipProvider"></param>
+        /// <returns></returns>
         public static UmbracoMembersUserManager<T> Create(
             IdentityFactoryOptions<UmbracoMembersUserManager<T>> options, 
-            IOwinContext context,
             IMemberService memberService,
-            IExternalLoginStore externalLoginStore = null)
+            IExternalLoginStore externalLoginStore = null,
+            IdentityEnabledMembersMembershipProvider membershipProvider = null)
         {
 
             //we'll grab some settings from the membership provider
-            var provider = Membership.Providers["UmbracoMembershipProvider"] as IdentityEnabledMembersMembershipProvider;
+            var provider = membershipProvider ?? Membership.Providers["UmbracoMembershipProvider"] as IdentityEnabledMembersMembershipProvider;
 
             if (provider == null)
             {
@@ -74,7 +82,31 @@ namespace UmbracoIdentity
                 externalLoginStore = new ExternalLoginStore();
             }
 
-            var manager = new UmbracoMembersUserManager<T>(new UmbracoMembersUserStore<T>(memberService, provider, externalLoginStore));
+            return Create(options, new UmbracoMembersUserStore<T>(memberService, provider, externalLoginStore), membershipProvider);
+        }
+
+        /// <summary>
+        /// Used to create a user manager with custom store
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="customUserStore"></param>
+        /// <param name="membershipProvider"></param>
+        /// <returns></returns>
+        public static UmbracoMembersUserManager<T> Create(
+          IdentityFactoryOptions<UmbracoMembersUserManager<T>> options,
+          UmbracoMembersUserStore<T> customUserStore,
+          IdentityEnabledMembersMembershipProvider membershipProvider = null)
+        {
+
+            //we'll grab some settings from the membership provider
+            var provider = membershipProvider ?? Membership.Providers["UmbracoMembershipProvider"] as IdentityEnabledMembersMembershipProvider;
+
+            if (provider == null)
+            {
+                throw new InvalidOperationException("In order to use " + typeof(UmbracoMembersUserManager<>) + " the Umbraco members membership provider must be of type " + typeof(IdentityEnabledMembersMembershipProvider));
+            }
+
+            var manager = new UmbracoMembersUserManager<T>(customUserStore);
 
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<T, int>(manager)
@@ -82,7 +114,7 @@ namespace UmbracoIdentity
                 AllowOnlyAlphanumericUserNames = false,
                 RequireUniqueEmail = true
             };
-            
+
             // Configure validation logic for passwords
             manager.PasswordValidator = new PasswordValidator
             {
@@ -90,7 +122,7 @@ namespace UmbracoIdentity
                 RequireNonLetterOrDigit = provider.MinRequiredNonAlphanumericCharacters > 0,
                 RequireDigit = false,
                 RequireLowercase = false,
-                RequireUppercase = false                
+                RequireUppercase = false
             };
 
             //use a custom hasher based on our membership provider
@@ -109,7 +141,7 @@ namespace UmbracoIdentity
             //    Subject = "Security Code",
             //    BodyFormat = "Your security code is: {0}"
             //});
-            
+
             //manager.EmailService = new EmailService();
             //manager.SmsService = new SmsService();
 
@@ -120,6 +152,8 @@ namespace UmbracoIdentity
             }
             return manager;
         }
+
+      
 
         protected override void Dispose(bool disposing)
         {
