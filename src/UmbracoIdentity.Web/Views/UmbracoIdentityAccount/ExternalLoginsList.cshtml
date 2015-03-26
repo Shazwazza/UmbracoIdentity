@@ -3,7 +3,14 @@
 @using Microsoft.Owin.Security
 
 @{
+    
+    //NOTE: You might need to filter these providers since in some cases there may be identity providers specifically
+    // for the back office or front-end. Generally if that is the case there will be items in the Properties collection
+    // that you can use to filter or the AuthenticationType will be prefixed with a custom value.
     var loginProviders = Context.GetOwinContext().Authentication.GetExternalAuthenticationTypes();
+        //Filtering Example:
+        //.Where(p => p.Properties.ContainsKey("UmbracoBackOffice") == false);
+    
     if (!loginProviders.Any())
     {
         <div>

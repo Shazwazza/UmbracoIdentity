@@ -17,7 +17,7 @@ namespace UmbracoIdentity.Web
 {
    
     /// <summary>
-    /// Summary description for Startup
+    /// OWIN Startup class for UmbracoIdentity 
     /// </summary>
     public class UmbracoIdentityStartup
     {
