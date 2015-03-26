@@ -16,7 +16,7 @@ namespace UmbracoIdentity
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        IEnumerable<IdentityUserLogin<int>> GetAll(int userId);
+        IEnumerable<IdentityMemberLogin<int>> GetAll(int userId);
         
         /// <summary>
         /// Returns all logins matching the login info - generally there should only be one but in some cases 

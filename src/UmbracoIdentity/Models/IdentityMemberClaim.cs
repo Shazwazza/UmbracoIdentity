@@ -5,13 +5,13 @@ using Microsoft.AspNet.Identity;
 namespace UmbracoIdentity.Models
 {
 
-    public class IdentityUserClaim : IdentityUserClaim<string> { }
+    public class IdentityMemberClaim : IdentityMemberClaim<string> { }
 
     /// <summary>
     ///     EntityType that represents one specific user claim
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
-    public class IdentityUserClaim<TKey>
+    public class IdentityMemberClaim<TKey>
     {
         /// <summary>
         ///     Primary key

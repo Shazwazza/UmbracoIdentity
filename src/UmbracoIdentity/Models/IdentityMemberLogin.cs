@@ -8,13 +8,13 @@ namespace UmbracoIdentity.Models
 
     
 
-    public class IdentityUserLogin : IdentityUserLogin<string> { }
+    public class IdentityMemberLogin : IdentityMemberLogin<string> { }
 
     /// <summary>
     ///     Entity type for a user's login (i.e. facebook, google)
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
-    public class IdentityUserLogin<TKey>
+    public class IdentityMemberLogin<TKey>
     {
         /// <summary>
         ///     The login provider for the login (i.e. facebook, google)

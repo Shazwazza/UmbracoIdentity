@@ -19,7 +19,7 @@ namespace UmbracoIdentity
     /// A custom user store that uses Umbraco member data
     /// </summary>
     public class UmbracoMembersUserStore<T> : DisposableObject, IUserStore<T, int>, IUserPasswordStore<T, int>, IUserEmailStore<T, int>, IUserLoginStore<T, int> 
-        where T : UmbracoIdentityUser, IUser<int>, new()
+        where T : UmbracoIdentityMember, IUser<int>, new()
     {
         private readonly IMemberService _memberService;
         private readonly IdentityEnabledMembersMembershipProvider _membershipProvider;
@@ -243,7 +243,7 @@ namespace UmbracoIdentity
             return Task.Run(() =>
             {
                 var logins = user.Logins;
-                var instance = new IdentityUserLogin<int>
+                var instance = new IdentityMemberLogin<int>
                 {
                     UserId = user.Id,
                     ProviderKey = login.ProviderKey,
@@ -359,7 +359,7 @@ namespace UmbracoIdentity
         {
             if (user != null)
             {
-                user.SetLoginsCallback(new Lazy<IEnumerable<IdentityUserLogin<int>>>(() =>
+                user.SetLoginsCallback(new Lazy<IEnumerable<IdentityMemberLogin<int>>>(() =>
                             _externalLoginStore.GetAll(user.Id)));
             }
             return user;

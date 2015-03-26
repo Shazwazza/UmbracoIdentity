@@ -7,7 +7,7 @@ using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
 {
-    public class UmbracoIdentityUser : IdentityUser<int, IdentityUserLogin<int>, IdentityUserRole<int>, IdentityUserClaim<int>>
+    public class UmbracoIdentityMember : IdentityMember<int, IdentityMemberLogin<int>, IdentityMemberRole<int>, IdentityMemberClaim<int>>
     {
         /// <summary>
         /// Gets/sets the members real name
@@ -17,13 +17,13 @@ namespace UmbracoIdentity
         /// <summary>
         /// Overridden to make the retrieval lazy
         /// </summary>
-        public override ICollection<IdentityUserLogin<int>> Logins
+        public override ICollection<IdentityMemberLogin<int>> Logins
         {
             get
             {
                 if (_getLogins != null && !_getLogins.IsValueCreated)
                 {
-                    _logins = new ObservableCollection<IdentityUserLogin<int>>();
+                    _logins = new ObservableCollection<IdentityMemberLogin<int>>();
                     foreach (var l in _getLogins.Value)
                     {
                         _logins.Add(l);
@@ -42,14 +42,14 @@ namespace UmbracoIdentity
             LoginsChanged = true;
         }
 
-        private ObservableCollection<IdentityUserLogin<int>> _logins;
-        private Lazy<IEnumerable<IdentityUserLogin<int>>> _getLogins;
+        private ObservableCollection<IdentityMemberLogin<int>> _logins;
+        private Lazy<IEnumerable<IdentityMemberLogin<int>>> _getLogins;
 
         /// <summary>
         /// Used to set a lazy call back to populate the user's Login list
         /// </summary>
         /// <param name="callback"></param>
-        public void SetLoginsCallback(Lazy<IEnumerable<IdentityUserLogin<int>>> callback)
+        public void SetLoginsCallback(Lazy<IEnumerable<IdentityMemberLogin<int>>> callback)
         {
             if (callback == null) throw new ArgumentNullException("callback");
             _getLogins = callback;

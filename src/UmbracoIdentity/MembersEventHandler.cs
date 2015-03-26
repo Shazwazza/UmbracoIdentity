@@ -11,7 +11,7 @@ namespace UmbracoIdentity
     /// Binds to Umbraco member events for each OwinContext
     /// </summary>
     public sealed class MembersEventHandler<T> : DisposableObject
-         where T : UmbracoIdentityUser, new()
+         where T : UmbracoIdentityMember, new()
     {
         private readonly IOwinContext _owinContext;
 

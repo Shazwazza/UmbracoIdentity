@@ -17,8 +17,8 @@ namespace UmbracoIdentity
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
-        public static void ConfigureUserManagerForUmbraco<T>(this IAppBuilder app)
-            where T : UmbracoIdentityUser, new()
+        public static void ConfigureUserManagerForUmbracoMembers<T>(this IAppBuilder app)
+            where T : UmbracoIdentityMember, new()
         {
 
             //Don't proceed if the app is not ready
@@ -35,9 +35,6 @@ namespace UmbracoIdentity
             // external logins are kept in sync if members are deleted from Umbraco
             app.CreatePerOwinContext<MembersEventHandler<T>>((options, context) => new MembersEventHandler<T>(context));
 
-            //TODO: This is just for the mem leak fix
-            app.CreatePerOwinContext<OwinContextDisposal<MembersEventHandler<T>, UmbracoMembersUserManager<T>>>(
-                (o, c) => new OwinContextDisposal<MembersEventHandler<T>, UmbracoMembersUserManager<T>>(c));
         }
 
         /// <summary>
@@ -55,34 +52,5 @@ namespace UmbracoIdentity
             return app;
         }
 
-        //This is a fix for OWIN mem leak! 
-        //http://stackoverflow.com/questions/24378856/memory-leak-in-owin-appbuilderextensions/24819543#24819543
-        private class OwinContextDisposal<T1, T2> : IDisposable
-            where T1 : IDisposable
-            where T2 : IDisposable
-        {
-            private readonly List<IDisposable> _disposables = new List<IDisposable>();
-            private bool _disposed = false;
-
-            public OwinContextDisposal(IOwinContext owinContext)
-            {
-                if (HttpContext.Current == null) return;
-
-                _disposables.Add(owinContext.Get<T1>());
-                _disposables.Add(owinContext.Get<T2>());
-
-                HttpContext.Current.DisposeOnPipelineCompleted(this);
-            }
-
-            public void Dispose()
-            {
-                if (_disposed) return;
-                foreach (var disposable in _disposables)
-                {
-                    disposable.Dispose();
-                }
-                _disposed = true;
-            }
-        }
     }
 }

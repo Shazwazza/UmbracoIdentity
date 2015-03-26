@@ -20,19 +20,19 @@ namespace UmbracoIdentity.Web.Controllers
     [Authorize]
     public class UmbracoIdentityAccountController : SurfaceController
     {
-        private UmbracoMembersUserManager<UmbracoApplicationUser> _userManager;
+        private UmbracoMembersUserManager<UmbracoApplicationMember> _userManager;
 
         protected IOwinContext OwinContext
         {
             get { return Request.GetOwinContext(); }
         }
 
-        public UmbracoMembersUserManager<UmbracoApplicationUser> UserManager
+        public UmbracoMembersUserManager<UmbracoApplicationMember> UserManager
         {
             get
             {
                 return _userManager ?? (_userManager = OwinContext
-                    .GetUserManager<UmbracoMembersUserManager<UmbracoApplicationUser>>());
+                    .GetUserManager<UmbracoMembersUserManager<UmbracoApplicationMember>>());
             }
         }
 
@@ -101,7 +101,7 @@ namespace UmbracoIdentity.Web.Controllers
                     return View("ExternalLoginFailure");
                 }
 
-                var user = new UmbracoApplicationUser()
+                var user = new UmbracoApplicationMember()
                 {
                     Name = info.ExternalIdentity.Name,
                     UserName = model.Email,
@@ -325,7 +325,7 @@ namespace UmbracoIdentity.Web.Controllers
                 return CurrentUmbracoPage();
             }
 
-            var user = new UmbracoApplicationUser()
+            var user = new UmbracoApplicationMember()
             {
                 UserName = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username,
                 Email = model.Email
@@ -374,11 +374,11 @@ namespace UmbracoIdentity.Web.Controllers
             }
         }
 
-        private async Task SignInAsync(UmbracoApplicationUser user, bool isPersistent)
+        private async Task SignInAsync(UmbracoApplicationMember member, bool isPersistent)
         {
             OwinContext.Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
             OwinContext.Authentication.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent },
-                await user.GenerateUserIdentityAsync(UserManager));
+                await member.GenerateUserIdentityAsync(UserManager));
         }
 
         private void AddModelErrors(IdentityResult result, string prefix = "")

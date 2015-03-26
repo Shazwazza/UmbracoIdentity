@@ -11,15 +11,15 @@ namespace UmbracoIdentity.Models
     /// <typeparam name="TLogin"></typeparam>
     /// <typeparam name="TRole"></typeparam>
     /// <typeparam name="TClaim"></typeparam>
-    public class IdentityUser<TKey, TLogin, TRole, TClaim> : IUser<TKey>
-        where TLogin : IdentityUserLogin<TKey>
-        where TRole : IdentityUserRole<TKey>
-        where TClaim : IdentityUserClaim<TKey>
+    public class IdentityMember<TKey, TLogin, TRole, TClaim> : IUser<TKey>
+        where TLogin : IdentityMemberLogin<TKey>
+        where TRole : IdentityMemberRole<TKey>
+        where TClaim : IdentityMemberClaim<TKey>
     {
         /// <summary>
         ///     Constructor
         /// </summary>
-        public IdentityUser()
+        public IdentityMember()
         {
             Claims = new List<TClaim>();
             Roles = new List<TRole>();

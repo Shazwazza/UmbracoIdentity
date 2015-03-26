@@ -11,7 +11,7 @@ namespace UmbracoIdentity
     /// A custom user manager that uses the UmbracoMembersUserStore
     /// </summary>
     public class UmbracoMembersUserManager<T> : UserManager<T, int>
-        where T : UmbracoIdentityUser, IUser<int>, new()
+        where T : UmbracoIdentityMember, IUser<int>, new()
     {
         public UmbracoMembersUserManager(IUserStore<T, int> store)
             : base(store)

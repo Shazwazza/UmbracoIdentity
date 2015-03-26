@@ -54,7 +54,7 @@ namespace UmbracoIdentity
             }
         }
 
-        public IEnumerable<IdentityUserLogin<int>> GetAll(int userId)
+        public IEnumerable<IdentityMemberLogin<int>> GetAll(int userId)
         {
             var sql = new Sql()
                 .Select("*")
@@ -63,7 +63,7 @@ namespace UmbracoIdentity
 
             var found = _db.Fetch<ExternalLoginDto>(sql);
 
-            return found.Select(x => new IdentityUserLogin<int>
+            return found.Select(x => new IdentityMemberLogin<int>
             {
                 LoginProvider = x.LoginProvider,
                 ProviderKey = x.ProviderKey,

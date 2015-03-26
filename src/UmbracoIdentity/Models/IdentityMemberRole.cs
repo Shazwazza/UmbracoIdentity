@@ -3,13 +3,13 @@ using System;
 namespace UmbracoIdentity.Models
 {
 
-    public class IdentityUserRole : IdentityUserRole<string> { }
+    public class IdentityMemberRole : IdentityMemberRole<string> { }
 
     /// <summary>
     ///     EntityType that represents a user belonging to a role
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
-    public class IdentityUserRole<TKey>
+    public class IdentityMemberRole<TKey>
     {
         /// <summary>
         ///     UserId for the user that is in the role

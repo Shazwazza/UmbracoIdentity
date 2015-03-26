@@ -25,7 +25,7 @@ namespace UmbracoIdentity.Web
         public void Configuration(IAppBuilder app)
         {
             //Single method to configure the Identity user manager for use with Umbraco
-            app.ConfigureUserManagerForUmbraco<UmbracoApplicationUser>();
+            app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
 
             // Enable the application to use a cookie to store information for the 
             // signed in user and to use a cookie to temporarily store information 
@@ -41,7 +41,7 @@ namespace UmbracoIdentity.Web
                     // logs in. This is a security feature which is used when you 
                     // change a password or add an external login to your account.  
                     OnValidateIdentity = SecurityStampValidator
-                        .OnValidateIdentity<UmbracoMembersUserManager<UmbracoApplicationUser>, UmbracoApplicationUser, int>(
+                        .OnValidateIdentity<UmbracoMembersUserManager<UmbracoApplicationMember>, UmbracoApplicationMember, int>(
                             TimeSpan.FromMinutes(30),
                             (manager, user) => user.GenerateUserIdentityAsync(manager),
                             UmbracoIdentity.IdentityExtensions.GetUserId<int>)
