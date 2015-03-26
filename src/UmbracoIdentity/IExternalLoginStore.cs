@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
+using UmbracoIdentity.Models;
+
 
 namespace UmbracoIdentity
 {

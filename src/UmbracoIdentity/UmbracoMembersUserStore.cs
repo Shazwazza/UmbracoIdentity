@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using UmbracoIdentity.Models;
 using Task = System.Threading.Tasks.Task;
 
 namespace UmbracoIdentity

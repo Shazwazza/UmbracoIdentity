@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using Microsoft.AspNet.Identity.EntityFramework;
+using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
 {

@@ -4,7 +4,7 @@ using System.Data.SqlServerCe;
 using System.Linq;
 using System.Web;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
+
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Umbraco.Core;
@@ -15,6 +15,7 @@ using Umbraco.Core.Persistence.DatabaseAnnotations;
 using Umbraco.Core.Persistence.DatabaseModelDefinitions;
 using Umbraco.Core.Persistence.SqlSyntax;
 using Umbraco.Core.Services;
+using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
 {
