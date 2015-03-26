@@ -300,7 +300,8 @@ namespace UmbracoIdentity.Web.Controllers
 
             if (Members.IsLoggedIn())
             {
-                OwinContext.Authentication.SignOut();
+                //ensure to only clear the default cookies
+                OwinContext.Authentication.SignOut(DefaultAuthenticationTypes.ApplicationCookie, DefaultAuthenticationTypes.ExternalCookie);
             }
 
             //if there is a specified path to redirect to then use it
