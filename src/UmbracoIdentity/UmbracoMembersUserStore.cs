@@ -121,7 +121,7 @@ namespace UmbracoIdentity
             var member = _memberService.GetById(userId);
             if (member == null)
             {
-                return null;
+                return Task.FromResult((T) null);
             }
             var result = AssignLoginsCallback(new T
             {
@@ -142,7 +142,7 @@ namespace UmbracoIdentity
             var member = _memberService.GetByUsername(userName);
             if (member == null)
             {
-                return null;
+                return Task.FromResult((T)null);
             }
 
             var result = AssignLoginsCallback(new T
