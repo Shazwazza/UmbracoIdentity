@@ -45,30 +45,29 @@ namespace UmbracoIdentity
         {
             if (user == null) throw new ArgumentNullException("user");
 
-            return Task.Run(() =>
-            {
-                var member = _memberService.CreateMember(
-                    user.UserName, user.Email, 
+            var member = _memberService.CreateMember(
+                    user.UserName, user.Email,
                     user.Name.IsNullOrWhiteSpace() ? user.UserName : user.Name,
                     _membershipProvider.DefaultMemberTypeAlias);
-                UpdateMemberProperties(member, user);
+            UpdateMemberProperties(member, user);
 
-                //the password must be 'something' it could be empty if authenticating
-                // with an external provider so we'll just generate one and prefix it, the 
-                // prefix will help us determine if the password hasn't actually been specified yet.
-                if (member.RawPasswordValue.IsNullOrWhiteSpace())
-                {
-                    //this will hash the guid with a salt so should be nicely random
-                    var aspHasher = new PasswordHasher();
-                    member.RawPasswordValue = "___UIDEMPTYPWORD__" + 
-                        aspHasher.HashPassword(Guid.NewGuid().ToString("N"));
+            //the password must be 'something' it could be empty if authenticating
+            // with an external provider so we'll just generate one and prefix it, the 
+            // prefix will help us determine if the password hasn't actually been specified yet.
+            if (member.RawPasswordValue.IsNullOrWhiteSpace())
+            {
+                //this will hash the guid with a salt so should be nicely random
+                var aspHasher = new PasswordHasher();
+                member.RawPasswordValue = "___UIDEMPTYPWORD__" +
+                    aspHasher.HashPassword(Guid.NewGuid().ToString("N"));
 
-                }
-                _memberService.Save(member);    
+            }
+            _memberService.Save(member);
 
-                //re-assign id
-                user.Id = member.Id;
-            });
+            //re-assign id
+            user.Id = member.Id;
+
+            return Task.FromResult(0);
         }
 
         public virtual async Task UpdateAsync(T user)
@@ -101,66 +100,63 @@ namespace UmbracoIdentity
         {
             if (user == null) throw new ArgumentNullException("user");
 
-            return Task.Run(() =>
+            var asInt = user.Id.TryConvertTo<int>();
+            if (!asInt)
             {
-                var asInt = user.Id.TryConvertTo<int>();
-                if (!asInt)
-                {
-                    throw new InvalidOperationException("The user id must be an integer to work with the UmbracoMembersUserStore");
-                }
+                throw new InvalidOperationException("The user id must be an integer to work with the UmbracoMembersUserStore");
+            }
 
-                var found = _memberService.GetById(asInt.Result);
-                if (found != null)
-                {
-                    _memberService.Delete(found);    
-                }
-                _externalLoginStore.DeleteUserLogins(asInt.Result);
-            });
+            var found = _memberService.GetById(asInt.Result);
+            if (found != null)
+            {
+                _memberService.Delete(found);
+            }
+            _externalLoginStore.DeleteUserLogins(asInt.Result);
+
+            return Task.FromResult(0);
         }
 
         public Task<T> FindByIdAsync(int userId)
         {
-            return Task.Run(() =>
+            var member = _memberService.GetById(userId);
+            if (member == null)
             {
-                var member = _memberService.GetById(userId);
-                if (member == null)
-                {
-                    return null;
-                }
-                return AssignLoginsCallback(new T
-                {
-                    Email = member.Email,
-                    Id = member.Id,
-                    LockoutEnabled = member.IsLockedOut,
-                    LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                    UserName = member.Username,
-                    PasswordHash = GetPasswordHash(member.RawPasswordValue),
-                    Name = member.Name
-                });
+                return null;
+            }
+            var result = AssignLoginsCallback(new T
+            {
+                Email = member.Email,
+                Id = member.Id,
+                LockoutEnabled = member.IsLockedOut,
+                LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
+                UserName = member.Username,
+                PasswordHash = GetPasswordHash(member.RawPasswordValue),
+                Name = member.Name
             });
+
+            return Task.FromResult(result);
         }
 
         public Task<T> FindByNameAsync(string userName)
-        {            
-            return Task.Run(() =>
+        {
+            var member = _memberService.GetByUsername(userName);
+            if (member == null)
             {
-                var member = _memberService.GetByUsername(userName);
-                if (member == null)
-                {
-                    return null;
-                }
+                return null;
+            }
 
-                return AssignLoginsCallback(new T
-                {
-                    Email = member.Email,
-                    Id = member.Id,
-                    LockoutEnabled = member.IsLockedOut,
-                    LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                    UserName = member.Username,
-                    PasswordHash = GetPasswordHash(member.RawPasswordValue),
-                    Name = member.Name
-                });
+            var result = AssignLoginsCallback(new T
+            {
+                Email = member.Email,
+                Id = member.Id,
+                LockoutEnabled = member.IsLockedOut,
+                LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
+                UserName = member.Username,
+                PasswordHash = GetPasswordHash(member.RawPasswordValue),
+                Name = member.Name
             });
+
+            return Task.FromResult(result);
         }
 
         public Task SetPasswordHashAsync(T user, string passwordHash)
@@ -168,7 +164,9 @@ namespace UmbracoIdentity
             if (user == null) throw new ArgumentNullException("user");
             if (passwordHash.IsNullOrWhiteSpace()) throw new ArgumentNullException("passwordHash");
 
-            return Task.Run(() => user.PasswordHash = passwordHash);
+            user.PasswordHash = passwordHash;
+
+            return Task.FromResult(0);
         }
 
         public Task<string> GetPasswordHashAsync(T user)
@@ -191,7 +189,9 @@ namespace UmbracoIdentity
             if (user == null) throw new ArgumentNullException("user");
             if (email.IsNullOrWhiteSpace()) throw new ArgumentNullException("email");
 
-            return Task.Run(() => user.Email = email);
+            user.Email = email;
+
+            return Task.FromResult(0);
         }
 
         public Task<string> GetEmailAsync(T user)
@@ -217,22 +217,22 @@ namespace UmbracoIdentity
 
         public Task<T> FindByEmailAsync(string email)
         {
-            return Task.Run(() =>
-            {
-                var member = _memberService.GetByEmail(email);
-                var result = member == null
-                    ? null
-                    : new T
-                    {
-                        Email = member.Email,
-                        Id = member.Id,
-                        LockoutEnabled = member.IsLockedOut,
-                        LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                        UserName = member.Username,
-                        PasswordHash = GetPasswordHash(member.RawPasswordValue)
-                    };
-                return AssignLoginsCallback(result);
-            });
+            var member = _memberService.GetByEmail(email);
+            var result = member == null
+                ? null
+                : new T
+                {
+                    Email = member.Email,
+                    Id = member.Id,
+                    LockoutEnabled = member.IsLockedOut,
+                    LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
+                    UserName = member.Username,
+                    PasswordHash = GetPasswordHash(member.RawPasswordValue)
+                };
+
+            var r = AssignLoginsCallback(result);
+
+            return Task.FromResult(r);
         }
 
         public Task AddLoginAsync(T user, UserLoginInfo login)
@@ -240,18 +240,17 @@ namespace UmbracoIdentity
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
 
-            return Task.Run(() =>
+            var logins = user.Logins;
+            var instance = new IdentityMemberLogin<int>
             {
-                var logins = user.Logins;
-                var instance = new IdentityMemberLogin<int>
-                {
-                    UserId = user.Id,
-                    ProviderKey = login.ProviderKey,
-                    LoginProvider = login.LoginProvider
-                };
-                var userLogin = instance;
-                logins.Add(userLogin);
-            });
+                UserId = user.Id,
+                ProviderKey = login.ProviderKey,
+                LoginProvider = login.LoginProvider
+            };
+            var userLogin = instance;
+            logins.Add(userLogin);
+
+            return Task.FromResult(0);
         }
 
         public Task RemoveLoginAsync(T user, UserLoginInfo login)
@@ -259,52 +258,50 @@ namespace UmbracoIdentity
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
 
-            return Task.Run(() =>
-            {
-                var provider = login.LoginProvider;
-                var key = login.ProviderKey;
-                var userLogin = user.Logins.SingleOrDefault((l => l.LoginProvider == provider && l.ProviderKey == key));
-                if (userLogin != null)
-                    user.Logins.Remove(userLogin);
-            });
+            var provider = login.LoginProvider;
+            var key = login.ProviderKey;
+            var userLogin = user.Logins.SingleOrDefault((l => l.LoginProvider == provider && l.ProviderKey == key));
+            if (userLogin != null)
+                user.Logins.Remove(userLogin);
+
+            return Task.FromResult(0);
         }
 
         public Task<IList<UserLoginInfo>> GetLoginsAsync(T user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
-            return Task.Run(() => (IList<UserLoginInfo>)
-                user.Logins.Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey)).ToList());
+            var result = (IList<UserLoginInfo>)
+                user.Logins.Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey)).ToList();
+
+            return Task.FromResult(result);
         }
 
         public Task<T> FindAsync(UserLoginInfo login)
         {
-            return Task.Run(() =>
+            //get all logins associated with the login id
+            var result = _externalLoginStore.Find(login).ToArray();
+            if (result.Any())
             {
-                //get all logins associated with the login id
-                var result = _externalLoginStore.Find(login).ToArray();
-                if (result.Any())
-                {
-                    //return the first member that matches the result
-                    var user = (from id in result
-                        select _memberService.GetById(id)
-                        into member
-                        where member != null
-                        select new T
-                        {
-                            Email = member.Email,
-                            Id = member.Id,
-                            LockoutEnabled = member.IsLockedOut,
-                            LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                            UserName = member.Username,
-                            PasswordHash = GetPasswordHash(member.RawPasswordValue)
-                        }).FirstOrDefault();
+                //return the first member that matches the result
+                var user = (from id in result
+                            select _memberService.GetById(id)
+                    into member
+                            where member != null
+                            select new T
+                            {
+                                Email = member.Email,
+                                Id = member.Id,
+                                LockoutEnabled = member.IsLockedOut,
+                                LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
+                                UserName = member.Username,
+                                PasswordHash = GetPasswordHash(member.RawPasswordValue)
+                            }).FirstOrDefault();
 
-                    return AssignLoginsCallback(user);
-                }
+                return Task.FromResult(AssignLoginsCallback(user));
+            }
 
-                return null;
-            });
+            return Task.FromResult((T)null);
         }
         
         protected override void DisposeResources()
