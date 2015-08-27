@@ -328,7 +328,8 @@ namespace UmbracoIdentity.Web.Controllers
             var user = new UmbracoApplicationMember()
             {
                 UserName = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username,
-                Email = model.Email
+                Email = model.Email,
+                MemberProperties = model.MemberProperties
             };
 
             var result = await UserManager.CreateAsync(user, model.Password);
@@ -342,13 +343,14 @@ namespace UmbracoIdentity.Web.Controllers
                 // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                 // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
+                TempData["FormSuccess"] = true;
+
                 //if there is a specified path to redirect to then use it
                 if (model.RedirectUrl.IsNullOrWhiteSpace() == false)
                 {
                     return Redirect(model.RedirectUrl);
                 }
-                //redirect to current page by default
-                TempData["FormSuccess"] = true;
+                //redirect to current page by default                
                 return RedirectToCurrentUmbracoPage();
             }
             else

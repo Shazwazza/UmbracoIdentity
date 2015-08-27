@@ -15,7 +15,7 @@
         var registerModel = Members.CreateRegistrationModel("Custom Member");
     *@
     
-    var registerModel = Members.CreateRegistrationModel();
+    var registerModel = Members.CreateRegistrationModel();    
     
     @*
         Configurable here:           
@@ -46,7 +46,7 @@
 
 @if (success) 
 { 
-    @* This message will show if RedirectOnSucces is set to false (default) *@
+    @* This message will show if RedirectOnSuccess is set to false (default) *@
     <p>Registration succeeeded.</p>
 }
 else
@@ -96,7 +96,7 @@ else
                     <div class="row">
                         <div class="small-12 columns">
                             <label for="@Html.IdFor(m => registerModel.MemberProperties[i].Value)">
-                                @Html.DisplayNameFor(m => registerModel.MemberProperties[i].Name)
+                                @registerModel.MemberProperties[i].Name
 
                                 @*
                                     By default this will render a textbox but if you want to change the editor template for this property you can

@@ -16,15 +16,15 @@
     Html
         .RequiresJs("~/js/jquery.validate.hooks.js", 200)
         .RequiresJs("~/js/foundation.form.validation.js", 201);
-    
+
     var success = TempData["ProfileUpdateSuccess"] != null;
 }
 
-@if (User.Identity.IsAuthenticated && profileModel != null)
+@if (User.Identity.IsAuthenticated)
 {   
     if (success)
     {
-        @* This message will show if RedirectOnSucces is set to false (default) *@
+        @* This message will show if RedirectOnSuccess is set to false (default) *@
         <p>Profile updated</p>
     }
 
@@ -62,7 +62,7 @@
                 <div class="row">
                     <div class="small-12 columns">
                         <label for="@Html.IdFor(m => profileModel.MemberProperties[i].Value)">
-                            @Html.DisplayNameFor(m => profileModel.MemberProperties[i].Name)
+                            @profileModel.MemberProperties[i].Name
 
                             @*
                                 By default this will render a textbox but if you want to change the editor template for this property you can

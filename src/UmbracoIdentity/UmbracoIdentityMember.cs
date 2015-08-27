@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using Umbraco.Web.Models;
 using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
@@ -54,5 +55,10 @@ namespace UmbracoIdentity
             if (callback == null) throw new ArgumentNullException("callback");
             _getLogins = callback;
         }
+
+        /// <summary>
+        /// Returns the member properties
+        /// </summary>
+        public List<UmbracoProperty> MemberProperties { get; set; }
     }
 }

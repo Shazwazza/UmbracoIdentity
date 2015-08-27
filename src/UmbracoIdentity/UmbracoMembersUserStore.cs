@@ -344,6 +344,28 @@ namespace UmbracoIdentity
                 anythingChanged = true;
                 member.RawPasswordValue = user.PasswordHash;
             }
+
+            if (user.MemberProperties != null)
+            {
+                foreach (var property in user.MemberProperties
+                    //ensure the property they are posting exists
+                    .Where(p => member.ContentType.PropertyTypeExists(p.Alias))
+                    .Where(p => member.Properties.Contains(p.Alias))
+                    //needs to be editable
+                    .Where(p => member.ContentType.MemberCanEditProperty(p.Alias))
+                    //needs to be different
+                    .Where(p =>
+                    {
+                        var mPropAsString = member.Properties[p.Alias].Value == null ? string.Empty : member.Properties[p.Alias].Value.ToString();
+                        var uPropAsString = p.Value ?? string.Empty;
+                        return mPropAsString != uPropAsString;
+                    }))
+                {
+                    anythingChanged = true;
+                    member.Properties[property.Alias].Value = property.Value;
+                }
+            }
+            
             return anythingChanged;
         }
 
