@@ -30,11 +30,16 @@ namespace UmbracoIdentity
         public static readonly object Locker = new object();
         private readonly UmbracoDatabase _db;
 
-        private readonly string connString = ConfigurationManager.ConnectionStrings["UmbracoIdentityStore"].ConnectionString;
+        private readonly ConnectionStringSettings identityStoreConnection = ConfigurationManager.ConnectionStrings["UmbracoIdentityStore"];
 
         public ExternalLoginStore()
         {
-           _db = new UmbracoDatabase(connString, "System.Data.SqlClient");
+            if (identityStoreConnection == null)
+            {
+                throw new ConfigurationException("UmbracoIdentityStore is not set in the configuration");
+            }
+
+            _db = new UmbracoDatabase(identityStoreConnection.ConnectionString, "System.Data.SqlClient");
             if (!_db.TableExist("ExternalLogins"))
             {
                 //unfortunately we'll get issues if we just try this because of differing sql syntax providers. In newer
