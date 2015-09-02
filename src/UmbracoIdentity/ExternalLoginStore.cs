@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlServerCe;
 using System.Linq;
 using System.Web;
@@ -29,28 +30,17 @@ namespace UmbracoIdentity
         public static readonly object Locker = new object();
         private readonly UmbracoDatabase _db;
 
-        private const string ConnString = @"Data Source=|DataDirectory|\UmbracoIdentity.sdf;Flush Interval=1;";
+        private readonly string connString = ConfigurationManager.ConnectionStrings["UmbracoIdentityStore"].ConnectionString;
 
         public ExternalLoginStore()
         {
-            if (!System.IO.File.Exists(IOHelper.MapPath("~/App_Data/UmbracoIdentity.sdf")))
-            {
-                using (var en = new SqlCeEngine(ConnString))
-                {
-                    en.CreateDatabase();
-                }    
-            }
-
-            _db = new UmbracoDatabase(ConnString, "System.Data.SqlServerCe.4.0");
+           _db = new UmbracoDatabase(connString, "System.Data.SqlClient");
             if (!_db.TableExist("ExternalLogins"))
             {
                 //unfortunately we'll get issues if we just try this because of differing sql syntax providers. In newer
                 // umbraco versions we'd just use the DatabaseSchemaHelper. So in the meantime we have to just 
                 // do this manually and use reflection :(;
-                //_db.CreateTable<ExternalLoginDto>();
-
-                var sqlceProvider = new SqlCeSyntaxProvider();
-                CreateTable(false, typeof (ExternalLoginDto), sqlceProvider);
+                _db.CreateTable<ExternalLoginDto>();
             }
         }
 
@@ -143,67 +133,6 @@ namespace UmbracoIdentity
             public string ProviderKey { get; set; }
         }
 
-        private void CreateTable(bool overwrite, Type modelType, SqlCeSyntaxProvider syntaxProvider)
-        {
-            var defFactoryType = Type.GetType("Umbraco.Core.Persistence.DatabaseModelDefinitions.DefinitionFactory,Umbraco.Core", true);
-            var tableDefinition = (TableDefinition)defFactoryType.CallStaticMethod("GetTableDefinition", modelType);
-
-            var tableName = tableDefinition.Name;
-
-            string createSql = syntaxProvider.Format(tableDefinition);
-            string createPrimaryKeySql = syntaxProvider.FormatPrimaryKey(tableDefinition);
-            var foreignSql = syntaxProvider.Format(tableDefinition.ForeignKeys);
-            var indexSql = syntaxProvider.Format(tableDefinition.Indexes);
-
-            var tableExist = _db.TableExist(tableName);
-            if (overwrite && tableExist)
-            {
-                _db.DropTable(tableName);
-                tableExist = false;
-            }
-
-            if (tableExist == false)
-            {
-                using (var transaction = _db.GetTransaction())
-                {
-                    //Execute the Create Table sql
-                    int created = _db.Execute(new Sql(createSql));
-                    LogHelper.Info<ExternalLoginStore>(string.Format("Create Table sql {0}:\n {1}", created, createSql));
-
-                    //If any statements exists for the primary key execute them here
-                    if (!string.IsNullOrEmpty(createPrimaryKeySql))
-                    {
-                        int createdPk = _db.Execute(new Sql(createPrimaryKeySql));
-                        LogHelper.Info<ExternalLoginStore>(string.Format("Primary Key sql {0}:\n {1}", createdPk, createPrimaryKeySql));
-                    }
-
-                    //Turn on identity insert if db provider is not mysql
-                    if (syntaxProvider.SupportsIdentityInsert() && tableDefinition.Columns.Any(x => x.IsIdentity))
-                        _db.Execute(new Sql(string.Format("SET IDENTITY_INSERT {0} ON ", syntaxProvider.GetQuotedTableName(tableName))));
-                    
-                    //Turn off identity insert if db provider is not mysql
-                    if (syntaxProvider.SupportsIdentityInsert() && tableDefinition.Columns.Any(x => x.IsIdentity))
-                        _db.Execute(new Sql(string.Format("SET IDENTITY_INSERT {0} OFF;", syntaxProvider.GetQuotedTableName(tableName))));
-                    
-                    //Loop through foreignkey statements and execute sql
-                    foreach (var sql in foreignSql)
-                    {
-                        int createdFk = _db.Execute(new Sql(sql));
-                        LogHelper.Info<ExternalLoginStore>(string.Format("Create Foreign Key sql {0}:\n {1}", createdFk, sql));
-                    }
-
-                    //Loop through index statements and execute sql
-                    foreach (var sql in indexSql)
-                    {
-                        int createdIndex = _db.Execute(new Sql(sql));
-                        LogHelper.Info<ExternalLoginStore>(string.Format("Create Index sql {0}:\n {1}", createdIndex, sql));
-                    }
-
-                    transaction.Complete();
-                }
-            }
-
-            LogHelper.Info<ExternalLoginStore>(string.Format("New table '{0}' was created", tableName));
-        }
+        
     }
 }
