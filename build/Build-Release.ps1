@@ -39,10 +39,13 @@ $SolutionInfoPath = Join-Path -Path $SolutionRoot -ChildPath "SolutionInfo.cs"
 (gc -Path $SolutionInfoPath) `
 	-replace "(?<=AssemblyInformationalVersion\(`")[.\w-]*(?=`"\))", "$ReleaseVersionNumber$PreReleaseName" |
 	sc -Path $SolutionInfoPath -Encoding UTF8;
+
 # Set the copyright
-$Copyright = "Copyright © Shannon Deminick ".(Get-Date).year
+$NowYear = (Get-Date).year
+$Copyright = "Copyright © Shannon Deminick $NowYear"
+
 (gc -Path $SolutionInfoPath) `
-	-replace "(?<=AssemblyCopyright\(`")[.\w-]*(?=`"\))", $Copyright |
+	-replace "(?<=AssemblyCopyright\(`").*(?=`"\))", "$Copyright" |
 	sc -Path $SolutionInfoPath -Encoding UTF8;
 
 # Build the solution in release mode
@@ -67,8 +70,7 @@ $CoreBinFolder = Join-Path -Path $SolutionRoot -ChildPath "UmbracoIdentity\bin\R
 Copy-Item "$CoreBinFolder\*.*" -Destination $ReleaseFolder -Include $include
 
 # COPY THE TRANSFORMS OVER
-Copy-Item "$BuildFolder\nuget-transforms\web.config.install.xdt" -Destination (New-Item (Join-Path -Path $ReleaseFolder -ChildPath "nuget-transforms") -Type directory);
-Copy-Item "$BuildFolder\nuget-transforms\web.config.uninstall.xdt" -Destination (Join-Path -Path $ReleaseFolder -ChildPath "nuget-transforms");
+Copy-Item "$BuildFolder\web.config.install.xdt" -Destination (New-Item (Join-Path -Path $ReleaseFolder -ChildPath "nuget-transforms") -Type directory);
 
 $AppCodeFolder = Join-Path -Path $SolutionRoot -ChildPath "UmbracoIdentity.Web\App_Code";
 

@@ -31,7 +31,6 @@
     <file src="*.pdb" target="lib\net45" />
 
     <file src="nuget-transforms\web.config.install.xdt" target="Content" />
-    <file src="nuget-transforms\web.config.uninstall.xdt" target="Content" />
 
     <file src="Controllers\*.pp" target="content\Controllers" />
     <file src="Models\**\*.pp" target="content\Models" />

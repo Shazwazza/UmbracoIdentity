@@ -1,0 +1,31 @@
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <system.web xdt:Transform="InsertIfMissing">
+
+    <authorization xdt:Transform="Remove" />
+    <authentication mode="None" xdt:Transform="InsertIfMissing" />
+
+    <membership xdt:Transform="InsertIfMissing">
+      <providers xdt:Transform="InsertIfMissing">
+        <add name="UmbracoMembershipProvider"
+             type="UmbracoIdentity.IdentityEnabledMembersMembershipProvider"
+             xdt:Locator="Match(name)"
+             xdt:Transform="SetAttributes"/>
+      </providers>
+    </membership>
+
+    <httpModules xdt:Transform="InsertIfMissing">
+
+      <remove name="FormsAuthenticationModule" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
+      <remove name="FormsAuthenticationModule" xdt:Transform="InsertIfMissing" />
+
+    </httpModules>
+  </system.web>
+  <system.webServer xdt:Transform="InsertIfMissing">
+    <modules xdt:Transform="InsertIfMissing">
+
+      <remove name="FormsAuthentication" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
+      <remove name="FormsAuthentication" xdt:Transform="InsertIfMissing" />
+
+    </modules>
+  </system.webServer>
+</configuration>

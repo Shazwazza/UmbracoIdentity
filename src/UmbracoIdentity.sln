@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmbracoIdentity", "UmbracoIdentity\UmbracoIdentity.csproj", "{FF225509-B1E9-41C0-BB9E-1A5DDBEA87F5}"
 EndProject
@@ -44,8 +44,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{12D5F68D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget-transforms", "nuget-transforms", "{29C8E9D9-B30E-4EDA-AF5F-4899A1CFDFFD}"
 	ProjectSection(SolutionItems) = preProject
-		..\build\nuget-transforms\Web.config.install.xdt = ..\build\nuget-transforms\Web.config.install.xdt
-		..\build\nuget-transforms\Web.config.uninstall.xdt = ..\build\nuget-transforms\Web.config.uninstall.xdt
+		..\build\web.config.install.xdt = ..\build\web.config.install.xdt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{3737D279-BB85-41B6-BBC2-09F6E44708E9}"
