@@ -42,7 +42,7 @@ $SolutionInfoPath = Join-Path -Path $SolutionRoot -ChildPath "SolutionInfo.cs"
 
 # Set the copyright
 $NowYear = (Get-Date).year
-$Copyright = "Copyright © Shannon Deminick $NowYear"
+$Copyright = "Copyright Â© Shannon Deminick $NowYear"
 
 (gc -Path $SolutionInfoPath) `
 	-replace "(?<=AssemblyCopyright\(`").*(?=`"\))", "$Copyright" |
@@ -91,7 +91,7 @@ $AppCodeDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "App_Start";
 Copy-Item "$AppCodeFolder\UmbracoIdentityStartup.cs" -Destination (New-Item ($AppCodeDestFolder) -Type directory);
 
 # COPY THE JS OVER
-Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Js\" -Destination $ReleaseFolder -recurse -Container -Filter *.js;
+Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Scripts\" -Destination $ReleaseFolder -recurse -Container -Filter *.js;
 
 # Remove the DEGUB code from the startup class since we don't want to ship that
 # NOTE: We're using the .Net constructs to do this because I could not get this to work with the powershell regex even with the (?s) prefix switch
