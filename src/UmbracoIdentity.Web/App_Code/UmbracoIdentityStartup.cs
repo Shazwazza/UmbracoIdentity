@@ -11,7 +11,7 @@ using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using UmbracoIdentity.Web;
 using Owin;
 
-[assembly: OwinStartup(typeof(UmbracoIdentityStartup))]
+[assembly: OwinStartup("UmbracoIdentityStartup", typeof(UmbracoIdentityStartup))]
 
 namespace UmbracoIdentity.Web
 {
