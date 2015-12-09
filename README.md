@@ -49,16 +49,65 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
 
 If you are familiar then here's what to do... 
 
+#### If you are using Umbraco 7.3+
+
+Once you've installed this Nuget package you should install this one:
+
+    PM> Install-Package UmbracoCms.IdentityExtensions
+
+you will see some classes added to your App_Start folder:
+
+* UmbracoApplicationUser - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityMember. You can customize this how you like.
+* UmbracoStartup - With Umbraco 7.3+ you won't need to worry about this class
+* UmbracoStandardOwinStartup - This is installed as part of the `UmbracoCms.IdentityExtensions` package which we will use the enable the UmbracoIdentity engine.
+
+Here's what you need to do:
+
+* In your web.config, change the appSetting `owin:appStartup` to: `UmbracoStandardOwinStartup`
+* In the `UmbracoStandardOwinStartup` file, add these lines of code:
+
+    ```csharp
+    //Single method to configure the Identity user manager for use with Umbraco
+    app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
+    
+    // Enable the application to use a cookie to store information for the 
+    // signed in user and to use a cookie to temporarily store information 
+    // about a user logging in with a third party login provider 
+    // Configure the sign in cookie
+    app.UseCookieAuthentication(new CookieAuthenticationOptions
+    {
+        AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+    
+        Provider = new CookieAuthenticationProvider
+        {
+            // Enables the application to validate the security stamp when the user 
+            // logs in. This is a security feature which is used when you 
+            // change a password or add an external login to your account.  
+            OnValidateIdentity = SecurityStampValidator
+                .OnValidateIdentity<UmbracoMembersUserManager<UmbracoApplicationMember>, UmbracoApplicationMember, int>(
+                    TimeSpan.FromMinutes(30),
+                    (manager, user) => user.GenerateUserIdentityAsync(manager),
+                    UmbracoIdentity.IdentityExtensions.GetUserId<int>)
+        }
+    });
+    ```
+    
+If you want to enable 3rd party OAuth authentication, you'll need to follow the normal ASP.Net Identity documentation, sample code for this exists in the `UmbracoStartup` class installed in your App_Start folder.
+
+#### If you are using Umbraco < 7.3
+
 Once you've installed the Nuget package, you will see some classes added to your App_Start folder:
 
 * UmbracoApplicationUser - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityMember. You can customize this how you like.
 * UmbracoStartup - this is basically the same as the Startup class that comes with the the VS 2013 template, except that it is named UmbracoStartup and contains some slightly different extension method calls:
 
-        //Single method to configure the Identity user manager for use with Umbraco
-        app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
-        
-        //Ensure owin is configured for Umbraco back office authentication
-        app.UseUmbracoBackAuthentication();
+    ```csharp
+    //Single method to configure the Identity user manager for use with Umbraco
+    app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
+    
+    //Ensure owin is configured for Umbraco back office authentication
+    app.UseUmbracoBackAuthentication();
+    ```
 
     * The rest of the startup class is pretty much the same as the VS 2013 template except that you are using your UmbracoApplicationMember type and the UmbracoMembersUserManager class.
 
