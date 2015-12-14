@@ -20,7 +20,7 @@ namespace UmbracoIdentity
     /// <summary>
     /// We are using a custom sqlce db to store this information
     /// </summary>
-    internal class ExternalLoginStore : DisposableObject, IExternalLoginStore
+    public class ExternalLoginStore : DisposableObject, IExternalLoginStore
     {
         //TODO: What is the OWIN form of MapPath??
 

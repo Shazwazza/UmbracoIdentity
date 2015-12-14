@@ -5,7 +5,7 @@ namespace UmbracoIdentity
     /// <summary>
     /// A custom password hasher that conforms to the current password hashing done in Umbraco
     /// </summary>
-    internal class MembershipPasswordHasher : IPasswordHasher
+    public class MembershipPasswordHasher : IPasswordHasher
     {
         private readonly IdentityEnabledMembersMembershipProvider _provider;
 
