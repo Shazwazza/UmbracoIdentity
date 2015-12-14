@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlServerCe;
 using System.Linq;
-using System.Web;
 using Microsoft.AspNet.Identity;
 
 using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin;
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Logging;

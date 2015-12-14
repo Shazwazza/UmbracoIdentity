@@ -14,14 +14,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
 
-      <dependency id="UmbracoCms.Core" version="7.2.4" />
-      <dependency id="Microsoft.Owin" version="3.0.1" />
-      <dependency id="Microsoft.Owin.Security" version="3.0.1" />
-      <dependency id="Microsoft.Owin.Security.Cookies" version="3.0.1" />
-      <dependency id="Microsoft.Owin.Security.OAuth" version="3.0.1" />
-      <dependency id="Microsoft.Owin.Host.SystemWeb" version="2.1.0" />
-      <dependency id="Microsoft.AspNet.Identity.Core" version="2.2.0" />
-      <dependency id="Microsoft.AspNet.Identity.Owin" version="2.2.0" />
+      <dependency id="UmbracoCms.Core" version="7.3.4" />    
       
     </dependencies>
   </metadata>

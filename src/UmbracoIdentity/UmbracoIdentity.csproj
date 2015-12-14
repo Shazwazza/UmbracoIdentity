@@ -251,6 +251,8 @@
     <Compile Include="FixedAsyncRenderActionInvoker.cs" />
     <Compile Include="FixedAsyncRenderControllerFactory.cs" />
     <Compile Include="FixedAsyncRenderMvcController.cs" />
+    <Compile Include="FrontEndCookieAuthenticationOptions.cs" />
+    <Compile Include="FrontEndCookieManager.cs" />
     <Compile Include="IdentityEnabledMembersMembershipProvider.cs" />
     <Compile Include="IdentityExtensions.cs" />
     <Compile Include="IExternalLoginStore.cs" />

@@ -10,8 +10,9 @@ using UmbracoIdentity;
 using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using UmbracoIdentity.Web;
 using Owin;
+using Umbraco.Web;
 
-[assembly: OwinStartup(typeof(UmbracoIdentityStartup))]
+[assembly: OwinStartup("UmbracoIdentityStartup", typeof(UmbracoIdentityStartup))]
 
 namespace UmbracoIdentity.Web
 {
@@ -19,11 +20,12 @@ namespace UmbracoIdentity.Web
     /// <summary>
     /// OWIN Startup class for UmbracoIdentity 
     /// </summary>
-    public class UmbracoIdentityStartup
+    public class UmbracoIdentityStartup : UmbracoDefaultOwinStartup
     {
- 
-        public void Configuration(IAppBuilder app)
+        public override void Configuration(IAppBuilder app)
         {
+            base.Configuration(app);
+
             //Single method to configure the Identity user manager for use with Umbraco
             app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
 
@@ -31,10 +33,8 @@ namespace UmbracoIdentity.Web
             // signed in user and to use a cookie to temporarily store information 
             // about a user logging in with a third party login provider 
             // Configure the sign in cookie
-            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            app.UseCookieAuthentication(new FrontEndCookieAuthenticationOptions
             {
-                AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
-
                 Provider = new CookieAuthenticationProvider
                 {
                     // Enables the application to validate the security stamp when the user 
@@ -47,11 +47,7 @@ namespace UmbracoIdentity.Web
                             UmbracoIdentity.IdentityExtensions.GetUserId<int>)
                 }
             });
-
-            //Ensure owin is configured for Umbraco back office authentication - this must
-            // be configured AFTER the standard UseCookieConfiguration above.
-            app.UseUmbracoBackAuthentication();
-
+            
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
             // Uncomment the following lines to enable logging in with third party login providers
