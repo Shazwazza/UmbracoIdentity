@@ -33,14 +33,14 @@
                                           @Html.TextBoxFor(m => registerModel.Username)
                                           @Html.ValidationMessageFor(m => registerModel.Username)
     *@
-  
+
     Html.EnableClientValidation();
     Html.EnableUnobtrusiveJavaScript();
 
     Html
-        .RequiresJs("~/js/jquery.validate.hooks.js", 200)
-        .RequiresJs("~/js/foundation.form.validation.js", 201);
-    
+        .RequiresJs("~/scripts/jquery.validate.hooks.js", 200)
+        .RequiresJs("~/scripts/foundation.form.validation.js", 201);
+
     var success = TempData["FormSuccess"] != null;
 }
 
