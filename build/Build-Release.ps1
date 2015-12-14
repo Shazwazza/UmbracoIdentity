@@ -42,7 +42,7 @@ $SolutionInfoPath = Join-Path -Path $SolutionRoot -ChildPath "SolutionInfo.cs"
 
 # Set the copyright
 $NowYear = (Get-Date).year
-$Copyright = "Copyright Â© Shannon Deminick $NowYear"
+$Copyright = "Copyright © Shannon Deminick $NowYear"
 
 (gc -Path $SolutionInfoPath) `
 	-replace "(?<=AssemblyCopyright\(`").*(?=`"\))", "$Copyright" |
