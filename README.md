@@ -43,15 +43,12 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
 
 [*What is OWIN? If you are unsure, be sure to read this before you continue!*](https://github.com/Shazwazza/UmbracoIdentity/wiki/What-is-Owin)
 
-If you are familiar then here's what to do... 
+If you are familiar with OWIN then here's what to do... 
 
 You will see some classes added to your App_Start & Models folders:
 
 * UmbracoApplicationMember - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityMember. You can customize this how you like.
 * UmbracoIdentityStartup - this is the OWIN startup class that will be used
-
-Here's what you need to do:
-
 * In your web.config, change the appSetting `owin:appStartup` to: `UmbracoIdentityStartup`
 * The `UmbracoIdentityStartup` file is now your OWIN startup class, you can modify it if you require Identity customizations. If you want to enable 3rd party OAuth authentication, you'll need to follow the normal ASP.Net Identity documentation, sample code for this exists in the `UmbracoIdentityStartup` class.
 
