@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/qaiwo2w8k5ieaf3v?svg=true)](https://ci.appveyor.com/project/Shandem/umbracoidentity)
+
 ![ASP.Net Identity for Umbraco](logo.png?raw=true)
 ===============
 
