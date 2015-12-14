@@ -1,31 +1,34 @@
 <configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <system.web xdt:Transform="InsertIfMissing">
+	<system.web xdt:Transform="InsertIfMissing">
 
-    <authorization xdt:Transform="Remove" />
-    <authentication mode="None" xdt:Transform="InsertIfMissing" />
+		<authorization xdt:Transform="Remove" />
+		<authentication xdt:Transform="Remove" />
+		<authentication mode="None" xdt:Transform="InsertIfMissing" />
 
-    <membership xdt:Transform="InsertIfMissing">
-      <providers xdt:Transform="InsertIfMissing">
-        <add name="UmbracoMembershipProvider"
-             type="UmbracoIdentity.IdentityEnabledMembersMembershipProvider"
-             xdt:Locator="Match(name)"
-             xdt:Transform="SetAttributes"/>
-      </providers>
-    </membership>
+		<membership xdt:Transform="InsertIfMissing">
+			<providers xdt:Transform="InsertIfMissing">
+				<add name="UmbracoMembershipProvider"
+					 type="UmbracoIdentity.IdentityEnabledMembersMembershipProvider, UmbracoIdentity"
+					 xdt:Locator="Match(name)"
+					 xdt:Transform="SetAttributes"/>
+			</providers>
+		</membership>
 
-    <httpModules xdt:Transform="InsertIfMissing">
+		<httpModules xdt:Transform="InsertIfMissing">
 
-      <remove name="FormsAuthenticationModule" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
-      <remove name="FormsAuthenticationModule" xdt:Transform="InsertIfMissing" />
+			<add name="FormsAuthenticationModule" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
+			<remove name="FormsAuthenticationModule" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
+			<remove name="FormsAuthenticationModule" xdt:Transform="InsertIfMissing" xdt:Locator="Match(name)" />
 
-    </httpModules>
-  </system.web>
-  <system.webServer xdt:Transform="InsertIfMissing">
-    <modules xdt:Transform="InsertIfMissing">
+		</httpModules>
+	</system.web>
+	<system.webServer xdt:Transform="InsertIfMissing">
+		<modules xdt:Transform="InsertIfMissing">
 
-      <remove name="FormsAuthentication" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
-      <remove name="FormsAuthentication" xdt:Transform="InsertIfMissing" />
+			<add name="FormsAuthentication" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
+			<remove name="FormsAuthentication" xdt:Transform="Remove" xdt:Locator="Match(name)"/>
+			<remove name="FormsAuthentication" xdt:Transform="InsertIfMissing" xdt:Locator="Match(name)" />
 
-    </modules>
-  </system.webServer>
+		</modules>
+	</system.webServer>
 </configuration>
