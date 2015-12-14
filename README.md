@@ -45,7 +45,7 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
     
 ### Owin setup
 
-**STOP!!** If you are not familiar with OWIN or ASP.Net Identity you will need to stop here and familiarize yourself with these things. If you are running the latest version of Visual Studio 2013, then you can create a new web project and create a site that has authentication. This will give you a good example of how to setup OWIN and Authentication. The following link above also has tons of information for you to start leaning with: https://delicious.com/shandem/owin
+[*What is OWIN? If you are unsure, be sure to read this before you continue!*](https://github.com/Shazwazza/UmbracoIdentity/wiki/Legacy-Installation)
 
 If you are familiar then here's what to do... 
 
