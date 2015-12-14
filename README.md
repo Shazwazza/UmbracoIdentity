@@ -55,10 +55,10 @@ Once you've installed this Nuget package you should install this one:
 
     PM> Install-Package UmbracoCms.IdentityExtensions
 
-you will see some classes added to your App_Start folder:
+you will see some classes added to your App_Start & Models folders:
 
 * UmbracoApplicationMember - this is similar to the ApplicationUser class that comes with the VS 2013 template, except that this one inherits from UmbracoIdentityMember. You can customize this how you like.
-* UmbracoStartup - With Umbraco 7.3+ you won't need to worry about this class
+* UmbracoIdentityStartup - With Umbraco 7.3+ you won't need to worry about this class
 * UmbracoStandardOwinStartup - This is installed as part of the `UmbracoCms.IdentityExtensions` package which we will use to enable the UmbracoIdentity engine.
 
 Here's what you need to do:
