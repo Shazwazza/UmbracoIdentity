@@ -9,17 +9,11 @@ There are some **[known issues and limitations](https://github.com/Shandem/Umbra
 
 ## Minimum Requirements:
 
-This package is built against Umbraco 7.2.4 and the Nuget dependency is also for that version though it will probably work with Umbraco versions 7.1.6+ or 6.2.2+
+This package requires **Umbraco 7.3.4+**. 
 
-If you are running previous versions to 7.1.6 or 6.2.2 then in order for this to work you will need to apply a work around and enable this AppSetting:
-
-    <add key="UmbracoIdentity:UseAsyncActionInvokerFix" value="true"/>
+*[If you are using Umbraco version 7.1.6+ and less than 7.3.0, see here for installation instructions](https://github.com/Shazwazza/UmbracoIdentity/wiki/Legacy-Installation) you will need to use version 2 of this package.*
 
 ## Installation
-
-First, read the minimum requirements above as you might need to enable the work around.
-
-*[If you are using Umbraco version 7.1.6+ and less than 7.3.0 see here for installation instructions](https://github.com/Shazwazza/UmbracoIdentity/wiki/Legacy-Installation)*
 
 ### Nuget
 
