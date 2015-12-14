@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -382,14 +381,6 @@ namespace UmbracoIdentity.Web.Controllers
             OwinContext.Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
             OwinContext.Authentication.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent },
                 await member.GenerateUserIdentityAsync(UserManager));
-
-            string alias = "membershipNumber";
-            if (member.MemberProperties.Any(p => p.Alias == alias))
-            {
-                string membershipNumber = member.MemberProperties.FirstOrDefault(p => p.Alias == alias).Value;
-                var claim = new Claim("MembershipNumber", membershipNumber);
-                UserManager.AddClaim(member.Id, claim);
-            }
         }
 
         private void AddModelErrors(IdentityResult result, string prefix = "")
