@@ -58,12 +58,14 @@ namespace UmbracoIdentity
         /// </summary>
         /// <param name="options"></param>
         /// <param name="memberService"></param>
+        /// <param name="memberTypeService"></param>
         /// <param name="externalLoginStore"></param>
         /// <param name="membershipProvider"></param>
         /// <returns></returns>
         public static UmbracoMembersUserManager<T> Create(
             IdentityFactoryOptions<UmbracoMembersUserManager<T>> options, 
             IMemberService memberService,
+            IMemberTypeService memberTypeService,
             IExternalLoginStore externalLoginStore = null,
             IdentityEnabledMembersMembershipProvider membershipProvider = null)
         {
@@ -82,7 +84,7 @@ namespace UmbracoIdentity
                 externalLoginStore = new ExternalLoginStore();
             }
 
-            return Create(options, new UmbracoMembersUserStore<T>(memberService, provider, externalLoginStore), membershipProvider);
+            return Create(options, new UmbracoMembersUserStore<T>(memberService, memberTypeService, provider, externalLoginStore), membershipProvider);
         }
 
         /// <summary>

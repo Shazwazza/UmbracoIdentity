@@ -39,6 +39,7 @@ namespace UmbracoIdentity
                 (o, c) => UmbracoMembersUserManager<T>.Create(
                     o,
                     appContext.Services.MemberService,
+                    appContext.Services.MemberTypeService,
                     membershipProvider: membershipProvider));
 
             //Configure Umbraco member event handler to be created per request - this will ensure that the

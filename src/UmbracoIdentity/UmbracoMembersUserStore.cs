@@ -8,6 +8,7 @@ using Microsoft.AspNet.Identity;
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using Umbraco.Web.Models;
 using UmbracoIdentity.Models;
 using Task = System.Threading.Tasks.Task;
 
@@ -22,16 +23,22 @@ namespace UmbracoIdentity
         where T : UmbracoIdentityMember, IUser<int>, new()
     {
         private readonly IMemberService _memberService;
+        private readonly IMemberTypeService _memberTypeService;
         private readonly IdentityEnabledMembersMembershipProvider _membershipProvider;
         private readonly IExternalLoginStore _externalLoginStore;
 
-        public UmbracoMembersUserStore(IMemberService memberService, IdentityEnabledMembersMembershipProvider membershipProvider, IExternalLoginStore externalLoginStore)
+        public UmbracoMembersUserStore(
+            IMemberService memberService, 
+            IMemberTypeService memberTypeService,
+            IdentityEnabledMembersMembershipProvider membershipProvider, 
+            IExternalLoginStore externalLoginStore)
         {
             if (memberService == null) throw new ArgumentNullException("memberService");
             if (membershipProvider == null) throw new ArgumentNullException("membershipProvider");
             if (externalLoginStore == null) throw new ArgumentNullException("externalLoginStore");
 
             _memberService = memberService;
+            _memberTypeService = memberTypeService;
             _membershipProvider = membershipProvider;
             _externalLoginStore = externalLoginStore;
 
@@ -123,16 +130,8 @@ namespace UmbracoIdentity
             {
                 return Task.FromResult((T) null);
             }
-            var result = AssignLoginsCallback(new T
-            {
-                Email = member.Email,
-                Id = member.Id,
-                LockoutEnabled = member.IsLockedOut,
-                LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                UserName = member.Username,
-                PasswordHash = GetPasswordHash(member.RawPasswordValue),
-                Name = member.Name
-            });
+
+            var result = AssignLoginsCallback(MapFromMember(member));
 
             return Task.FromResult(result);
         }
@@ -145,16 +144,7 @@ namespace UmbracoIdentity
                 return Task.FromResult((T)null);
             }
 
-            var result = AssignLoginsCallback(new T
-            {
-                Email = member.Email,
-                Id = member.Id,
-                LockoutEnabled = member.IsLockedOut,
-                LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                UserName = member.Username,
-                PasswordHash = GetPasswordHash(member.RawPasswordValue),
-                Name = member.Name
-            });
+            var result = AssignLoginsCallback(MapFromMember(member));
 
             return Task.FromResult(result);
         }
@@ -220,15 +210,7 @@ namespace UmbracoIdentity
             var member = _memberService.GetByEmail(email);
             var result = member == null
                 ? null
-                : new T
-                {
-                    Email = member.Email,
-                    Id = member.Id,
-                    LockoutEnabled = member.IsLockedOut,
-                    LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                    UserName = member.Username,
-                    PasswordHash = GetPasswordHash(member.RawPasswordValue)
-                };
+                : MapFromMember(member);
 
             var r = AssignLoginsCallback(result);
 
@@ -285,18 +267,10 @@ namespace UmbracoIdentity
             {
                 //return the first member that matches the result
                 var user = (from id in result
-                            select _memberService.GetById(id)
+                    select _memberService.GetById(id)
                     into member
-                            where member != null
-                            select new T
-                            {
-                                Email = member.Email,
-                                Id = member.Id,
-                                LockoutEnabled = member.IsLockedOut,
-                                LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
-                                UserName = member.Username,
-                                PasswordHash = GetPasswordHash(member.RawPasswordValue)
-                            }).FirstOrDefault();
+                    where member != null
+                    select MapFromMember(member)).FirstOrDefault();
 
                 return Task.FromResult(AssignLoginsCallback(user));
             }
@@ -308,6 +282,58 @@ namespace UmbracoIdentity
         {
             _externalLoginStore.Dispose();
         }
+
+        private T MapFromMember(IMember member)
+        {
+            var result = new T
+            {
+                Email = member.Email,
+                Id = member.Id,
+                LockoutEnabled = member.IsLockedOut,
+                LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
+                UserName = member.Username,
+                PasswordHash = GetPasswordHash(member.RawPasswordValue),
+                Name = member.Name
+            };
+
+            result.MemberProperties = GetMemberProperties(member).ToList();
+
+            return result;
+        }
+
+        private IEnumerable<UmbracoProperty> GetMemberProperties(IMember member)
+        {
+            var builtIns = ((Dictionary<string, PropertyType>)
+                typeof (Umbraco.Core.Constants.Conventions.Member).CallStaticMethod("GetStandardPropertyTypeStubs"))
+                .Select(x => x.Key).ToArray();
+
+            var memberType = _memberTypeService.Get(member.ContentTypeAlias);
+            if (memberType == null) throw new NullReferenceException("No member type found with alias " + member.ContentTypeAlias);
+
+            var viewProperties = new List<UmbracoProperty>();
+
+            foreach (var prop in memberType.PropertyTypes.Where(x => builtIns.Contains(x.Alias) == false))
+            {
+                var value = string.Empty;
+
+                var propValue = member.Properties[prop.Alias];
+                if (propValue != null && propValue.Value != null)
+                {
+                    value = propValue.Value.ToString();
+                }
+
+                var viewProperty = new UmbracoProperty
+                {
+                    Alias = prop.Alias,
+                    Name = prop.Name,
+                    Value = value
+                };
+
+                viewProperties.Add(viewProperty);
+            }
+            return viewProperties;
+        }
+
 
         private bool UpdateMemberProperties(IMember member, T user)
         {
