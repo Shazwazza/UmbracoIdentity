@@ -21,6 +21,8 @@ This package requires **Umbraco 7.3.4+**.
 
     PM> Install-Package UmbracoIdentity
 
+There's also a nightly Nuget feed: `https://ci.appveyor.com/nuget/umbracoidentity-nightly`
+
 ### Config updates
 
 These config updates 'should' be taken care of by the nuget install, but you should double check to be sure.
