@@ -1,9 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Web;
 using Microsoft.Owin;
-using Microsoft.Owin.Extensions;
 using Owin;
 using Umbraco.Core;
 using Microsoft.AspNet.Identity.Owin;
@@ -105,7 +101,64 @@ namespace UmbracoIdentity
             //Configure Umbraco user manager to be created per request
             app.CreatePerOwinContext<TManager>(userManager);
         }
-        
 
+
+        /// <summary>
+        /// Configure Identity Role Manage for Umbraco
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="app">The application.</param>
+        /// <param name="appContext">The application context.</param>
+        public static void ConfigureRoleManagerForUmbracoMembers<T>(
+            this IAppBuilder app,
+            ApplicationContext appContext = null) where T : UmbracoIdentityRole, new()
+        {
+            if (appContext == null) appContext = ApplicationContext.Current;
+            if (appContext == null) throw new ArgumentNullException("appContext");
+
+            //Don't proceed if the app is not ready
+            if (!appContext.IsConfigured
+                || appContext.DatabaseContext == null
+                || !appContext.DatabaseContext.IsDatabaseConfigured) return;
+
+            //Configure Umbraco members role manager to be created per request
+            app.CreatePerOwinContext<UmbracoMembersRoleManager<T>>(((o, c) => UmbracoMembersRoleManager<T>.Create(
+                o,
+                appContext.Services.MemberGroupService)));
+        }
+
+        /// <summary>
+        /// Configures the role manager for umbraco members.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="app">The application.</param>
+        /// <param name="customRoleStore">The custom role store.</param>
+        public static void ConfigureRoleManagerForUmbracoMembers<T>(
+            this IAppBuilder app,
+            UmbracoMembersRoleStore<T> customRoleStore) 
+            where T : UmbracoIdentityRole, new()
+        {
+            //Configure Umbraco members role manager to be created per request
+            app.CreatePerOwinContext<UmbracoMembersRoleManager<T>>(((o, c) => UmbracoMembersRoleManager<T>.Create(
+                o,
+                customRoleStore)));
+        }
+
+        /// <summary>
+        /// Configures the role manager for umbraco members.
+        /// </summary>
+        /// <typeparam name="TManager">The type of the manager.</typeparam>
+        /// <typeparam name="TRole">The type of the role.</typeparam>
+        /// <param name="app">The application.</param>
+        /// <param name="roleManager">The role manager.</param>
+        public static void ConfigureRoleManagerForUmbracoMembers<TManager, TRole>(
+            this IAppBuilder app,
+            Func<IdentityFactoryOptions<TManager>, IOwinContext, TManager> roleManager)
+            where TManager : UmbracoMembersRoleManager<TRole>
+            where TRole : UmbracoIdentityRole, new()
+        {
+            //Configure Umbraco members role manager to be created per request
+            app.CreatePerOwinContext<TManager>(roleManager);
+        }
     }
 }

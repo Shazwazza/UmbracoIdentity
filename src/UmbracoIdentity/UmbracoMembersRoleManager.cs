@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Umbraco.Core.Services;
-using Umbraco.Web.Security.Providers;
 
 namespace UmbracoIdentity
 {
@@ -13,11 +12,15 @@ namespace UmbracoIdentity
         { }
 
         public static UmbracoMembersRoleManager<T> Create(IdentityFactoryOptions<UmbracoMembersRoleManager<T>> options, 
-            IMemberService memberService,
-            IMemberGroupService memberGroupService,
-            MembersRoleProvider roleProvider = null)
+            IMemberGroupService memberGroupService)
         {
-            var roleStore = new UmbracoMembersRoleStore<T>(memberService, memberGroupService);
+            var roleStore = new UmbracoMembersRoleStore<T>(memberGroupService);
+            return Create(options, roleStore);
+        }
+
+        public static UmbracoMembersRoleManager<T> Create(IdentityFactoryOptions<UmbracoMembersRoleManager<T>> options,
+            UmbracoMembersRoleStore<T> roleStore)
+        {
             return new UmbracoMembersRoleManager<T>(roleStore);
         } 
     }

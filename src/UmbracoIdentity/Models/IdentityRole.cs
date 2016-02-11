@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNet.Identity;
-using Umbraco.Core.Models;
 
 namespace UmbracoIdentity.Models
 {
@@ -11,8 +8,20 @@ namespace UmbracoIdentity.Models
     /// <typeparam name="TKey">The type of the key.</typeparam>
     public class IdentityRole<TKey> : IRole<TKey>
     {
-        public virtual TKey Id { get; private set; }
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
+        public virtual TKey Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
         public virtual string Name { get; set; }
     }
 }
