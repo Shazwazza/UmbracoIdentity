@@ -176,3 +176,4 @@ src/UmbracoIdentity.Web/App_Browsers/*
 src/UmbracoIdentity.Web/MacroScripts/Web.config
 src/UmbracoIdentity.Web/App_Data/cache/*
 src/UmbracoIdentity.Web/Views/Partials/Grid/*
+src/.UmbracoIdentity.boltdata/*
