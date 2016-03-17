@@ -12,7 +12,6 @@
 [Rr]elease/
 x64/
 build/
-[Bb]in/
 [Oo]bj/
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
@@ -177,3 +176,6 @@ src/UmbracoIdentity.Web/MacroScripts/Web.config
 src/UmbracoIdentity.Web/App_Data/cache/*
 src/UmbracoIdentity.Web/Views/Partials/Grid/*
 src/.UmbracoIdentity.boltdata/*
+src/UmbracoIdentity.Web/App_Data/NuGetBackup/*
+src/**/bin/*.dll
+src/**/bin/*.xml
