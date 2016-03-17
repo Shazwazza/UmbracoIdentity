@@ -179,3 +179,5 @@ src/.UmbracoIdentity.boltdata/*
 src/UmbracoIdentity.Web/App_Data/NuGetBackup/*
 src/**/bin/*.dll
 src/**/bin/*.xml
+src/UmbracoIdentity.Web/bin/amd64/*
+src/UmbracoIdentity.Web/bin/x86/*
