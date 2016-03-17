@@ -11,6 +11,7 @@ using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using UmbracoIdentity.Web;
 using Owin;
 using Umbraco.Web;
+using Umbraco.Web.Security.Identity;
 
 [assembly: OwinStartup("UmbracoIdentityStartup", typeof(UmbracoIdentityStartup))]
 
@@ -22,15 +23,32 @@ namespace UmbracoIdentity.Web
     /// </summary>
     public class UmbracoIdentityStartup : UmbracoDefaultOwinStartup
     {
-        public override void Configuration(IAppBuilder app)
+        /// <summary>
+        /// Configures services to be created in the OWIN context (CreatePerOwinContext)
+        /// </summary>
+        /// <param name="app"/>
+        protected override void ConfigureServices(IAppBuilder app)
         {
-            base.Configuration(app);
+            base.ConfigureServices(app);
 
             //Single method to configure the Identity user manager for use with Umbraco
             app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
 
             //Single method to configure the Identity user manager for use with Umbraco
             app.ConfigureRoleManagerForUmbracoMembers<UmbracoApplicationRole>();
+        }
+
+        /// <summary>
+        /// Configures middleware to be used (i.e. app.Use...)
+        /// </summary>
+        /// <param name="app"/>
+        protected override void ConfigureMiddleware(IAppBuilder app)
+        {
+            //Ensure owin is configured for Umbraco back office authentication. If you have any front-end OWIN
+            // cookie configuration, this must be declared after it.
+            app
+                .UseUmbracoBackOfficeCookieAuthentication(ApplicationContext, PipelineStage.Authenticate)
+                .UseUmbracoBackOfficeExternalCookieAuthentication(ApplicationContext, PipelineStage.Authenticate);                
 
             // Enable the application to use a cookie to store information for the 
             // signed in user and to use a cookie to temporarily store information 
@@ -38,11 +56,12 @@ namespace UmbracoIdentity.Web
             // Configure the sign in cookie
             app.UseCookieAuthentication(
                 //You can modify these options for any customizations you'd like
-                new FrontEndCookieAuthenticationOptions());
+                new FrontEndCookieAuthenticationOptions(),
+                PipelineStage.Authenticate);
             
-            app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
-
             // Uncomment the following lines to enable logging in with third party login providers
+
+            //app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
             //app.UseMicrosoftAccountAuthentication(
             //  clientId: "",
@@ -61,8 +80,10 @@ namespace UmbracoIdentity.Web
             //  clientSecret: ""); 
 
 #if DEBUG
-
+             
             //NOTE: THIS block gets removed during the build process, this is for internal dev purposes
+
+            app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
             //// Enables the application to temporarily store user information when 
             //// they are verifying the second factor in the two-factor authentication process.
@@ -86,8 +107,11 @@ namespace UmbracoIdentity.Web
              clientSecret: "QoF1YzsbRXZ-gwbB2fHidcXR"); 
 #endif
 
-        }
 
+            //Lasty we need to ensure that the preview Middleware is registered, this must come after
+            // all of the authentication middleware:
+            app.UseUmbracoPreviewAuthentication(ApplicationContext, PipelineStage.Authorize);
+        }
         
     }
 }

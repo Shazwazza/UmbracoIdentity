@@ -21,6 +21,29 @@ namespace UmbracoIdentity.Web.Controllers
     public class UmbracoIdentityAccountController : SurfaceController
     {
         private UmbracoMembersUserManager<UmbracoApplicationMember> _userManager;
+        private UmbracoMembersRoleManager<UmbracoApplicationRole> _roleManager;
+
+        public UmbracoIdentityAccountController(UmbracoContext umbracoContext, UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager) : base(umbracoContext)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
+        public UmbracoIdentityAccountController(UmbracoContext umbracoContext, UmbracoHelper umbracoHelper, UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager) : base(umbracoContext, umbracoHelper)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
+        public UmbracoIdentityAccountController(UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
+        public UmbracoIdentityAccountController()
+        {
+        }
 
         protected IOwinContext OwinContext
         {
@@ -33,6 +56,15 @@ namespace UmbracoIdentity.Web.Controllers
             {
                 return _userManager ?? (_userManager = OwinContext
                     .GetUserManager<UmbracoMembersUserManager<UmbracoApplicationMember>>());
+            }
+        }
+
+        public UmbracoMembersRoleManager<UmbracoApplicationRole> RoleManager
+        {
+            get
+            {
+                return _roleManager ?? (_roleManager = OwinContext
+                    .Get<UmbracoMembersRoleManager<UmbracoApplicationRole>>());
             }
         }
 
@@ -199,6 +231,22 @@ namespace UmbracoIdentity.Web.Controllers
             var linkedAccounts = UserManager.GetLogins(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
             ViewBag.ShowRemoveButton = HasPassword() || linkedAccounts.Count > 1;
             return PartialView(linkedAccounts);
+        }
+
+        [ChildActionOnly]
+        public async Task<ActionResult> ShowRoles()
+        {
+            var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+
+            var model = new RoleManagementModel();
+
+            if (user != null)
+            {
+                model.AssignedRoles = user.Roles.Select(x => x.RoleName);
+                model.AvailableRoles = await RoleManager.GetAll();
+            }
+
+            return PartialView("ShowRoles", model);
         }
 
         #endregion

@@ -4,6 +4,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Umbraco.Core;
 using Umbraco.Core.Services;
+using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
 {

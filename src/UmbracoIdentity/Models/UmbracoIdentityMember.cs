@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
 using Umbraco.Web.Models;
-using UmbracoIdentity.Models;
 
-namespace UmbracoIdentity
+namespace UmbracoIdentity.Models
 {
     public class UmbracoIdentityMember : IdentityMember<int, IdentityMemberLogin<int>, IdentityMemberRole<int>, IdentityMemberClaim<int>>
     {
@@ -14,6 +12,27 @@ namespace UmbracoIdentity
         /// Gets/sets the members real name
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Overridden to make the retrieval lazy
+        /// </summary>
+        public override ICollection<IdentityMemberRole<int>> Roles
+        {
+            get
+            {
+                if (_getRoles != null && !_getRoles.IsValueCreated)
+                {
+                    _roles = new ObservableCollection<IdentityMemberRole<int>>();
+                    foreach (var l in _getRoles.Value)
+                    {
+                        _roles.Add(l);
+                    }
+                    //now assign events
+                    _roles.CollectionChanged += Roles_CollectionChanged;
+                }
+                return _roles;
+            }
+        }
 
         /// <summary>
         /// Overridden to make the retrieval lazy
@@ -37,14 +56,22 @@ namespace UmbracoIdentity
         }
 
         public bool LoginsChanged { get; private set; }
+        public bool RolesChanged { get; private set; }
 
         void Logins_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             LoginsChanged = true;
         }
+        void Roles_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            RolesChanged = true;
+        }
 
         private ObservableCollection<IdentityMemberLogin<int>> _logins;
         private Lazy<IEnumerable<IdentityMemberLogin<int>>> _getLogins;
+
+        private ObservableCollection<IdentityMemberRole<int>> _roles;
+        private Lazy<IEnumerable<IdentityMemberRole<int>>> _getRoles;
 
         /// <summary>
         /// Used to set a lazy call back to populate the user's Login list
@@ -54,6 +81,16 @@ namespace UmbracoIdentity
         {
             if (callback == null) throw new ArgumentNullException("callback");
             _getLogins = callback;
+        }
+
+        /// <summary>
+        /// Used to set a lazy call back to populate the user's Role list
+        /// </summary>
+        /// <param name="callback"></param>
+        public void SetRolesCallback(Lazy<IEnumerable<IdentityMemberRole<int>>> callback)
+        {
+            if (callback == null) throw new ArgumentNullException("callback");
+            _getRoles = callback;
         }
 
         /// <summary>

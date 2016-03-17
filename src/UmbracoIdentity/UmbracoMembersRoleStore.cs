@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using UmbracoIdentity.Models;
 using Task = System.Threading.Tasks.Task;
 
 namespace UmbracoIdentity
@@ -17,6 +21,11 @@ namespace UmbracoIdentity
             IMemberGroupService memberGroupService)
         {
             _memberGroupService = memberGroupService;
+        }
+
+        public Task<IEnumerable<string>> GetAll()
+        {
+            return Task.FromResult(_memberGroupService.GetAll().Select(x => x.Name));
         }
 
         public Task CreateAsync(T role)

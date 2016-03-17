@@ -3,6 +3,7 @@ using Microsoft.Owin;
 using Owin;
 using Umbraco.Core;
 using Microsoft.AspNet.Identity.Owin;
+using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
 {
@@ -36,6 +37,7 @@ namespace UmbracoIdentity
                     o,
                     appContext.Services.MemberService,
                     appContext.Services.MemberTypeService,
+                    appContext.Services.MemberGroupService,
                     membershipProvider: membershipProvider));
 
             //Configure Umbraco member event handler to be created per request - this will ensure that the

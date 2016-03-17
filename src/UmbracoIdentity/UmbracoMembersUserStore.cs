@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Security;
@@ -19,26 +20,35 @@ namespace UmbracoIdentity
     /// <summary>
     /// A custom user store that uses Umbraco member data
     /// </summary>
-    public class UmbracoMembersUserStore<T> : DisposableObject, IUserStore<T, int>, IUserPasswordStore<T, int>, IUserEmailStore<T, int>, IUserLoginStore<T, int> 
-        where T : UmbracoIdentityMember, IUser<int>, new()
+    public class UmbracoMembersUserStore<TMember> : DisposableObject, 
+        IUserStore<TMember, int>, 
+        IUserPasswordStore<TMember, int>, 
+        IUserEmailStore<TMember, int>, 
+        IUserLoginStore<TMember, int>, 
+        IUserRoleStore<TMember, int>        
+        where TMember : UmbracoIdentityMember, IUser<int>, new()
     {
         private readonly IMemberService _memberService;
         private readonly IMemberTypeService _memberTypeService;
+        private readonly IMemberGroupService _memberGroupService;
         private readonly IdentityEnabledMembersMembershipProvider _membershipProvider;
         private readonly IExternalLoginStore _externalLoginStore;
 
         public UmbracoMembersUserStore(
             IMemberService memberService, 
             IMemberTypeService memberTypeService,
+            IMemberGroupService memberGroupService,
             IdentityEnabledMembersMembershipProvider membershipProvider, 
             IExternalLoginStore externalLoginStore)
         {
             if (memberService == null) throw new ArgumentNullException("memberService");
+            if (memberGroupService == null) throw new ArgumentNullException(nameof(memberGroupService));
             if (membershipProvider == null) throw new ArgumentNullException("membershipProvider");
             if (externalLoginStore == null) throw new ArgumentNullException("externalLoginStore");
 
             _memberService = memberService;
             _memberTypeService = memberTypeService;
+            _memberGroupService = memberGroupService;
             _membershipProvider = membershipProvider;
             _externalLoginStore = externalLoginStore;
 
@@ -48,7 +58,7 @@ namespace UmbracoIdentity
             }
         }
 
-        public virtual Task CreateAsync(T user)
+        public virtual async Task CreateAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
@@ -74,10 +84,35 @@ namespace UmbracoIdentity
             //re-assign id
             user.Id = member.Id;
 
-            return Task.FromResult(0);
+            if (user.LoginsChanged)
+            {
+                var logins = await GetLoginsAsync(user);
+                _externalLoginStore.SaveUserLogins(member.Id, logins);
+            }
+
+            if (user.RolesChanged)
+            {
+                IMembershipRoleService<IMember> memberRoleService = _memberService;
+
+                var persistedRoles = memberRoleService.GetAllRoles(member.Id).ToArray();
+                var userRoles = user.Roles.Select(x => x.RoleName).ToArray();
+
+                var keep = persistedRoles.Intersect(userRoles).ToArray();
+                var remove = persistedRoles.Except(keep).ToArray();
+                var add = userRoles.Except(persistedRoles).ToArray();
+
+                memberRoleService.DissociateRoles(new[] { member.Id }, remove);
+                memberRoleService.AssignRoles(new[] { member.Id }, add);
+            }
+            
         }
 
-        public virtual async Task UpdateAsync(T user)
+        /// <summary>
+        /// Performs the persistence for the member
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public virtual async Task UpdateAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
@@ -100,10 +135,25 @@ namespace UmbracoIdentity
                     var logins = await GetLoginsAsync(user);
                     _externalLoginStore.SaveUserLogins(found.Id, logins);
                 }
+
+                if (user.RolesChanged)
+                {
+                    IMembershipRoleService<IMember> memberRoleService = _memberService;
+
+                    var persistedRoles = memberRoleService.GetAllRoles(found.Id).ToArray();
+                    var userRoles = user.Roles.Select(x => x.RoleName).ToArray();
+
+                    var keep = persistedRoles.Intersect(userRoles).ToArray();
+                    var remove = persistedRoles.Except(keep).ToArray();
+                    var add = userRoles.Except(persistedRoles).ToArray();
+
+                    memberRoleService.DissociateRoles(new[] {found.Id}, remove);
+                    memberRoleService.AssignRoles(new[] {found.Id}, add);
+                }
             }           
         }
 
-        public Task DeleteAsync(T user)
+        public Task DeleteAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
@@ -123,33 +173,33 @@ namespace UmbracoIdentity
             return Task.FromResult(0);
         }
 
-        public Task<T> FindByIdAsync(int userId)
+        public Task<TMember> FindByIdAsync(int userId)
         {
             var member = _memberService.GetById(userId);
             if (member == null)
             {
-                return Task.FromResult((T) null);
+                return Task.FromResult((TMember) null);
             }
 
-            var result = AssignLoginsCallback(MapFromMember(member));
+            var result = AssignUserDataCallback(MapFromMember(member));
 
             return Task.FromResult(result);
         }
 
-        public Task<T> FindByNameAsync(string userName)
+        public Task<TMember> FindByNameAsync(string userName)
         {
             var member = _memberService.GetByUsername(userName);
             if (member == null)
             {
-                return Task.FromResult((T)null);
+                return Task.FromResult((TMember)null);
             }
 
-            var result = AssignLoginsCallback(MapFromMember(member));
+            var result = AssignUserDataCallback(MapFromMember(member));
 
             return Task.FromResult(result);
         }
 
-        public Task SetPasswordHashAsync(T user, string passwordHash)
+        public Task SetPasswordHashAsync(TMember user, string passwordHash)
         {
             if (user == null) throw new ArgumentNullException("user");
             if (passwordHash.IsNullOrWhiteSpace()) throw new ArgumentNullException("passwordHash");
@@ -159,14 +209,14 @@ namespace UmbracoIdentity
             return Task.FromResult(0);
         }
 
-        public Task<string> GetPasswordHashAsync(T user)
+        public Task<string> GetPasswordHashAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
             return Task.FromResult(user.PasswordHash);
         }
 
-        public Task<bool> HasPasswordAsync(T user)
+        public Task<bool> HasPasswordAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
@@ -174,7 +224,7 @@ namespace UmbracoIdentity
         }
 
 
-        public Task SetEmailAsync(T user, string email)
+        public Task SetEmailAsync(TMember user, string email)
         {
             if (user == null) throw new ArgumentNullException("user");
             if (email.IsNullOrWhiteSpace()) throw new ArgumentNullException("email");
@@ -184,40 +234,40 @@ namespace UmbracoIdentity
             return Task.FromResult(0);
         }
 
-        public Task<string> GetEmailAsync(T user)
+        public Task<string> GetEmailAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
             return Task.FromResult(user.Email);
         }
 
-        public Task<bool> GetEmailConfirmedAsync(T user)
+        public Task<bool> GetEmailConfirmedAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
             throw new NotImplementedException();
         }
 
-        public Task SetEmailConfirmedAsync(T user, bool confirmed)
+        public Task SetEmailConfirmedAsync(TMember user, bool confirmed)
         {
             if (user == null) throw new ArgumentNullException("user");
 
             throw new NotImplementedException();
         }
 
-        public Task<T> FindByEmailAsync(string email)
+        public Task<TMember> FindByEmailAsync(string email)
         {
             var member = _memberService.GetByEmail(email);
             var result = member == null
                 ? null
                 : MapFromMember(member);
 
-            var r = AssignLoginsCallback(result);
+            var r = AssignUserDataCallback(result);
 
             return Task.FromResult(r);
         }
 
-        public Task AddLoginAsync(T user, UserLoginInfo login)
+        public Task AddLoginAsync(TMember user, UserLoginInfo login)
         {
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
@@ -235,7 +285,7 @@ namespace UmbracoIdentity
             return Task.FromResult(0);
         }
 
-        public Task RemoveLoginAsync(T user, UserLoginInfo login)
+        public Task RemoveLoginAsync(TMember user, UserLoginInfo login)
         {
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
@@ -249,7 +299,7 @@ namespace UmbracoIdentity
             return Task.FromResult(0);
         }
 
-        public Task<IList<UserLoginInfo>> GetLoginsAsync(T user)
+        public Task<IList<UserLoginInfo>> GetLoginsAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
 
@@ -259,7 +309,7 @@ namespace UmbracoIdentity
             return Task.FromResult(result);
         }
 
-        public Task<T> FindAsync(UserLoginInfo login)
+        public Task<TMember> FindAsync(UserLoginInfo login)
         {
             //get all logins associated with the login id
             var result = _externalLoginStore.Find(login).ToArray();
@@ -272,20 +322,96 @@ namespace UmbracoIdentity
                     where member != null
                     select MapFromMember(member)).FirstOrDefault();
 
-                return Task.FromResult(AssignLoginsCallback(user));
+                return Task.FromResult(AssignUserDataCallback(user));
             }
 
-            return Task.FromResult((T)null);
+            return Task.FromResult((TMember)null);
         }
-        
+
+
+        /// <summary>
+        /// Adds a user to a role
+        /// </summary>
+        /// <param name="user"/><param name="roleName"/>
+        /// <returns/>
+        public Task AddToRoleAsync(TMember user, string roleName)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                throw new ArgumentException("roleName is null or empty");
+            }
+
+            var roleEntity = _memberGroupService.GetByName(roleName);
+            if (roleEntity == null)
+            {
+                throw new InvalidOperationException(roleName + " does not exist as a role");
+            }
+
+            var roles = user.Roles;
+            var instance = new IdentityMemberRole { UserId = user.Id, RoleName = roleEntity.Name };
+            var userRole = instance;
+            roles.Add(userRole);
+
+            return Task.FromResult(0);            
+        }
+
+        /// <summary>
+        /// Removes the role for the user
+        /// </summary>
+        /// <param name="user"/><param name="roleName"/>
+        /// <returns/>
+        public Task RemoveFromRoleAsync(TMember user, string roleName)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                throw new ArgumentException("roleName is null or empty");
+            }
+
+            var memberRole = user.Roles.SingleOrDefault(l => l.RoleName.InvariantEquals(roleName));
+            if (memberRole != null)
+                user.Roles.Remove(memberRole);
+
+            return Task.FromResult(0);
+        }
+
+        /// <summary>
+        /// Returns the roles for this user
+        /// </summary>
+        /// <param name="user"/>
+        /// <returns/>
+        public Task<IList<string>> GetRolesAsync(TMember user)
+        {
+            if (user == null) throw new ArgumentNullException("user");
+
+            return Task.FromResult((IList<string>) new List<string>(user.Roles.Select(l => l.RoleName)));
+        }
+
+        /// <summary>
+        /// Returns true if a user is in the role
+        /// </summary>
+        /// <param name="user"/><param name="roleName"/>
+        /// <returns/>
+        public Task<bool> IsInRoleAsync(TMember user, string roleName)
+        {
+            return Task.FromResult(user.Roles.Any(x => x.RoleName.InvariantEquals(roleName)));
+        }
+
         protected override void DisposeResources()
         {
             _externalLoginStore.Dispose();
         }
 
-        private T MapFromMember(IMember member)
+        private TMember MapFromMember(IMember member)
         {
-            var result = new T
+            var result = new TMember
             {
                 Email = member.Email,
                 Id = member.Id,
@@ -335,7 +461,7 @@ namespace UmbracoIdentity
         }
 
 
-        private bool UpdateMemberProperties(IMember member, T user)
+        private bool UpdateMemberProperties(IMember member, TMember user)
         {
             var anythingChanged = false;
             //don't assign anything if nothing has changed as this will trigger
@@ -400,14 +526,31 @@ namespace UmbracoIdentity
             return storedPass.StartsWith("___UIDEMPTYPWORD__") ? null : storedPass;
         }
 
-        private T AssignLoginsCallback(T user)
+        /// <summary>
+        /// This is used to assign the lazy callbacks for the user's data collections
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private TMember AssignUserDataCallback(TMember user)
         {
             if (user != null)
             {
                 user.SetLoginsCallback(new Lazy<IEnumerable<IdentityMemberLogin<int>>>(() =>
                             _externalLoginStore.GetAll(user.Id)));
+
+                user.SetRolesCallback(new Lazy<IEnumerable<IdentityMemberRole<int>>>(() =>
+                {
+                    IMembershipRoleService<IMember> memberRoleService = _memberService;
+                    var roles = memberRoleService.GetAllRoles(user.Id);
+                    return roles.Select(x => new IdentityMemberRole()
+                    {
+                        RoleName = x,
+                        UserId = user.Id
+                    });
+                }));
             }
             return user;
-        }
+        }        
+
     }
 }

@@ -20,7 +20,7 @@
     var success = TempData["ProfileUpdateSuccess"] != null;
 }
 
-@if (User.Identity.IsAuthenticated)
+@if (User.Identity.IsAuthenticated && profileModel != null)
 {   
     if (success)
     {
@@ -82,6 +82,8 @@
             <button>Save</button>
         </fieldset>
     }
+
+    @Html.Action("ShowRoles", "UmbracoIdentityAccount")
 
     @Html.Action("RemoveAccountList", "UmbracoIdentityAccount")
     

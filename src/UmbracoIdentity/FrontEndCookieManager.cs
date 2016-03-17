@@ -59,11 +59,6 @@ namespace UmbracoIdentity
             return (bool)typeof(UriExtensions).CallStaticMethod("IsInstallerRequest", request.Uri);
         }
         
-        private static bool HasPreviewCookie(IOwinRequest request)
-        {
-            return request.Cookies[Constants.Web.PreviewCookieName] != null;
-        }
-
         /// <summary>
         /// Determines if the request should be authenticated for the back office
         /// </summary>
@@ -82,9 +77,7 @@ namespace UmbracoIdentity
             if (//check back office
                 IsBackOfficeRequest(request)
                     //check installer
-                || IsInstallerRequest(request)
-                    //detect in preview
-                || (HasPreviewCookie(request) && request.Uri != null && request.Uri.AbsolutePath.StartsWith(IOHelper.ResolveUrl(SystemDirectories.Umbraco)) == false))
+                || IsInstallerRequest(request))
             {
                 return true;
             }

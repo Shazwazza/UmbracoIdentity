@@ -3,7 +3,7 @@ using System;
 namespace UmbracoIdentity.Models
 {
 
-    public class IdentityMemberRole : IdentityMemberRole<string> { }
+    public class IdentityMemberRole : IdentityMemberRole<int> { }
 
     /// <summary>
     ///     EntityType that represents a user belonging to a role
@@ -17,8 +17,8 @@ namespace UmbracoIdentity.Models
         public virtual TKey UserId { get; set; }
 
         /// <summary>
-        ///     RoleId for the role
+        /// RoleId for the role
         /// </summary>
-        public virtual TKey RoleId { get; set; }
+        public virtual string RoleName { get; set; }
     }
 }

@@ -1,0 +1,16 @@
+﻿@using UmbracoIdentity.Web.Controllers
+@model UmbracoIdentity.Web.Models.UmbracoIdentity.RoleManagementModel
+
+<fieldset>
+    <legend>Assigned roles</legend>
+
+    <ul class="inline-list">
+        @foreach (var assigned in Model.AssignedRoles)
+            {
+            <li>
+                @assigned
+            </li>
+        }
+    </ul>
+
+</fieldset>

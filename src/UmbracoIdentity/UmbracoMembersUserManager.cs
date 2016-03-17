@@ -4,6 +4,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Umbraco.Core.Services;
+using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
 {
@@ -16,13 +17,7 @@ namespace UmbracoIdentity
         public UmbracoMembersUserManager(IUserStore<T, int> store)
             : base(store)
         {
-        }
-
-        //TODO: Support this
-        public override bool SupportsUserRole
-        {
-            get { return false; }
-        }
+        }        
 
         //TODO: Support this
         public override bool SupportsQueryableUsers
@@ -59,6 +54,7 @@ namespace UmbracoIdentity
         /// <param name="options"></param>
         /// <param name="memberService"></param>
         /// <param name="memberTypeService"></param>
+        /// <param name="memberGroupService"></param>
         /// <param name="externalLoginStore"></param>
         /// <param name="membershipProvider"></param>
         /// <returns></returns>
@@ -66,6 +62,7 @@ namespace UmbracoIdentity
             IdentityFactoryOptions<UmbracoMembersUserManager<T>> options, 
             IMemberService memberService,
             IMemberTypeService memberTypeService,
+            IMemberGroupService memberGroupService,
             IExternalLoginStore externalLoginStore = null,
             IdentityEnabledMembersMembershipProvider membershipProvider = null)
         {
@@ -84,7 +81,7 @@ namespace UmbracoIdentity
                 externalLoginStore = new ExternalLoginStore();
             }
 
-            return Create(options, new UmbracoMembersUserStore<T>(memberService, memberTypeService, provider, externalLoginStore), membershipProvider);
+            return Create(options, new UmbracoMembersUserStore<T>(memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
         }
 
         /// <summary>
