@@ -258,6 +258,7 @@
     <Compile Include="IExternalLoginStore.cs" />
     <Compile Include="MembersEventHandler.cs" />
     <Compile Include="MembershipPasswordHasher.cs" />
+    <Compile Include="Models\IdentityRole.cs" />
     <Compile Include="Models\IdentityMember.cs" />
     <Compile Include="Models\IdentityMemberClaim.cs" />
     <Compile Include="Models\IdentityMemberRole.cs" />
@@ -268,6 +269,9 @@
     <Compile Include="UmbracoBackOfficeAuthenticationMiddleware.cs" />
     <Compile Include="UmbracoBackOfficeAuthenticationOptions.cs" />
     <Compile Include="UmbracoIdentityMember.cs" />
+    <Compile Include="UmbracoIdentityRole.cs" />
+    <Compile Include="UmbracoMembersRoleStore.cs" />
+    <Compile Include="UmbracoMembersRoleManager.cs" />
     <Compile Include="UmbracoMembersUserManager.cs" />
     <Compile Include="UmbracoMembersUserStore.cs" />
   </ItemGroup>
