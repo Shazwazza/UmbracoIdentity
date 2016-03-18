@@ -16,7 +16,8 @@ $SolutionRoot = Join-Path -Path $RepoRoot "src";
 #trace
 "Solution Root: $SolutionRoot"
 
-$MSBuild = "$Env:SYSTEMROOT\Microsoft.NET\Framework\v4.0.30319\msbuild.exe";
+$ProgFiles86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)");
+$MSBuild = "$ProgFiles86\MSBuild\14.0\Bin\MSBuild.exe"
 
 # Make sure we don't have a release folder for this version already
 $BuildFolder = Join-Path -Path $RepoRoot -ChildPath "build";
@@ -114,13 +115,18 @@ Foreach-Object {
 Copy-Item "$BuildFolder\Readme.txt" -Destination $ReleaseFolder
 
 # COPY OVER THE CORE NUSPEC AND BUILD THE NUGET PACKAGE
-Copy-Item "$BuildFolder\UmbracoIdentity.nuspec" -Destination $ReleaseFolder
-$CoreNuSpec = Join-Path -Path $ReleaseFolder -ChildPath "UmbracoIdentity.nuspec";
+$CopyrightYear = (Get-Date).year;
 $NuGet = Join-Path $SolutionRoot -ChildPath ".nuget\NuGet.exe"
+
+Copy-Item "$BuildFolder\UmbracoIdentity.Core.nuspec" -Destination $ReleaseFolder
+$CoreNuSpec = Join-Path -Path $ReleaseFolder -ChildPath "UmbracoIdentity.Core.nuspec";
 Write-Output "DEBUGGING: " $CoreNuSpec -OutputDirectory $ReleaseFolder -Version $ReleaseVersionNumber$PreReleaseName
-& $NuGet pack $CoreNuSpec -OutputDirectory $ReleaseFolder -Version $ReleaseVersionNumber$PreReleaseName
+& $NuGet pack $CoreNuSpec -OutputDirectory $ReleaseFolder -Version $ReleaseVersionNumber$PreReleaseName -Properties copyrightyear=$CopyrightYear
+
+Copy-Item "$BuildFolder\UmbracoIdentity.nuspec" -Destination $ReleaseFolder
+$NuSpec = Join-Path -Path $ReleaseFolder -ChildPath "UmbracoIdentity.nuspec";
+Write-Output "DEBUGGING: " $NuSpec -OutputDirectory $ReleaseFolder -Version $ReleaseVersionNumber$PreReleaseName
+& $NuGet pack $NuSpec -OutputDirectory $ReleaseFolder -Version $ReleaseVersionNumber$PreReleaseName -Properties copyrightyear=$CopyrightYear
 
 ""
 "Build $ReleaseVersionNumber$PreReleaseName is done!"
-"NuGet packages also created, so if you want to push them just run:"
-"  nuget push $CoreNuSpec"

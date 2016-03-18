@@ -3,7 +3,7 @@
   <metadata>
     <id>UmbracoIdentity</id>
     <title>ASP.Net Identity for Umbraco Members</title>
-    <version>0.0.0.0</version>
+    <version>$version$</version>
     <authors>Shannon Deminick</authors>
     <description>A library for enabling ASP.Net Identity to work with Umbraco front-end members</description>
     <summary>A library for enabling ASP.Net Identity to work with Umbraco front-end members</summary>
@@ -12,16 +12,14 @@
     <projectUrl>https://github.com/Shandem/UmbracoIdentity/</projectUrl>
     <tags>asp.net identity umbraco security authentication authorization owin</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright © Shannon Deminick $copyrightyear$</copyright>
     <dependencies>
 
-      <dependency id="UmbracoCms.Core" version="7.4.2" />    
+      <dependency id="UmbracoIdentity.Core" version="$version$" />    
       
     </dependencies>
   </metadata>
   <files>
-
-    <file src="*.dll" target="lib\net45" />
-    <file src="*.pdb" target="lib\net45" />
 
     <file src="nuget-transforms\web.config.install.xdt" target="Content" />
 
