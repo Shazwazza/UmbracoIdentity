@@ -39,6 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{12D5F68D
 		..\build\Build-Release.ps1 = ..\build\Build-Release.ps1
 		..\build\Readme.txt = ..\build\Readme.txt
 		SolutionInfo.cs = SolutionInfo.cs
+		..\build\UmbracoIdentity.Core.nuspec = ..\build\UmbracoIdentity.Core.nuspec
 		..\build\UmbracoIdentity.nuspec = ..\build\UmbracoIdentity.nuspec
 	EndProjectSection
 EndProject
