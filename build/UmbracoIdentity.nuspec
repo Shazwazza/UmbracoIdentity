@@ -14,7 +14,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
 
-      <dependency id="UmbracoCms.Core" version="7.3.4" />    
+      <dependency id="UmbracoCms.Core" version="7.4.2" />    
       
     </dependencies>
   </metadata>
