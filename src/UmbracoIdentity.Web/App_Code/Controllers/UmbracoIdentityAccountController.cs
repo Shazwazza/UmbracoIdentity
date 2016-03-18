@@ -405,43 +405,48 @@ namespace UmbracoIdentity.Web.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> HandleRegisterMember([Bind(Prefix = "registerModel")]RegisterModel model)
         {
-
             if (ModelState.IsValid == false)
             {
                 return CurrentUmbracoPage();
             }
 
-            var user = new UmbracoApplicationMember()
+            var username = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username;
+            var memberService = Services.MemberService;
+
+            if (memberService.GetByUsername(username) == null)
             {
-                UserName = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username,
-                Email = model.Email,
-                MemberProperties = model.MemberProperties
-            };
+                //register member
+                var member = memberService.CreateMember(username, model.Email, model.Name, model.MemberTypeAlias);
+                memberService.Save(member);
+                memberService.SavePassword(member, model.Password);
 
-            var result = await UserManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
-            {
-                await SignInAsync(user, isPersistent: false);
-
-                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
-                // Send an email with this link
-                // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
-                TempData["FormSuccess"] = true;
-
-                //if there is a specified path to redirect to then use it
-                if (model.RedirectUrl.IsNullOrWhiteSpace() == false)
+                var user = await UserManager.FindAsync(username, model.Password);
+                if (user != null)
                 {
-                    return Redirect(model.RedirectUrl);
+                    //authenticate member
+                    await SignInAsync(user, isPersistent: false);
+
+                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
+                    // Send an email with this link
+                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+
+                    TempData["FormSuccess"] = true;
+
+                    //if there is a specified path to redirect to then use it
+                    if (!model.RedirectUrl.IsNullOrWhiteSpace())
+                    {
+                        return Redirect(model.RedirectUrl);
+                    }
+
+                    //redirect to current page by default
+                    return RedirectToCurrentUmbracoPage();
                 }
-                //redirect to current page by default                
-                return RedirectToCurrentUmbracoPage();
             }
             else
             {
-                AddModelErrors(result, "registerModel");
+                ModelState.AddModelError("registerModel", "The email address provided has already been registered");
             }
 
             return CurrentUmbracoPage();
