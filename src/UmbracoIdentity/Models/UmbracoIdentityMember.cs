@@ -14,6 +14,14 @@ namespace UmbracoIdentity.Models
         public string Name { get; set; }
 
         /// <summary>
+        /// The member type alias
+        /// </summary>
+        /// <remarks>
+        /// Setting this will only have an affect when creating a new member
+        /// </remarks>
+        public string MemberTypeAlias { get; set; }
+
+        /// <summary>
         /// Overridden to make the retrieval lazy
         /// </summary>
         public override ICollection<IdentityMemberRole<int>> Roles

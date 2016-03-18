@@ -415,7 +415,8 @@ namespace UmbracoIdentity.Web.Controllers
             {
                 UserName = model.UsernameIsEmail || model.Username == null ? model.Email : model.Username,
                 Email = model.Email,
-                MemberProperties = model.MemberProperties
+                MemberProperties = model.MemberProperties,
+                MemberTypeAlias = model.MemberTypeAlias
             };
 
             var result = await UserManager.CreateAsync(user, model.Password);

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
@@ -11,10 +12,10 @@ namespace UmbracoIdentity
     /// <summary>
     /// A custom user manager that uses the UmbracoMembersUserStore
     /// </summary>
-    public class UmbracoMembersUserManager<T> : UserManager<T, int>
-        where T : UmbracoIdentityMember, IUser<int>, new()
+    public class UmbracoMembersUserManager<TUser> : UserManager<TUser, int>
+        where TUser : UmbracoIdentityMember, IUser<int>, new()
     {
-        public UmbracoMembersUserManager(IUserStore<T, int> store)
+        public UmbracoMembersUserManager(IUserStore<TUser, int> store)
             : base(store)
         {
         }        
@@ -36,8 +37,7 @@ namespace UmbracoIdentity
         {
             get { return false; }
         }
-
-
+        
         public override bool SupportsUserTwoFactor
         {
             get { return false; }
@@ -58,8 +58,8 @@ namespace UmbracoIdentity
         /// <param name="externalLoginStore"></param>
         /// <param name="membershipProvider"></param>
         /// <returns></returns>
-        public static UmbracoMembersUserManager<T> Create(
-            IdentityFactoryOptions<UmbracoMembersUserManager<T>> options, 
+        public static UmbracoMembersUserManager<TUser> Create(
+            IdentityFactoryOptions<UmbracoMembersUserManager<TUser>> options, 
             IMemberService memberService,
             IMemberTypeService memberTypeService,
             IMemberGroupService memberGroupService,
@@ -81,7 +81,7 @@ namespace UmbracoIdentity
                 externalLoginStore = new ExternalLoginStore();
             }
 
-            return Create(options, new UmbracoMembersUserStore<T>(memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
+            return Create(options, new UmbracoMembersUserStore<TUser>(memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
         }
 
         /// <summary>
@@ -91,9 +91,9 @@ namespace UmbracoIdentity
         /// <param name="customUserStore"></param>
         /// <param name="membershipProvider"></param>
         /// <returns></returns>
-        public static UmbracoMembersUserManager<T> Create(
-          IdentityFactoryOptions<UmbracoMembersUserManager<T>> options,
-          UmbracoMembersUserStore<T> customUserStore,
+        public static UmbracoMembersUserManager<TUser> Create(
+          IdentityFactoryOptions<UmbracoMembersUserManager<TUser>> options,
+          UmbracoMembersUserStore<TUser> customUserStore,
           IdentityEnabledMembersMembershipProvider membershipProvider = null)
         {
 
@@ -105,10 +105,10 @@ namespace UmbracoIdentity
                 throw new InvalidOperationException("In order to use " + typeof(UmbracoMembersUserManager<>) + " the Umbraco members membership provider must be of type " + typeof(IdentityEnabledMembersMembershipProvider));
             }
 
-            var manager = new UmbracoMembersUserManager<T>(customUserStore);
+            var manager = new UmbracoMembersUserManager<TUser>(customUserStore);
 
             // Configure validation logic for usernames
-            manager.UserValidator = new UserValidator<T, int>(manager)
+            manager.UserValidator = new UserValidator<TUser, int>(manager)
             {
                 AllowOnlyAlphanumericUserNames = false,
                 RequireUniqueEmail = true
@@ -147,13 +147,11 @@ namespace UmbracoIdentity
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = new DataProtectorTokenProvider<T, int>(dataProtectionProvider.Create("ASP.NET Identity"));
+                manager.UserTokenProvider = new DataProtectorTokenProvider<TUser, int>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
             return manager;
         }
-
-      
-
+        
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

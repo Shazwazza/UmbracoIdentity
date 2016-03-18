@@ -61,11 +61,12 @@ namespace UmbracoIdentity
         public virtual async Task CreateAsync(TMember user)
         {
             if (user == null) throw new ArgumentNullException("user");
-
+            
             var member = _memberService.CreateMember(
                     user.UserName, user.Email,
                     user.Name.IsNullOrWhiteSpace() ? user.UserName : user.Name,
-                    _membershipProvider.DefaultMemberTypeAlias);
+                    user.MemberTypeAlias.IsNullOrWhiteSpace() ? _membershipProvider.DefaultMemberTypeAlias: user.MemberTypeAlias);
+
             UpdateMemberProperties(member, user);
 
             //the password must be 'something' it could be empty if authenticating
@@ -421,7 +422,8 @@ namespace UmbracoIdentity
                 LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                 UserName = member.Username,
                 PasswordHash = GetPasswordHash(member.RawPasswordValue),
-                Name = member.Name
+                Name = member.Name,
+                MemberTypeAlias = member.ContentTypeAlias
             };
 
             result.MemberProperties = GetMemberProperties(member).ToList();
