@@ -23,6 +23,8 @@ This package requires **Umbraco 7.4.2+**.
 
 There's also a nightly Nuget feed: `https://ci.appveyor.com/nuget/umbracoidentity-nightly`
 
+*There is also just an UmbracoIdentity.Core package too in case you just want the binaries*
+
 ### Config updates
 
 These config updates 'should' be taken care of by the nuget install, but you should double check to be sure.
