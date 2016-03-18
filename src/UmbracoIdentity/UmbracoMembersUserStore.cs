@@ -147,8 +147,10 @@ namespace UmbracoIdentity
                     var remove = persistedRoles.Except(keep).ToArray();
                     var add = userRoles.Except(persistedRoles).ToArray();
 
-                    memberRoleService.DissociateRoles(new[] {found.Id}, remove);
-                    memberRoleService.AssignRoles(new[] {found.Id}, add);
+                    if (remove.Any())
+                        memberRoleService.DissociateRoles(new[] {found.Id}, remove);
+                    if (add.Any())
+                        memberRoleService.AssignRoles(new[] {found.Id}, add);
                 }
             }           
         }

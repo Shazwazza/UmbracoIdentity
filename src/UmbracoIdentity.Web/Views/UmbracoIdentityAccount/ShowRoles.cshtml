@@ -2,15 +2,41 @@
 @model UmbracoIdentity.Web.Models.UmbracoIdentity.RoleManagementModel
 
 <fieldset>
-    <legend>Assigned roles</legend>
+    <legend>Roles</legend>
 
-    <ul class="inline-list">
-        @foreach (var assigned in Model.AssignedRoles)
-            {
-            <li>
-                @assigned
-            </li>
-        }
-    </ul>
+    <blockquote>NOTE: If you don't want your Members to be able to manage their own roles then you should remove the <code>UmbracoIdentityAccountController.ToggleRole</code> method</blockquote>
+
+    <div class="row">
+        <div class="small-6 columns">
+            <h5>Assigned</h5>
+            <ul class="">
+                @foreach (var assigned in Model.AssignedRoles)
+                {
+                    using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>("ToggleRole", null, new {@class = "foundationForm"}))
+                    {
+                        @Html.AntiForgeryToken()
+                        <li>
+                            <button class="button secondary round tiny" value="@assigned" name="roleName">@assigned</button>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        <div class="small-6 columns">
+            <h5>Available</h5>
+            <ul class="">
+                @foreach (var available in Model.AvailableRoles.Except(Model.AssignedRoles))
+                {
+                    using (Html.BeginUmbracoForm<UmbracoIdentityAccountController>("ToggleRole", null, new { @class = "foundationForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <li>
+                            <button class="button secondary round tiny" value="@available" name="roleName">@available</button>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
 
 </fieldset>

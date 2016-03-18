@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -13,6 +14,7 @@ using Umbraco.Core;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 using UmbracoIdentity;
+using UmbracoIdentity.Models;
 using IdentityExtensions = UmbracoIdentity.IdentityExtensions;
 
 namespace UmbracoIdentity.Web.Controllers
@@ -233,6 +235,44 @@ namespace UmbracoIdentity.Web.Controllers
             return PartialView(linkedAccounts);
         }
 
+        #endregion
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ToggleRole(string roleName)
+        {
+            if (string.IsNullOrWhiteSpace(roleName)) throw new ArgumentNullException("role cannot be null");
+
+            var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+            if (user != null)
+            {
+                var found = user.Roles.FirstOrDefault(x => x.RoleName == roleName);
+                if (found != null)
+                {
+                    user.Roles.Remove(found);
+                }
+                else
+                {   
+                    user.Roles.Add(new IdentityMemberRole {RoleName = roleName, UserId = user.Id});
+                }
+                var result = await UserManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return RedirectToCurrentUmbracoPage();
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error);
+                    }
+                    return CurrentUmbracoPage();
+                }
+            }
+
+            return RedirectToCurrentUmbracoPage();
+        }
+
         [ChildActionOnly]
         public async Task<ActionResult> ShowRoles()
         {
@@ -248,8 +288,6 @@ namespace UmbracoIdentity.Web.Controllers
 
             return PartialView("ShowRoles", model);
         }
-
-        #endregion
 
         [ChildActionOnly]
         public ActionResult ManagePassword()
