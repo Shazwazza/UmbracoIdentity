@@ -15,8 +15,9 @@
     <copyright>Copyright © Shannon Deminick $copyrightyear$</copyright>
     <dependencies>
 
-      <dependency id="UmbracoIdentity.Core" version="$version$" />    
-      
+      <dependency id="UmbracoIdentity.Core" version="$version$" />
+      <dependency id="UmbracoCms" version="7.4.2" />
+
     </dependencies>
   </metadata>
   <files>
