@@ -11,7 +11,7 @@ There are some **[known issues and limitations](https://github.com/Shandem/Umbra
 
 ## Minimum Requirements:
 
-This package requires **Umbraco 7.3.4+**. 
+This package requires **Umbraco 7.4.2+**. 
 
 *[If you are using Umbraco version 7.1.6+ and less than 7.3.0, see here for installation instructions](https://github.com/Shazwazza/UmbracoIdentity/wiki/Legacy-Installation) (you will need to use version 2 of this package)*
 
