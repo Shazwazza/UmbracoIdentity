@@ -25,9 +25,9 @@ namespace UmbracoIdentity
         //TODO: What is the OWIN form of MapPath??
 
         public static readonly object Locker = new object();
-        private readonly UmbracoDatabase _db;
+        private readonly UmbracoDatabase _db;        
 
-        private const string ConnString = @"Data Source=|DataDirectory|\UmbracoIdentity.sdf;Flush Interval=1;";
+        private static string ConnString = @"Data Source=|DataDirectory|\UmbracoIdentity.sdf;Flush Interval=1;";
 
         public ExternalLoginStore()
         {
@@ -50,6 +50,15 @@ namespace UmbracoIdentity
                 var sqlceProvider = new SqlCeSyntaxProvider();
                 CreateTable(false, typeof (ExternalLoginDto), sqlceProvider);
             }
+        }
+
+        /// <summary>
+        /// Sets the connection string (Must be set before the instantiation of ExternalLoginStore)
+        /// </summary>
+        /// <param name="connectionString"></param>
+        public static void SetConnectionString(string connectionString)
+        {
+            ConnString = connectionString;
         }
 
         public IEnumerable<IdentityMemberLogin<int>> GetAll(int userId)
