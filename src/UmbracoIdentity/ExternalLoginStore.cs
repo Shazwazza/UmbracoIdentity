@@ -26,8 +26,9 @@ namespace UmbracoIdentity
 
         public static readonly object Locker = new object();
         private readonly UmbracoDatabase _db;        
-
+        
         private static string ConnString = @"Data Source=|DataDirectory|\UmbracoIdentity.sdf;Flush Interval=1;";
+        private static string ProviderString = "System.Data.SqlServerCe.4.0";
 
         public ExternalLoginStore()
         {
@@ -39,7 +40,7 @@ namespace UmbracoIdentity
                 }    
             }
 
-            _db = new UmbracoDatabase(ConnString, "System.Data.SqlServerCe.4.0");
+            _db = new UmbracoDatabase(ConnString, ProviderString);
             if (!_db.TableExist("ExternalLogins"))
             {
                 //unfortunately we'll get issues if we just try this because of differing sql syntax providers. In newer
@@ -56,9 +57,10 @@ namespace UmbracoIdentity
         /// Sets the connection string (Must be set before the instantiation of ExternalLoginStore)
         /// </summary>
         /// <param name="connectionString"></param>
-        public static void SetConnectionString(string connectionString)
+        public static void SetConnectionString(string connectionString, string provider)
         {
             ConnString = connectionString;
+            ProviderString = provider;
         }
 
         public IEnumerable<IdentityMemberLogin<int>> GetAll(int userId)
