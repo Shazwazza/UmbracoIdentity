@@ -59,3 +59,9 @@ If you are familiar with OWIN then here's what to do...
 ## [Documentation](https://github.com/Shandem/UmbracoIdentity/wiki)
 
 See docs for examples, usage, etc...
+
+## Copyright & Licence
+
+&copy; 2016 by Shannon Deminick
+
+This is free software and is licensed under the [MIT License](http://opensource.org/licenses/MIT)
