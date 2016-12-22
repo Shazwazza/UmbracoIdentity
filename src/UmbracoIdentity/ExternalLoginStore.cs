@@ -46,7 +46,7 @@ namespace UmbracoIdentity
                 // umbraco versions we'd just use the DatabaseSchemaHelper. So in the meantime we have to just 
                 // do this manually and use reflection :(;
                 //_db.CreateTable<ExternalLoginDto>();
-
+                
                 var sqlceProvider = new SqlCeSyntaxProvider();
                 CreateTable(false, typeof (ExternalLoginDto), sqlceProvider);
             }
@@ -141,10 +141,10 @@ namespace UmbracoIdentity
             public string ProviderKey { get; set; }
         }
 
-        private void CreateTable(bool overwrite, Type modelType, SqlCeSyntaxProvider syntaxProvider)
+        private void CreateTable(bool overwrite, Type modelType, ISqlSyntaxProvider syntaxProvider)
         {
             var defFactoryType = Type.GetType("Umbraco.Core.Persistence.DatabaseModelDefinitions.DefinitionFactory,Umbraco.Core", true);
-            var tableDefinition = (TableDefinition)defFactoryType.CallStaticMethod("GetTableDefinition", modelType);
+            var tableDefinition = (TableDefinition)defFactoryType.CallStaticMethod("GetTableDefinition", syntaxProvider, modelType);
 
             var tableName = tableDefinition.Name;
 
