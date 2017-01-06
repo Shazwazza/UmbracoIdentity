@@ -31,20 +31,28 @@ These config updates 'should' be taken care of by the nuget install, but you sho
 
 Remove FormsAuthentication from your web.config, this should be the last entry in your httpmodules lists:
 
-    <remove name="FormsAuthenticationModule" />
-    
+```xml
+<remove name="FormsAuthenticationModule" />
+```
+
 The entry is slightly different for the system.webServer/modules list:
 
-    <remove name="FormsAuthentication" />
-    
+```xml
+<remove name="FormsAuthentication" />
+```
+
 You then need to disable FormsAuthentication as the authentication provider, change the authentication element to:
 
-    <authentication mode="None" />
+```xml
+<authentication mode="None" />
+```
     
 Replace the 'type' attribute of your UmbracoMembershipProvider in your web.config to be:
 
-    "UmbracoIdentity.IdentityEnabledMembersMembershipProvider, UmbracoIdentity"
-    
+```xml
+"UmbracoIdentity.IdentityEnabledMembersMembershipProvider, UmbracoIdentity"
+```
+
 ### Owin setup
 
 [*What is OWIN? If you are unsure, be sure to read this before you continue!*](https://github.com/Shazwazza/UmbracoIdentity/wiki/What-is-Owin)
