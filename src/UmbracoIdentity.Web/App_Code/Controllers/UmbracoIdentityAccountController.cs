@@ -17,7 +17,7 @@ using UmbracoIdentity;
 using UmbracoIdentity.Models;
 using IdentityExtensions = UmbracoIdentity.IdentityExtensions;
 
-namespace UmbracoIdentity.Web.Controllers
+namespace UmbracoIdentity.Web.Controllers 
 {
     [Authorize]
     public class UmbracoIdentityAccountController : SurfaceController
