@@ -34,6 +34,21 @@ namespace UmbracoIdentity.Web
             //Single method to configure the Identity user manager for use with Umbraco
             app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
 
+            //Method used to store in external SQL CE db (legacy)
+            //app.ConfigureUserManagerForUmbracoMembers<UmbracoMembersUserManager<UmbracoApplicationMember>, UmbracoApplicationMember>(
+            //    ApplicationContext,
+            //    (options, context) => UmbracoMembersUserManager<UmbracoApplicationMember>.Create(
+            //        options,
+            //        ApplicationContext.Services.MemberService,
+            //        ApplicationContext.Services.MemberTypeService,
+            //        ApplicationContext.Services.MemberGroupService,
+            //        //custom login store to force the storage be in an external SQLCE db
+            //        new ExternalLoginStore(
+            //            ApplicationContext.ProfilingLogger.Logger,
+            //            ApplicationContext.DatabaseContext,
+            //            //use an external SQLCE db file
+            //            useSeparateDbFile: true)));
+
             //Single method to configure the Identity user manager for use with Umbraco
             app.ConfigureRoleManagerForUmbracoMembers<UmbracoApplicationRole>();
         }
@@ -58,7 +73,7 @@ namespace UmbracoIdentity.Web
                 //You can modify these options for any customizations you'd like
                 new FrontEndCookieAuthenticationOptions(),
                 PipelineStage.Authenticate);
-            
+
             // Uncomment the following lines to enable logging in with third party login providers
 
             //app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
