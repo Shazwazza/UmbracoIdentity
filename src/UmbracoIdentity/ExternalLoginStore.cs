@@ -111,18 +111,12 @@ namespace UmbracoIdentity
         {
             var schemaHelper = new DatabaseSchemaHelper(_db, _logger, _sqlSyntaxProvider);
             if (!schemaHelper.TableExist(TableName))
-            {            
-                var tableExist = schemaHelper.TableExist(TableName);
-                
-                if (tableExist == false)
+            {
+                using (var transaction = _db.GetTransaction())
                 {
-                    using (var transaction = _db.GetTransaction())
-                    {
-                        schemaHelper.CreateTable<ExternalLoginDto>();
-                        transaction.Complete();
-                    }
+                    schemaHelper.CreateTable<ExternalLoginDto>();
+                    transaction.Complete();
                 }
-
                 LogHelper.Info<ExternalLoginStore>(string.Format("New table '{0}' was created", TableName));
             }
         }
