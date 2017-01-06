@@ -5,6 +5,9 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
+using Umbraco.Core.Persistence;
+using Umbraco.Core.Persistence.SqlSyntax;
 using Umbraco.Core.Services;
 using UmbracoIdentity.Models;
 
@@ -50,7 +53,42 @@ namespace UmbracoIdentity
         }
 
         /// <summary>
-        /// Default method to create a user store
+        /// Default method to create a user manager
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
+        /// <param name="sqlSyntax"></param>
+        /// <param name="database"></param>
+        /// <param name="memberService"></param>
+        /// <param name="memberTypeService"></param>
+        /// <param name="memberGroupService"></param>
+        /// <param name="membershipProvider"></param>
+        /// <returns></returns>
+        public static UmbracoMembersUserManager<TUser> Create(
+            IdentityFactoryOptions<UmbracoMembersUserManager<TUser>> options,
+            ILogger logger,
+            ISqlSyntaxProvider sqlSyntax,
+            UmbracoDatabase database,
+            IMemberService memberService,
+            IMemberTypeService memberTypeService,
+            IMemberGroupService memberGroupService,            
+            IdentityEnabledMembersMembershipProvider membershipProvider = null)
+        {
+            //we'll grab some settings from the membership provider
+            var provider = membershipProvider ?? Membership.Providers["UmbracoMembershipProvider"] as IdentityEnabledMembersMembershipProvider;
+
+            if (provider == null)
+            {
+                throw new InvalidOperationException("In order to use " + typeof(UmbracoMembersUserManager<>) + " the Umbraco members membership provider must be of type " + typeof(IdentityEnabledMembersMembershipProvider));
+            }
+            
+            var externalLoginStore = new ExternalLoginStore(logger, sqlSyntax, database);
+
+            return Create(options, new UmbracoMembersUserStore<TUser>(memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
+        }
+
+        /// <summary>
+        /// Method to create a user manager which can be used to specify a custom IExternalLoginStore
         /// </summary>
         /// <param name="options"></param>
         /// <param name="memberService"></param>
@@ -67,7 +105,6 @@ namespace UmbracoIdentity
             IExternalLoginStore externalLoginStore = null,
             IdentityEnabledMembersMembershipProvider membershipProvider = null)
         {
-
             //we'll grab some settings from the membership provider
             var provider = membershipProvider ?? Membership.Providers["UmbracoMembershipProvider"] as IdentityEnabledMembersMembershipProvider;
 
@@ -78,6 +115,8 @@ namespace UmbracoIdentity
 
             if (externalLoginStore == null)
             {
+                //we need to rely on singletons here due to backwards compat
+
                 //use the default
                 externalLoginStore = new ExternalLoginStore(
                     ApplicationContext.Current.ProfilingLogger.Logger,

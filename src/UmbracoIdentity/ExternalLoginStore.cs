@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlServerCe;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using Microsoft.AspNet.Identity;
 
@@ -30,7 +31,7 @@ namespace UmbracoIdentity
 
         private readonly ILogger _logger;
         private readonly ISqlSyntaxProvider _sqlSyntaxProvider;
-        private readonly bool _useSeparateDbFile;        
+        private readonly bool _useSeparateDbFile;
         private readonly UmbracoDatabase _db;
         private const string ConnString = @"Data Source=|DataDirectory|\UmbracoIdentity.sdf;Flush Interval=1;";
         public const string TableName = "ExternalLogins";
@@ -39,11 +40,11 @@ namespace UmbracoIdentity
         /// Constructor for backwards compat will use an external SQLCE DB file
         /// </summary>
         [Obsolete("Use the ctor that specifies all dependencies")]
-        public ExternalLoginStore() 
+        public ExternalLoginStore()
             : this(ApplicationContext.Current.ProfilingLogger.Logger,
-                  ApplicationContext.Current.DatabaseContext, 
+                  ApplicationContext.Current.DatabaseContext,
                   true)
-        {            
+        {
         }
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace UmbracoIdentity
             _db = db;
             _useSeparateDbFile = false;
         }
-       
+
         private void EnsureInitialized()
         {
             LazyInitializer.EnsureInitialized(ref _dbInitialized, ref _isInitialized, ref _locker, () =>
@@ -101,7 +102,7 @@ namespace UmbracoIdentity
                 EnsureSqlCe();
                 EnsureTable();
                 return true;
-            });            
+            });
         }
 
         /// <summary>
@@ -142,10 +143,9 @@ namespace UmbracoIdentity
         {
             EnsureInitialized();
 
+            //Can't use strongly typed here due to a bug in 7.5.6 PocoToSqlExpressionVisitor ctor
             var sql = new Sql()
-                .Select("*")
-                .From<ExternalLoginDto>(_sqlSyntaxProvider)
-                .Where<ExternalLoginDto>(dto => dto.UserId == userId);
+                .Select("*").From(TableName).Where("UserId=@userId", new {userId = userId});                
 
             var found = _db.Fetch<ExternalLoginDto>(sql);
 
@@ -161,10 +161,9 @@ namespace UmbracoIdentity
         {
             EnsureInitialized();
 
-            var sql = new Sql() 
-                .Select("*")
-                .From<ExternalLoginDto>(_sqlSyntaxProvider)
-                .Where<ExternalLoginDto>(dto => dto.LoginProvider == login.LoginProvider && dto.ProviderKey == login.ProviderKey);
+            //Can't use strongly typed here due to a bug in 7.5.6 PocoToSqlExpressionVisitor ctor
+            var sql = new Sql()
+                .Select("*").From(TableName).Where("LoginProvider=@loginProvider AND ProviderKey=@providerKey", new {loginProvider = login.LoginProvider, providerKey = login.ProviderKey});                
 
             var found = _db.Fetch<ExternalLoginDto>(sql);
 
@@ -178,7 +177,7 @@ namespace UmbracoIdentity
             using (var t = _db.GetTransaction())
             {
                 //clear out logins for member
-                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new {userId = memberId});
+                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
 
                 //add them all
                 foreach (var l in logins)
@@ -201,7 +200,7 @@ namespace UmbracoIdentity
 
             using (var t = _db.GetTransaction())
             {
-                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new {userId = memberId});
+                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
 
                 t.Complete();
             }
@@ -234,6 +233,6 @@ namespace UmbracoIdentity
             [NullSetting(NullSetting = NullSettings.NotNull)]
             public string ProviderKey { get; set; }
         }
-        
+
     }
 }
