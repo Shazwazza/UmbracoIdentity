@@ -85,7 +85,8 @@ Copy-Item "$AppCodeFolder\Models" -Destination $ReleaseFolder -recurse -Containe
 
 # COPY THE VIEWS OVER
 $ViewsDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "Views";
-Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Views\" -Destination $ReleaseFolder -recurse -Container -Filter *.cshtml;
+Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Views\*.cshtml" -Destination (New-Item ($ViewsDestFolder) -Type directory);
+Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Views\UmbracoIdentityAccount\*.cshtml" -Destination (New-Item (Join-Path -Path $ViewsDestFolder -ChildPath "UmbracoIdentityAccount") -Type directory);
 
 # COPY THE APP_STARTUP OVER
 $AppCodeDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "App_Start";
