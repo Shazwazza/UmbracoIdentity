@@ -37,9 +37,19 @@ namespace UmbracoIdentity.Models
         public virtual bool EmailConfirmed { get; set; }
 
         /// <summary>
-        ///     The salted/hashed form of the user password
+        /// The salted/hashed form of the user's password
         /// </summary>
+        /// <remarks>
+        /// If the password is generated (i.e. the user account was created by an OAuth login provider), this will return null
+        /// </remarks>
         public virtual string PasswordHash { get; set; }
+
+        /// <summary>
+        /// This gets/sets the raw stored password in the database which we still need even if it's a generated one whereas 
+        /// (due to backwards compat) the <see cref="PasswordHash"/> property contains a real user's hashed password when they've 
+        /// created one explicitly.
+        /// </summary>
+        internal string StoredPassword { get; set; }
 
         /// <summary>
         ///     A random value that should change whenever a users credentials have changed (password changed, login removed)

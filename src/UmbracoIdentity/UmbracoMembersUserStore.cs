@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Web.Security;
 using Microsoft.AspNet.Identity;
 
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Web.Models;
@@ -25,27 +27,36 @@ namespace UmbracoIdentity
         IUserPasswordStore<TMember, int>, 
         IUserEmailStore<TMember, int>, 
         IUserLoginStore<TMember, int>, 
-        IUserRoleStore<TMember, int>        
+        IUserRoleStore<TMember, int>,
+        IUserSecurityStampStore<TMember, int> 
         where TMember : UmbracoIdentityMember, IUser<int>, new()
     {
+        private readonly ILogger _logger;
         private readonly IMemberService _memberService;
         private readonly IMemberTypeService _memberTypeService;
         private readonly IMemberGroupService _memberGroupService;
         private readonly IdentityEnabledMembersMembershipProvider _membershipProvider;
         private readonly IExternalLoginStore _externalLoginStore;
+        private bool _disposed = false;
+
+        private const string EmptyPasswordPrefix = "___UIDEMPTYPWORD__";
+        private const string SecurityStampProperty = "securityStamp";
 
         public UmbracoMembersUserStore(
-            IMemberService memberService, 
+            ILogger logger,
+            IMemberService memberService,
             IMemberTypeService memberTypeService,
             IMemberGroupService memberGroupService,
-            IdentityEnabledMembersMembershipProvider membershipProvider, 
+            IdentityEnabledMembersMembershipProvider membershipProvider,
             IExternalLoginStore externalLoginStore)
         {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (memberService == null) throw new ArgumentNullException("memberService");
             if (memberGroupService == null) throw new ArgumentNullException(nameof(memberGroupService));
             if (membershipProvider == null) throw new ArgumentNullException("membershipProvider");
             if (externalLoginStore == null) throw new ArgumentNullException("externalLoginStore");
 
+            _logger = logger;
             _memberService = memberService;
             _memberTypeService = memberTypeService;
             _memberGroupService = memberGroupService;
@@ -58,8 +69,21 @@ namespace UmbracoIdentity
             }
         }
 
+        [Obsolete("Use the ctor specifying all parameters")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UmbracoMembersUserStore(
+            IMemberService memberService, 
+            IMemberTypeService memberTypeService,
+            IMemberGroupService memberGroupService,
+            IdentityEnabledMembersMembershipProvider membershipProvider, 
+            IExternalLoginStore externalLoginStore)
+            : this(ApplicationContext.Current.ProfilingLogger.Logger, memberService, memberTypeService, memberGroupService, membershipProvider, externalLoginStore)
+        {
+        }
+
         public virtual async Task CreateAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
             
             var member = _memberService.CreateMember(
@@ -76,7 +100,7 @@ namespace UmbracoIdentity
             {
                 //this will hash the guid with a salt so should be nicely random
                 var aspHasher = new PasswordHasher();
-                member.RawPasswordValue = "___UIDEMPTYPWORD__" +
+                member.RawPasswordValue = EmptyPasswordPrefix +
                     aspHasher.HashPassword(Guid.NewGuid().ToString("N"));
 
             }
@@ -115,6 +139,7 @@ namespace UmbracoIdentity
         /// <returns></returns>
         public virtual async Task UpdateAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             var asInt = user.Id.TryConvertTo<int>();
@@ -158,6 +183,7 @@ namespace UmbracoIdentity
 
         public Task DeleteAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             var asInt = user.Id.TryConvertTo<int>();
@@ -178,6 +204,7 @@ namespace UmbracoIdentity
 
         public Task<TMember> FindByIdAsync(int userId)
         {
+            ThrowIfDisposed();
             var member = _memberService.GetById(userId);
             if (member == null)
             {
@@ -191,6 +218,7 @@ namespace UmbracoIdentity
 
         public Task<TMember> FindByNameAsync(string userName)
         {
+            ThrowIfDisposed();
             var member = _memberService.GetByUsername(userName);
             if (member == null)
             {
@@ -204,6 +232,7 @@ namespace UmbracoIdentity
 
         public Task SetPasswordHashAsync(TMember user, string passwordHash)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
             if (passwordHash.IsNullOrWhiteSpace()) throw new ArgumentNullException("passwordHash");
 
@@ -214,6 +243,7 @@ namespace UmbracoIdentity
 
         public Task<string> GetPasswordHashAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             return Task.FromResult(user.PasswordHash);
@@ -221,6 +251,7 @@ namespace UmbracoIdentity
 
         public Task<bool> HasPasswordAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             return Task.FromResult(user.PasswordHash.IsNullOrWhiteSpace() == false);
@@ -229,6 +260,7 @@ namespace UmbracoIdentity
 
         public Task SetEmailAsync(TMember user, string email)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
             if (email.IsNullOrWhiteSpace()) throw new ArgumentNullException("email");
 
@@ -239,6 +271,7 @@ namespace UmbracoIdentity
 
         public Task<string> GetEmailAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             return Task.FromResult(user.Email);
@@ -246,6 +279,7 @@ namespace UmbracoIdentity
 
         public Task<bool> GetEmailConfirmedAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             throw new NotImplementedException();
@@ -253,6 +287,7 @@ namespace UmbracoIdentity
 
         public Task SetEmailConfirmedAsync(TMember user, bool confirmed)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             throw new NotImplementedException();
@@ -260,6 +295,7 @@ namespace UmbracoIdentity
 
         public Task<TMember> FindByEmailAsync(string email)
         {
+            ThrowIfDisposed();
             var member = _memberService.GetByEmail(email);
             var result = member == null
                 ? null
@@ -272,6 +308,7 @@ namespace UmbracoIdentity
 
         public Task AddLoginAsync(TMember user, UserLoginInfo login)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
 
@@ -290,6 +327,7 @@ namespace UmbracoIdentity
 
         public Task RemoveLoginAsync(TMember user, UserLoginInfo login)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
             if (login == null) throw new ArgumentNullException("login");
 
@@ -304,6 +342,7 @@ namespace UmbracoIdentity
 
         public Task<IList<UserLoginInfo>> GetLoginsAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             var result = (IList<UserLoginInfo>)
@@ -314,6 +353,7 @@ namespace UmbracoIdentity
 
         public Task<TMember> FindAsync(UserLoginInfo login)
         {
+            ThrowIfDisposed();
             //get all logins associated with the login id
             var result = _externalLoginStore.Find(login).ToArray();
             if (result.Any())
@@ -339,6 +379,7 @@ namespace UmbracoIdentity
         /// <returns/>
         public Task AddToRoleAsync(TMember user, string roleName)
         {
+            ThrowIfDisposed();
             if (user == null)
             {
                 throw new ArgumentNullException("user");
@@ -369,6 +410,7 @@ namespace UmbracoIdentity
         /// <returns/>
         public Task RemoveFromRoleAsync(TMember user, string roleName)
         {
+            ThrowIfDisposed();
             if (user == null)
             {
                 throw new ArgumentNullException("user");
@@ -392,6 +434,7 @@ namespace UmbracoIdentity
         /// <returns/>
         public Task<IList<string>> GetRolesAsync(TMember user)
         {
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
 
             return Task.FromResult((IList<string>) new List<string>(user.Roles.Select(l => l.RoleName)));
@@ -404,12 +447,37 @@ namespace UmbracoIdentity
         /// <returns/>
         public Task<bool> IsInRoleAsync(TMember user, string roleName)
         {
+            ThrowIfDisposed();
             return Task.FromResult(user.Roles.Any(x => x.RoleName.InvariantEquals(roleName)));
+        }
+
+        public Task SetSecurityStampAsync(TMember user, string stamp)
+        {
+            ThrowIfDisposed();
+
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            user.SecurityStamp = stamp;
+            return Task.FromResult(0);
+        }
+
+        public Task<string> GetSecurityStampAsync(TMember user)
+        {
+            ThrowIfDisposed();
+
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            //the stamp cannot be null, so if it is currently null then we'll just return a hash of the password
+            return Task.FromResult(user.SecurityStamp.IsNullOrWhiteSpace()
+                //ensure that the stored password is not empty either! it shouldn't be but just in case we'll return a new guid
+                ? (user.StoredPassword.IsNullOrWhiteSpace() ? Guid.NewGuid().ToString() : user.StoredPassword.ToMd5())
+                : user.SecurityStamp);
         }
 
         protected override void DisposeResources()
         {
             _externalLoginStore.Dispose();
+            _disposed = true;
         }
 
         private TMember MapFromMember(IMember member)
@@ -422,9 +490,21 @@ namespace UmbracoIdentity
                 LockoutEndDateUtc = DateTime.MaxValue.ToUniversalTime(),
                 UserName = member.Username,
                 PasswordHash = GetPasswordHash(member.RawPasswordValue),
+                StoredPassword = member.RawPasswordValue,
                 Name = member.Name,
                 MemberTypeAlias = member.ContentTypeAlias
             };
+
+            bool propertyTypeExists;
+            var memberSecurityStamp = GetSecurityStamp(member, out propertyTypeExists);
+            if (!propertyTypeExists)
+            {
+                _logger.Warn<UmbracoMembersUserStore<TMember>>($"The {SecurityStampProperty} does not exist on the member type {member.ContentType.Alias}, see docs on how to fix: https://github.com/Shazwazza/UmbracoIdentity/wiki");
+            }
+            else
+            {
+                result.SecurityStamp = memberSecurityStamp;
+            }
 
             result.MemberProperties = GetMemberProperties(member).ToList();
 
@@ -433,12 +513,10 @@ namespace UmbracoIdentity
 
         private IEnumerable<UmbracoProperty> GetMemberProperties(IMember member)
         {
-            var builtIns = ((Dictionary<string, PropertyType>)
-                typeof (Umbraco.Core.Constants.Conventions.Member).CallStaticMethod("GetStandardPropertyTypeStubs"))
+            var builtIns = Umbraco.Core.Constants.Conventions.Member.GetStandardPropertyTypeStubs()
                 .Select(x => x.Key).ToArray();
 
-            var memberType = _memberTypeService.Get(member.ContentTypeAlias);
-            if (memberType == null) throw new NullReferenceException("No member type found with alias " + member.ContentTypeAlias);
+            var memberType = member.ContentType;
 
             var viewProperties = new List<UmbracoProperty>();
 
@@ -500,6 +578,13 @@ namespace UmbracoIdentity
                 anythingChanged = true;
                 member.RawPasswordValue = user.PasswordHash;
             }
+            bool propertyTypeExists;
+            var memberSecurityStamp = GetSecurityStamp(member, out propertyTypeExists);
+            if (memberSecurityStamp != null && memberSecurityStamp != user.SecurityStamp)
+            {
+                anythingChanged = true;
+                member.Properties[SecurityStampProperty].Value = user.SecurityStamp;
+            }
 
             if (user.MemberProperties != null)
             {
@@ -525,9 +610,32 @@ namespace UmbracoIdentity
             return anythingChanged;
         }
 
+        /// <summary>
+        /// Checks if the security stamp property exists and if so returns it, otherwise null
+        /// </summary>
+        /// <param name="member"></param>
+        /// <param name="propertyExists">returns false if the property </param>
+        /// <returns></returns>
+        private string GetSecurityStamp(IMember member, out bool propertyExists)
+        {
+            propertyExists = member.ContentType.PropertyTypes.Any(x => x.Alias == SecurityStampProperty);
+            if (!propertyExists)
+                return null;
+
+            if (!member.Properties.Contains(SecurityStampProperty))            
+                return null;
+
+            return member.Properties[SecurityStampProperty].Value?.ToString() ?? string.Empty;
+        }
+
+        /// <summary>
+        /// This checks if the password 
+        /// </summary>
+        /// <param name="storedPass"></param>
+        /// <returns></returns>
         private string GetPasswordHash(string storedPass)
         {
-            return storedPass.StartsWith("___UIDEMPTYPWORD__") ? null : storedPass;
+            return storedPass.StartsWith(EmptyPasswordPrefix) ? null : storedPass;
         }
 
         /// <summary>
@@ -554,7 +662,12 @@ namespace UmbracoIdentity
                 }));
             }
             return user;
-        }        
-
+        }
+        
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+        }
     }
 }

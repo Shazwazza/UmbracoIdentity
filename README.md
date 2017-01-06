@@ -29,6 +29,8 @@ There's also a nightly Nuget feed: `https://ci.appveyor.com/nuget/umbracoidentit
 
 *There is also just an UmbracoIdentity.Core package too in case you just want the binaries*
 
+    PM> Install-Package UmbracoIdentity.Core
+
 ### Config updates
 
 These config updates 'should' be taken care of by the nuget install, but you should double check to be sure.

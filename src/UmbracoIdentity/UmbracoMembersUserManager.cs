@@ -35,13 +35,9 @@ namespace UmbracoIdentity
         {
             get { return false;  }
         }
-
-        //TODO: Support this
-        public override bool SupportsUserSecurityStamp
-        {
-            get { return false; }
-        }
         
+        public override bool SupportsUserSecurityStamp => true;
+
         public override bool SupportsUserTwoFactor
         {
             get { return false; }
@@ -84,7 +80,7 @@ namespace UmbracoIdentity
             
             var externalLoginStore = new ExternalLoginStore(logger, sqlSyntax, database);
 
-            return Create(options, new UmbracoMembersUserStore<TUser>(memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
+            return Create(options, new UmbracoMembersUserStore<TUser>(logger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
         }
 
         /// <summary>
@@ -124,7 +120,7 @@ namespace UmbracoIdentity
                     ApplicationContext.Current.DatabaseContext.Database);
             }
 
-            return Create(options, new UmbracoMembersUserStore<TUser>(memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
+            return Create(options, new UmbracoMembersUserStore<TUser>(ApplicationContext.Current.ProfilingLogger.Logger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
         }
 
         /// <summary>
