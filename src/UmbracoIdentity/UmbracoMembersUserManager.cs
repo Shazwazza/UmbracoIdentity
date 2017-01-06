@@ -4,6 +4,7 @@ using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
+using Umbraco.Core;
 using Umbraco.Core.Services;
 using UmbracoIdentity.Models;
 
@@ -78,7 +79,10 @@ namespace UmbracoIdentity
             if (externalLoginStore == null)
             {
                 //use the default
-                externalLoginStore = new ExternalLoginStore();
+                externalLoginStore = new ExternalLoginStore(
+                    ApplicationContext.Current.ProfilingLogger.Logger,
+                    ApplicationContext.Current.DatabaseContext.SqlSyntax,
+                    ApplicationContext.Current.DatabaseContext.Database);
             }
 
             return Create(options, new UmbracoMembersUserStore<TUser>(memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
