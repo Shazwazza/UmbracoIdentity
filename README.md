@@ -59,6 +59,10 @@ Replace the 'type' attribute of your UmbracoMembershipProvider in your web.confi
 "UmbracoIdentity.IdentityEnabledMembersMembershipProvider, UmbracoIdentity"
 ```
 
+### Umbraco integration
+
+You'll need to configure some Umbraco properties: https://github.com/Shazwazza/UmbracoIdentity/wiki#umbraco-integration
+
 ### Owin setup
 
 [*What is OWIN? If you are unsure, be sure to read this before you continue!*](https://github.com/Shazwazza/UmbracoIdentity/wiki/What-is-Owin)
