@@ -260,10 +260,6 @@
     </Compile>
     <Compile Include="AppBuilderExtensions.cs" />
     <Compile Include="ExternalLoginStore.cs" />
-    <Compile Include="FixAsyncActionInvokerStartupHandler.cs" />
-    <Compile Include="FixedAsyncRenderActionInvoker.cs" />
-    <Compile Include="FixedAsyncRenderControllerFactory.cs" />
-    <Compile Include="FixedAsyncRenderMvcController.cs" />
     <Compile Include="FrontEndCookieAuthenticationOptions.cs" />
     <Compile Include="FrontEndCookieManager.cs" />
     <Compile Include="IdentityEnabledMembersMembershipProvider.cs" />
