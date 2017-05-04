@@ -19,6 +19,8 @@ $SolutionRoot = Join-Path -Path $RepoRoot "src";
 $ProgFiles86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)");
 $MSBuild = "$ProgFiles86\MSBuild\14.0\Bin\MSBuild.exe"
 
+Write-Host "MSBUILD = $MSBuild"
+
 # Make sure we don't have a release folder for this version already
 $BuildFolder = Join-Path -Path $RepoRoot -ChildPath "build";
 $ReleaseFolder = Join-Path -Path $BuildFolder -ChildPath "Releases\v$ReleaseVersionNumber$PreReleaseName";
