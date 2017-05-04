@@ -4,5 +4,5 @@ image: Visual Studio 2017
 build_script:
 - ps: .\Build\Build-Release.ps1 $env:APPVEYOR_BUILD_VERSION '' 1
 artifacts:
-- path: build\Releases\v$(APPVEYOR_BUILD_VERSION)\*.nupkg
+- path: build\Release\*.nupkg
   name: Nuget Package
