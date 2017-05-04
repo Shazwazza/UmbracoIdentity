@@ -16,7 +16,7 @@
     <dependencies>
 
       <dependency id="UmbracoIdentity.Core" version="$version$" />
-      <dependency id="UmbracoCms" version="7.5.6" />
+      <dependency id="UmbracoCms" version="7.6.0" />
 
     </dependencies>
   </metadata>
