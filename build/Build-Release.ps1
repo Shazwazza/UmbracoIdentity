@@ -6,7 +6,11 @@ param (
 	[Parameter(Mandatory=$true)]
 	[string]
 	[AllowEmptyString()]
-	$PreReleaseName
+	$PreReleaseName,
+	[Parameter(Mandatory=$false)]
+	[int]
+	$IsBuildServer = 0
+
 )
 
 $PSScriptFilePath = (Get-Item $MyInvocation.MyCommand.Path);
@@ -16,8 +20,13 @@ $SolutionRoot = Join-Path -Path $RepoRoot "src";
 #trace
 "Solution Root: $SolutionRoot"
 
-$ProgFiles86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)");
-$MSBuild = "$ProgFiles86\MSBuild\14.0\Bin\MSBuild.exe"
+if ($IsBuildServer -eq 1) {
+	$MSBuild = "MSBuild.exe"
+}
+else {
+	$ProgFiles86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)");
+	$MSBuild = "$ProgFiles86\MSBuild\14.0\Bin\MSBuild.exe"
+}
 
 Write-Host "MSBUILD = $MSBuild"
 
