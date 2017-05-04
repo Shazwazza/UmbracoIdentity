@@ -134,9 +134,17 @@ Foreach-Object {
 # COPY THE README OVER
 Copy-Item "$BuildFolder\Readme.txt" -Destination $ReleaseFolder
 
+# Go get nuget.exe if we don't hae it
+$NuGet = "$BuildFolder\nuget.exe"
+$FileExists = Test-Path $NuGet 
+If ($FileExists -eq $False) {
+	#$SourceNugetExe = "http://nuget.org/nuget.exe"
+	$SourceNugetExe = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+	Invoke-WebRequest $SourceNugetExe -OutFile $NuGet
+}
+
 # COPY OVER THE CORE NUSPEC AND BUILD THE NUGET PACKAGE
 $CopyrightYear = (Get-Date).year;
-$NuGet = Join-Path $SolutionRoot -ChildPath ".nuget\NuGet.exe"
 
 Copy-Item "$BuildFolder\UmbracoIdentity.Core.nuspec" -Destination $ReleaseFolder
 $CoreNuSpec = Join-Path -Path $ReleaseFolder -ChildPath "UmbracoIdentity.Core.nuspec";

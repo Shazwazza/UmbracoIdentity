@@ -36,6 +36,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "UmbracoIdentity.Web", "http
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{12D5F68D-7BD0-444A-9D3B-D2FB833CDD64}"
 	ProjectSection(SolutionItems) = preProject
+		..\appveyor.build.yml = ..\appveyor.build.yml
 		..\appveyor.yml = ..\appveyor.yml
 		..\build\Build-Release.ps1 = ..\build\Build-Release.ps1
 		..\build\Readme.txt = ..\build\Readme.txt
