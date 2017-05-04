@@ -1,9 +1,9 @@
 param (
 	[Parameter(Mandatory=$true)]
-	[ValidatePattern("^\d+\.\d+\.(?:\d+\.\d+$|\d+$)")]
+	[ValidatePattern("^\d+\.\d+\.(?:\d+\.\d+$|\d+$)|^\d+\.\d+\.\d+-(\w|-|\.)+$")]
 	[string]
 	$ReleaseVersionNumber,
-	[Parameter(Mandatory=$true)]
+	[Parameter(Mandatory=$false)]
 	[string]
 	[AllowEmptyString()]
 	$PreReleaseName,
@@ -12,6 +12,14 @@ param (
 	$IsBuildServer = 0
 
 )
+
+if([string]::IsNullOrEmpty($PreReleaseName) -And $ReleaseVersionNumber.Contains("-"))
+{	
+	$parts = $ReleaseVersionNumber.Split("-")
+	$ReleaseVersionNumber = $parts[0]
+	$PreReleaseName = "-" + $parts[1]
+	Write-Host "Version parts split: ($ReleaseVersionNumber) and ($PreReleaseName)"
+}
 
 $PSScriptFilePath = (Get-Item $MyInvocation.MyCommand.Path);
 $RepoRoot = (get-item $PSScriptFilePath).Directory.Parent.FullName;
