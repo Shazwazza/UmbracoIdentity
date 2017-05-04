@@ -6,3 +6,9 @@ build_script:
 artifacts:
 - path: build\Release\*.nupkg
   name: Nuget Package
+deploy:
+- provider: NuGet
+  api_key:
+    secure: bUbD7nXHxmrIWR1bP+pVv1fhPYZlI4JEn9jZMYsz8l5VFVeqkiuMMOQ97xT72q7H
+  on:
+    branch: master
