@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmbracoIdentity", "UmbracoIdentity\UmbracoIdentity.csproj", "{FF225509-B1E9-41C0-BB9E-1A5DDBEA87F5}"
 EndProject
@@ -36,6 +36,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "UmbracoIdentity.Web", "http
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{12D5F68D-7BD0-444A-9D3B-D2FB833CDD64}"
 	ProjectSection(SolutionItems) = preProject
+		..\appveyor.yml = ..\appveyor.yml
 		..\build\Build-Release.ps1 = ..\build\Build-Release.ps1
 		..\build\Readme.txt = ..\build\Readme.txt
 		SolutionInfo.cs = SolutionInfo.cs
