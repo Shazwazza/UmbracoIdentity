@@ -3,7 +3,7 @@
 ![ASP.Net Identity for Umbraco](logo.png?raw=true)
 ===============
 
-**Version 6.0**
+[![NuGet](https://img.shields.io/nuget/v/Nuget.Core.svg)](https://www.nuget.org/packages/UmbracoIdentity)
 
 Allows for using OWIN &amp; ASP.Net Identity in Umbraco for front-end members
 
