@@ -17,8 +17,6 @@ using Task = System.Threading.Tasks.Task;
 
 namespace UmbracoIdentity
 {
-
-
     /// <summary>
     /// A custom user store that uses Umbraco member data
     /// </summary>
@@ -40,7 +38,6 @@ namespace UmbracoIdentity
         private bool _disposed = false;
 
         private const string EmptyPasswordPrefix = "___UIDEMPTYPWORD__";
-        private const string SecurityStampProperty = "securityStamp";
 
         public UmbracoMembersUserStore(
             ILogger logger,
@@ -495,10 +492,10 @@ namespace UmbracoIdentity
             };
 
             bool propertyTypeExists;
-            var memberSecurityStamp = GetSecurityStamp(member, out propertyTypeExists);
+            var memberSecurityStamp = member.GetSecurityStamp(out propertyTypeExists);
             if (!propertyTypeExists)
             {
-                _logger.Warn<UmbracoMembersUserStore<TMember>>($"The {SecurityStampProperty} does not exist on the member type {member.ContentType.Alias}, see docs on how to fix: https://github.com/Shazwazza/UmbracoIdentity/wiki");
+                _logger.Warn<UmbracoMembersUserStore<TMember>>($"The {UmbracoIdentityConstants.SecurityStampProperty} does not exist on the member type {member.ContentType.Alias}, see docs on how to fix: https://github.com/Shazwazza/UmbracoIdentity/wiki");
             }
             else
             {
@@ -578,11 +575,11 @@ namespace UmbracoIdentity
                 member.RawPasswordValue = user.PasswordHash;
             }
             bool propertyTypeExists;
-            var memberSecurityStamp = GetSecurityStamp(member, out propertyTypeExists);
+            var memberSecurityStamp = member.GetSecurityStamp(out propertyTypeExists);
             if (memberSecurityStamp != null && memberSecurityStamp != user.SecurityStamp)
             {
                 anythingChanged = true;
-                member.Properties[SecurityStampProperty].Value = user.SecurityStamp;
+                member.Properties[UmbracoIdentityConstants.SecurityStampProperty].Value = user.SecurityStamp;
             }
 
             if (user.MemberProperties != null)
@@ -609,23 +606,7 @@ namespace UmbracoIdentity
             return anythingChanged;
         }
 
-        /// <summary>
-        /// Checks if the security stamp property exists and if so returns it, otherwise null
-        /// </summary>
-        /// <param name="member"></param>
-        /// <param name="propertyExists">returns false if the property </param>
-        /// <returns></returns>
-        private string GetSecurityStamp(IMember member, out bool propertyExists)
-        {
-            propertyExists = member.ContentType.PropertyTypes.Any(x => x.Alias == SecurityStampProperty);
-            if (!propertyExists)
-                return null;
-
-            if (!member.Properties.Contains(SecurityStampProperty))            
-                return null;
-
-            return member.Properties[SecurityStampProperty].Value?.ToString() ?? string.Empty;
-        }
+        
 
         /// <summary>
         /// This checks if the password 
