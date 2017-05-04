@@ -1,5 +1,5 @@
-version: 6.0.0.{build}
-skip_tags: true
+version: 6.0.0
+skip_non_tags: true
 image: Visual Studio 2017
 build_script:
 - ps: .\Build\Build-Release.ps1 $env:APPVEYOR_BUILD_VERSION '' 1
