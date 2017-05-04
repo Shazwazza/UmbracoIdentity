@@ -1,20 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlServerCe;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using Microsoft.AspNet.Identity;
-
-using Microsoft.AspNet.Identity.Owin;
 using Umbraco.Core;
-using Umbraco.Core.IO;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Persistence;
 using Umbraco.Core.Persistence.DatabaseAnnotations;
-using Umbraco.Core.Persistence.DatabaseModelDefinitions;
 using Umbraco.Core.Persistence.SqlSyntax;
-using Umbraco.Core.Services;
 using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
@@ -22,7 +15,7 @@ namespace UmbracoIdentity
     /// <summary>
     /// We are using a custom sqlce db to store this information
     /// </summary>
-    public class ExternalLoginStore : DisposableObject, IExternalLoginStore
+    public class ExternalLoginStore :  IExternalLoginStore
     {
         private static bool _dbInitialized;
         private static bool _isInitialized;
@@ -30,21 +23,13 @@ namespace UmbracoIdentity
 
 
         private readonly ILogger _logger;
+        private readonly DatabaseContext _dbContext;
         private readonly ISqlSyntaxProvider _sqlSyntaxProvider;
-        private readonly bool _useSeparateDbFile;
-        private readonly UmbracoDatabase _db;
-        private const string ConnString = @"Data Source=|DataDirectory|\UmbracoIdentity.sdf;Flush Interval=1;";
         public const string TableName = "ExternalLogins";
 
-        /// <summary>
-        /// Constructor for backwards compat will use an external SQLCE DB file
-        /// </summary>
-        [Obsolete("Use the ctor that specifies all dependencies")]
-        public ExternalLoginStore()
-            : this(ApplicationContext.Current.ProfilingLogger.Logger,
-                  ApplicationContext.Current.DatabaseContext,
-                  true)
+        private UmbracoDatabase GetDatabase()
         {
+            return _dbContext.Database;
         }
 
         /// <summary>
@@ -54,52 +39,20 @@ namespace UmbracoIdentity
         /// <param name="dbContext">
         /// The Umbraco database context
         /// </param>
-        /// <param name="useSeparateDbFile">
-        /// Set to true if a separate SQLCE db will be used (UmbracoIdentity.sdf)
-        /// </param>
-        public ExternalLoginStore(ILogger logger, DatabaseContext dbContext, bool useSeparateDbFile)
+        public ExternalLoginStore(ILogger logger, DatabaseContext dbContext)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
 
             _logger = logger;
-            _useSeparateDbFile = useSeparateDbFile;
-
-            if (useSeparateDbFile)
-            {
-                _db = new UmbracoDatabase(ConnString, "System.Data.SqlServerCe.4.0", _logger);
-                _sqlSyntaxProvider = new SqlCeSyntaxProvider();
-            }
-            else
-            {
-                _db = dbContext.Database;
-                _sqlSyntaxProvider = dbContext.SqlSyntax;
-            }
-        }
-
-        /// <summary>
-        /// Default constructor which will use the database instance provided for storage
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="sqlSyntaxProvider"></param>
-        /// <param name="db"></param>
-        public ExternalLoginStore(ILogger logger, ISqlSyntaxProvider sqlSyntaxProvider, UmbracoDatabase db)
-        {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (sqlSyntaxProvider == null) throw new ArgumentNullException(nameof(sqlSyntaxProvider));
-            if (db == null) throw new ArgumentNullException(nameof(db));
-
-            _logger = logger;
-            _sqlSyntaxProvider = sqlSyntaxProvider;
-            _db = db;
-            _useSeparateDbFile = false;
+            _dbContext = dbContext;
+            _sqlSyntaxProvider = dbContext.SqlSyntax;
         }
 
         private void EnsureInitialized()
         {
             LazyInitializer.EnsureInitialized(ref _dbInitialized, ref _isInitialized, ref _locker, () =>
             {
-                EnsureSqlCe();
                 EnsureTable();
                 return true;
             });
@@ -109,11 +62,12 @@ namespace UmbracoIdentity
         /// Checks if the table exists and if not it creates it
         /// </summary>
         private void EnsureTable()
-        {
-            var schemaHelper = new DatabaseSchemaHelper(_db, _logger, _sqlSyntaxProvider);
+        {            
+            var db = GetDatabase();
+            var schemaHelper = new DatabaseSchemaHelper(db, _logger, _sqlSyntaxProvider);
             if (!schemaHelper.TableExist(TableName))
             {
-                using (var transaction = _db.GetTransaction())
+                using (var transaction = db.GetTransaction())
                 {
                     schemaHelper.CreateTable<ExternalLoginDto>();
                     transaction.Complete();
@@ -121,33 +75,18 @@ namespace UmbracoIdentity
                 LogHelper.Info<ExternalLoginStore>(string.Format("New table '{0}' was created", TableName));
             }
         }
-
-        /// <summary>
-        /// If SqlCe is used then ensure the db exists - for backwards compat
-        /// </summary>
-        private void EnsureSqlCe()
-        {
-            if (_useSeparateDbFile == false) return;
-            if (!(_sqlSyntaxProvider is SqlCeSyntaxProvider)) return;
-
-            if (!System.IO.File.Exists(IOHelper.MapPath("~/App_Data/UmbracoIdentity.sdf")))
-            {
-                using (var en = new SqlCeEngine(ConnString))
-                {
-                    en.CreateDatabase();
-                }
-            }
-        }
-
+        
         public IEnumerable<IdentityMemberLogin<int>> GetAll(int userId)
         {
             EnsureInitialized();
+            
+            var db = GetDatabase();
 
             //Can't use strongly typed here due to a bug in 7.5.6 PocoToSqlExpressionVisitor ctor
             var sql = new Sql()
-                .Select("*").From(TableName).Where("UserId=@userId", new {userId = userId});                
+                .Select("*").From(TableName).Where("UserId=@userId", new { userId = userId });
 
-            var found = _db.Fetch<ExternalLoginDto>(sql);
+            var found = db.Fetch<ExternalLoginDto>(sql);
 
             return found.Select(x => new IdentityMemberLogin<int>
             {
@@ -161,11 +100,13 @@ namespace UmbracoIdentity
         {
             EnsureInitialized();
 
+            var db = GetDatabase();
+
             //Can't use strongly typed here due to a bug in 7.5.6 PocoToSqlExpressionVisitor ctor
             var sql = new Sql()
-                .Select("*").From(TableName).Where("LoginProvider=@loginProvider AND ProviderKey=@providerKey", new {loginProvider = login.LoginProvider, providerKey = login.ProviderKey});                
+                .Select("*").From(TableName).Where("LoginProvider=@loginProvider AND ProviderKey=@providerKey", new { loginProvider = login.LoginProvider, providerKey = login.ProviderKey });
 
-            var found = _db.Fetch<ExternalLoginDto>(sql);
+            var found = db.Fetch<ExternalLoginDto>(sql);
 
             return found.Select(x => x.UserId);
         }
@@ -174,15 +115,16 @@ namespace UmbracoIdentity
         {
             EnsureInitialized();
 
-            using (var t = _db.GetTransaction())
+            var db = GetDatabase();
+            using (var t = db.GetTransaction())
             {
                 //clear out logins for member
-                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
+                db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
 
                 //add them all
                 foreach (var l in logins)
                 {
-                    _db.Insert(new ExternalLoginDto
+                    db.Insert(new ExternalLoginDto
                     {
                         LoginProvider = l.LoginProvider,
                         ProviderKey = l.ProviderKey,
@@ -198,18 +140,14 @@ namespace UmbracoIdentity
         {
             EnsureInitialized();
 
-            using (var t = _db.GetTransaction())
+            var db = GetDatabase();
+            using (var t = db.GetTransaction())
             {
-                _db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
+                db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
 
                 t.Complete();
             }
-        }
-
-        protected override void DisposeResources()
-        {
-            _db.Dispose();
-        }
+        }       
 
         [TableName(TableName)]
         [ExplicitColumns]

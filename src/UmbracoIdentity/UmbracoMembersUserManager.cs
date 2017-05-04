@@ -1,13 +1,9 @@
 using System;
-using System.Threading.Tasks;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
-using Umbraco.Core.Persistence;
-using Umbraco.Core.Persistence.SqlSyntax;
 using Umbraco.Core.Services;
 using UmbracoIdentity.Models;
 
@@ -53,8 +49,7 @@ namespace UmbracoIdentity
         /// </summary>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        /// <param name="sqlSyntax"></param>
-        /// <param name="database"></param>
+        /// <param name="databaseContext"></param>
         /// <param name="memberService"></param>
         /// <param name="memberTypeService"></param>
         /// <param name="memberGroupService"></param>
@@ -63,8 +58,7 @@ namespace UmbracoIdentity
         public static UmbracoMembersUserManager<TUser> Create(
             IdentityFactoryOptions<UmbracoMembersUserManager<TUser>> options,
             ILogger logger,
-            ISqlSyntaxProvider sqlSyntax,
-            UmbracoDatabase database,
+            DatabaseContext databaseContext,
             IMemberService memberService,
             IMemberTypeService memberTypeService,
             IMemberGroupService memberGroupService,            
@@ -78,7 +72,7 @@ namespace UmbracoIdentity
                 throw new InvalidOperationException("In order to use " + typeof(UmbracoMembersUserManager<>) + " the Umbraco members membership provider must be of type " + typeof(IdentityEnabledMembersMembershipProvider));
             }
             
-            var externalLoginStore = new ExternalLoginStore(logger, sqlSyntax, database);
+            var externalLoginStore = new ExternalLoginStore(logger, databaseContext);
 
             return Create(options, new UmbracoMembersUserStore<TUser>(logger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
         }
@@ -116,8 +110,7 @@ namespace UmbracoIdentity
                 //use the default
                 externalLoginStore = new ExternalLoginStore(
                     ApplicationContext.Current.ProfilingLogger.Logger,
-                    ApplicationContext.Current.DatabaseContext.SqlSyntax,
-                    ApplicationContext.Current.DatabaseContext.Database);
+                    ApplicationContext.Current.DatabaseContext);
             }
 
             return Create(options, new UmbracoMembersUserStore<TUser>(ApplicationContext.Current.ProfilingLogger.Logger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);

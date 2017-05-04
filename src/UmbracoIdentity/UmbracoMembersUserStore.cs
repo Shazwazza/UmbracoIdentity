@@ -476,7 +476,6 @@ namespace UmbracoIdentity
 
         protected override void DisposeResources()
         {
-            _externalLoginStore.Dispose();
             _disposed = true;
         }
 

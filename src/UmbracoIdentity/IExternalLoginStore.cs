@@ -9,7 +9,7 @@ namespace UmbracoIdentity
     /// <summary>
     /// Used to store the external login info, this can be replaced with your own implementation
     /// </summary>
-    public interface IExternalLoginStore : IDisposable
+    public interface IExternalLoginStore
     {
         /// <summary>
         /// Returns all user logins assigned

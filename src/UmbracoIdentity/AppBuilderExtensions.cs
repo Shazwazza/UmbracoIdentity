@@ -36,8 +36,7 @@ namespace UmbracoIdentity
                 (o, c) => UmbracoMembersUserManager<T>.Create(
                     o,
                     appContext.ProfilingLogger.Logger,
-                    appContext.DatabaseContext.SqlSyntax,
-                    appContext.DatabaseContext.Database,
+                    appContext.DatabaseContext,
                     appContext.Services.MemberService,
                     appContext.Services.MemberTypeService,
                     appContext.Services.MemberGroupService,
