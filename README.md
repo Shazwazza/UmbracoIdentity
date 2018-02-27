@@ -23,7 +23,9 @@ The package can be installed with Nuget:
 
     PM> Install-Package UmbracoIdentity
    
-Then follow the [3 installation steps](https://github.com/Shazwazza/UmbracoIdentity/wiki#installation)
+Then follow the [3 installation steps](https://github.com/Shazwazza/UmbracoIdentity/wiki#installation) and you will end up with code files installed complete with examples and an integrated demo page that looks like:
+
+![UmbracoIdentity demo page](https://github.com/Shazwazza/UmbracoIdentity/blob/master/assets/demo-page.png "UmbracoIdentity demo page")
 
 ## [Documentation](https://github.com/Shandem/UmbracoIdentity/wiki)
 
