@@ -110,18 +110,20 @@ namespace UmbracoIdentity.Web
             //    DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
 
             app.UseFacebookAuthentication(
-                   appId: "296106450571102",
-                   appSecret: "bde97767dee96e743cbc364bbb39852d");
+                   appId: "YOURAPPID",
+                   appSecret: "YOURAPPSECRET");
 
             app.UseGoogleAuthentication(
-             clientId: "1072120697051-3hqomjgqnqnra9vt4gr129qr6tfud0fn.apps.googleusercontent.com",
-             clientSecret: "QoF1YzsbRXZ-gwbB2fHidcXR"); 
+             clientId: "YOURCLIENTID.apps.googleusercontent.com",
+             clientSecret: "YOURCLIENTSECRET"); 
 #endif
 
 
             //Lasty we need to ensure that the preview Middleware is registered, this must come after
             // all of the authentication middleware:
             app.UseUmbracoPreviewAuthentication(ApplicationContext, PipelineStage.Authorize);
+
+            base.ConfigureMiddleware(app);
         }
         
     }
