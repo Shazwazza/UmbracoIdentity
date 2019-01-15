@@ -9,13 +9,10 @@ using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using Umbraco.Web;
-using UmbracoIdentity.Web;
 using Umbraco.Core;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
-using UmbracoIdentity;
 using UmbracoIdentity.Models;
-using IdentityExtensions = UmbracoIdentity.IdentityExtensions;
 
 namespace UmbracoIdentity.Web.Controllers 
 {
@@ -105,66 +102,45 @@ namespace UmbracoIdentity.Web.Controllers
                 await SignInAsync(user, isPersistent: false);
                 return RedirectToLocal(returnUrl);
             }
-            else
-            {
-                // If the user does not have an account, then prompt the user to create an account
-                ViewBag.ReturnUrl = returnUrl;
-                ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
 
-                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
-            }
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel model, string returnUrl)
-        {
-            if (User.Identity.IsAuthenticated)
+            if (loginInfo.Email.IsNullOrWhiteSpace())
             {
-                //go home, already authenticated
-                return RedirectToLocal(returnUrl);
+                ViewBag.Description = "No email address found in the claims, ensure your OAuth provider is configured to return the Email address";
+                return View("ExternalLoginFailure");
             }
 
-            if (ModelState.IsValid)
+            // If the user does not have an account, then create one
+
+            user = new UmbracoApplicationMember()
             {
-                // Get the information about the user from the external login provider
-                var info = await OwinContext.Authentication.GetExternalLoginInfoAsync();
-                if (info == null)
-                {
-                    return View("ExternalLoginFailure");
-                }
+                Name = loginInfo.ExternalIdentity.Name,
+                UserName = loginInfo.Email,
+                Email = loginInfo.Email
+            };
 
-                var user = new UmbracoApplicationMember()
-                {
-                    Name = info.ExternalIdentity.Name,
-                    UserName = model.Email,
-                    Email = model.Email
-                };
-
-                var result = await UserManager.CreateAsync(user);
+            var result = await UserManager.CreateAsync(user);
+            if (result.Succeeded)
+            {
+                result = await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
                 if (result.Succeeded)
                 {
-                    result = await UserManager.AddLoginAsync(user.Id, info.Login);
-                    if (result.Succeeded)
-                    {
-                        await SignInAsync(user, isPersistent: false);
+                    await SignInAsync(user, isPersistent: false);
 
-                        // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
-                        // Send an email with this link
-                        // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                        // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                        // SendEmail(user.Email, callbackUrl, "Confirm your account", "Please confirm your account by clicking this link");
+                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
+                    // Send an email with this link
+                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                    // SendEmail(user.Email, callbackUrl, "Confirm your account", "Please confirm your account by clicking this link");
 
-                        return RedirectToLocal(returnUrl);
-                    }
+                    return RedirectToLocal(returnUrl);
                 }
-                AddModelErrors(result);
             }
 
-            ViewBag.ReturnUrl = returnUrl;
-            return View(model);
+            //something went wrong
+            AddModelErrors(result);
+            return View("ExternalLoginFailure");
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -190,7 +166,7 @@ namespace UmbracoIdentity.Web.Controllers
                 TempData["LinkLoginError"] = new[] { "An error occurred, could not get external login info" };
                 return RedirectToLocal(returnUrl);
             }
-            var result = await UserManager.AddLoginAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity), loginInfo.Login);
+            var result = await UserManager.AddLoginAsync(User.Identity.GetUserId<int>(), loginInfo.Login);
             if (result.Succeeded)
             {
                 return RedirectToLocal(returnUrl);
@@ -205,12 +181,12 @@ namespace UmbracoIdentity.Web.Controllers
         public async Task<ActionResult> Disassociate(string loginProvider, string providerKey)
         {
             var result = await UserManager.RemoveLoginAsync(
-                UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity),
+                User.Identity.GetUserId<int>(),
                 new UserLoginInfo(loginProvider, providerKey));
 
             if (result.Succeeded)
             {
-                var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+                var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
                 await SignInAsync(user, isPersistent: false);
                 return RedirectToCurrentUmbracoPage();
             }
@@ -230,7 +206,7 @@ namespace UmbracoIdentity.Web.Controllers
         [ChildActionOnly]
         public ActionResult RemoveAccountList()
         {
-            var linkedAccounts = UserManager.GetLogins(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+            var linkedAccounts = UserManager.GetLogins(User.Identity.GetUserId<int>());
             ViewBag.ShowRemoveButton = HasPassword() || linkedAccounts.Count > 1;
             return PartialView(linkedAccounts);
         }
@@ -243,7 +219,7 @@ namespace UmbracoIdentity.Web.Controllers
         {
             if (string.IsNullOrWhiteSpace(roleName)) throw new ArgumentNullException("role cannot be null");
 
-            var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+            var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
             if (user != null)
             {
                 var found = user.Roles.FirstOrDefault(x => x.RoleName == roleName);
@@ -276,7 +252,7 @@ namespace UmbracoIdentity.Web.Controllers
         [ChildActionOnly]
         public async Task<ActionResult> ShowRoles()
         {
-            var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+            var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
 
             var model = new RoleManagementModel();
 
@@ -314,10 +290,10 @@ namespace UmbracoIdentity.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    IdentityResult result = await UserManager.ChangePasswordAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity), model.OldPassword, model.NewPassword);
+                    IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId<int>(), model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
-                        var user = await UserManager.FindByIdAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+                        var user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
                         await SignInAsync(user, isPersistent: false);
                         TempData["ChangePasswordSuccess"] = true;
                         return RedirectToCurrentUmbracoPage();
@@ -339,7 +315,7 @@ namespace UmbracoIdentity.Web.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    IdentityResult result = await UserManager.AddPasswordAsync(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity), model.NewPassword);
+                    IdentityResult result = await UserManager.AddPasswordAsync(User.Identity.GetUserId<int>(), model.NewPassword);
                     if (result.Succeeded)
                     {
                         TempData["ChangePasswordSuccess"] = true;
@@ -480,7 +456,7 @@ namespace UmbracoIdentity.Web.Controllers
 
         private bool HasPassword()
         {
-            var user = UserManager.FindById(UmbracoIdentity.IdentityExtensions.GetUserId<int>(User.Identity));
+            var user = UserManager.FindById(User.Identity.GetUserId<int>());
             if (user != null)
             {
                 return !user.PasswordHash.IsNullOrWhiteSpace();

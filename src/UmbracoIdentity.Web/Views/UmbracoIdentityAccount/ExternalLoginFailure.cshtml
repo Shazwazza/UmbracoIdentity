@@ -4,3 +4,28 @@
 
 <h2>@ViewBag.Title.</h2>
 <h3 class="text-danger">Unsuccessful login with service.</h3>
+
+@if (ViewBag.Description != null)
+{
+    <p>@ViewBag.Description</p>
+}
+
+@if (ViewData.ModelState.Count > 0)
+{
+    <ul>
+        @foreach (var state in ViewData.ModelState)
+        {
+            <li>
+                @state.Key : 
+                <ul>
+                    @foreach (var error in state.Value.Errors)
+                    {
+                        <li>
+                            @error.ErrorMessage
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+}
