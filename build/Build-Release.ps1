@@ -68,8 +68,20 @@ $Copyright = "Copyright © Shannon Deminick $NowYear"
 	-replace "(?<=AssemblyCopyright\(`").*(?=`"\))", "$Copyright" |
 	sc -Path $SolutionInfoPath -Encoding UTF8;
 
-# Build the solution in release mode
 $SolutionPath = Join-Path -Path $SolutionRoot -ChildPath "UmbracoIdentity.sln";
+
+# Go get nuget.exe if we don't hae it
+$NuGet = "$BuildFolder\nuget.exe"
+$FileExists = Test-Path $NuGet 
+If ($FileExists -eq $False) {
+	#$SourceNugetExe = "http://nuget.org/nuget.exe"
+	$SourceNugetExe = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+	Invoke-WebRequest $SourceNugetExe -OutFile $NuGet
+}
+
+#restore nuget packages
+Write-Host "Restoring nuget packages..."
+& $NuGet restore $SolutionPath
 
 # clean sln for all deploys
 & $MSBuild "$SolutionPath" /p:Configuration=Release /maxcpucount /t:Clean
@@ -78,7 +90,7 @@ if (-not $?)
 	throw "The MSBuild process returned an error code."
 }
 
-#build
+# Build the solution in release mode
 & $MSBuild "$SolutionPath" /p:Configuration=Release /maxcpucount
 if (-not $?)
 {
@@ -133,15 +145,6 @@ Foreach-Object {
 
 # COPY THE README OVER
 Copy-Item "$BuildFolder\Readme.txt" -Destination $ReleaseFolder
-
-# Go get nuget.exe if we don't hae it
-$NuGet = "$BuildFolder\nuget.exe"
-$FileExists = Test-Path $NuGet 
-If ($FileExists -eq $False) {
-	#$SourceNugetExe = "http://nuget.org/nuget.exe"
-	$SourceNugetExe = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
-	Invoke-WebRequest $SourceNugetExe -OutFile $NuGet
-}
 
 # COPY OVER THE CORE NUSPEC AND BUILD THE NUGET PACKAGE
 $CopyrightYear = (Get-Date).year;
