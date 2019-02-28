@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.AspNet.Identity;
+using NPoco;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Persistence;
 using Umbraco.Core.Persistence.DatabaseAnnotations;
 using Umbraco.Core.Persistence.SqlSyntax;
+using Umbraco.Core.Scoping;
 using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
@@ -23,30 +25,25 @@ namespace UmbracoIdentity
 
 
         private readonly ILogger _logger;
-        private readonly DatabaseContext _dbContext;
-        private readonly ISqlSyntaxProvider _sqlSyntaxProvider;
+        private readonly IScopeProvider _scopeProvider;
         public const string TableName = "ExternalLogins";
 
-        private UmbracoDatabase GetDatabase()
-        {
-            return _dbContext.Database;
-        }
+        private Sql<ISqlContext> Sql() => _scopeProvider.SqlContext.Sql();
 
         /// <summary>
         /// Constructor which can be used to define a SQLCE based login store
         /// </summary>
         /// <param name="logger"></param>
-        /// <param name="dbContext">
+        /// <param name="scopeProvider">
         /// The Umbraco database context
         /// </param>
-        public ExternalLoginStore(ILogger logger, DatabaseContext dbContext)
+        public ExternalLoginStore(ILogger logger, IScopeProvider scopeProvider)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
+            if (scopeProvider == null) throw new ArgumentNullException(nameof(scopeProvider));
 
             _logger = logger;
-            _dbContext = dbContext;
-            _sqlSyntaxProvider = dbContext.SqlSyntax;
+            _scopeProvider = scopeProvider;
         }
 
         private void EnsureInitialized()
@@ -62,69 +59,81 @@ namespace UmbracoIdentity
         /// Checks if the table exists and if not it creates it
         /// </summary>
         private void EnsureTable()
-        {            
-            var db = GetDatabase();
-            var schemaHelper = new DatabaseSchemaHelper(db, _logger, _sqlSyntaxProvider);
-            if (!schemaHelper.TableExist(TableName))
-            {
-                using (var transaction = db.GetTransaction())
-                {
-                    schemaHelper.CreateTable<ExternalLoginDto>();
-                    transaction.Complete();
-                }
-                LogHelper.Info<ExternalLoginStore>(string.Format("New table '{0}' was created", TableName));
-            }
+        {      
+            // TODO: Replace with Migration
+            //var db = GetDatabase();
+            //var schemaHelper = new DatabaseSchemaHelper(db, _logger, _sqlSyntaxProvider);
+            //if (!schemaHelper.TableExist(TableName))
+            //{
+            //    using (var transaction = db.GetTransaction())
+            //    {
+            //        schemaHelper.CreateTable<ExternalLoginDto>();
+            //        transaction.Complete();
+            //    }
+            //    _logger.Info<ExternalLoginStore>(string.Format("New table '{0}' was created", TableName));
+            //}
         }
         
         public IEnumerable<IdentityMemberLogin<int>> GetAll(int userId)
         {
             EnsureInitialized();
-            
-            var db = GetDatabase();
 
-            //Can't use strongly typed here due to a bug in 7.5.6 PocoToSqlExpressionVisitor ctor
-            var sql = new Sql()
-                .Select("*").From(TableName).Where("UserId=@userId", new { userId = userId });
-
-            var found = db.Fetch<ExternalLoginDto>(sql);
-
-            return found.Select(x => new IdentityMemberLogin<int>
+            IEnumerable<IdentityMemberLogin<int>> response;
+            using (var scope = _scopeProvider.CreateScope())
             {
-                LoginProvider = x.LoginProvider,
-                ProviderKey = x.ProviderKey,
-                UserId = x.UserId
-            });
+                var sql = Sql()
+                    .Select<ExternalLoginDto>()
+                    .From<ExternalLoginDto>()
+                    .Where<ExternalLoginDto>(x => x.UserId == userId);
+
+                var found = scope.Database.Fetch<ExternalLoginDto>(sql);
+
+                response = found.Select(x => new IdentityMemberLogin<int>
+                {
+                    LoginProvider = x.LoginProvider,
+                    ProviderKey = x.ProviderKey,
+                    UserId = x.UserId
+                });
+                scope.Complete();
+            }
+
+            return response;
         }
 
         public IEnumerable<int> Find(UserLoginInfo login)
         {
             EnsureInitialized();
 
-            var db = GetDatabase();
+            IEnumerable<int> response;
+            using (var scope = _scopeProvider.CreateScope())
+            {
+                var sql = Sql()
+                    .Select<ExternalLoginDto>()
+                    .From<ExternalLoginDto>()
+                    .Where<ExternalLoginDto>(x => x.LoginProvider == login.LoginProvider && x.ProviderKey == login.ProviderKey);
 
-            //Can't use strongly typed here due to a bug in 7.5.6 PocoToSqlExpressionVisitor ctor
-            var sql = new Sql()
-                .Select("*").From(TableName).Where("LoginProvider=@loginProvider AND ProviderKey=@providerKey", new { loginProvider = login.LoginProvider, providerKey = login.ProviderKey });
+                var found = scope.Database.Fetch<ExternalLoginDto>(sql);
 
-            var found = db.Fetch<ExternalLoginDto>(sql);
+                response = found.Select(x => x.UserId);
+                scope.Complete();
+            }
 
-            return found.Select(x => x.UserId);
+            return response;
         }
 
         public void SaveUserLogins(int memberId, IEnumerable<UserLoginInfo> logins)
         {
             EnsureInitialized();
 
-            var db = GetDatabase();
-            using (var t = db.GetTransaction())
+            using (var scope = _scopeProvider.CreateScope())
             {
                 //clear out logins for member
-                db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
+                scope.Database.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
 
                 //add them all
                 foreach (var l in logins)
                 {
-                    db.Insert(new ExternalLoginDto
+                    scope.Database.Insert(new ExternalLoginDto
                     {
                         LoginProvider = l.LoginProvider,
                         ProviderKey = l.ProviderKey,
@@ -132,7 +141,7 @@ namespace UmbracoIdentity
                     });
                 }
 
-                t.Complete();
+                scope.Complete();
             }
         }
 
@@ -140,12 +149,10 @@ namespace UmbracoIdentity
         {
             EnsureInitialized();
 
-            var db = GetDatabase();
-            using (var t = db.GetTransaction())
+            using (var scope = _scopeProvider.CreateScope())
             {
-                db.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
-
-                t.Complete();
+                scope.Database.Execute("DELETE FROM ExternalLogins WHERE UserId=@userId", new { userId = memberId });
+                scope.Complete();
             }
         }       
 

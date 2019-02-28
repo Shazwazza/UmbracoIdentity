@@ -8,6 +8,7 @@ using System.Web.Security;
 using Microsoft.AspNet.Identity;
 
 using Umbraco.Core;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -20,7 +21,7 @@ namespace UmbracoIdentity
     /// <summary>
     /// A custom user store that uses Umbraco member data
     /// </summary>
-    public class UmbracoMembersUserStore<TMember> : DisposableObject, 
+    public class UmbracoMembersUserStore<TMember> : DisposableObjectSlim, 
         IUserStore<TMember, int>, 
         IUserPasswordStore<TMember, int>, 
         IUserEmailStore<TMember, int>, 
@@ -74,7 +75,7 @@ namespace UmbracoIdentity
             IMemberGroupService memberGroupService,
             IdentityEnabledMembersMembershipProvider membershipProvider, 
             IExternalLoginStore externalLoginStore)
-            : this(ApplicationContext.Current.ProfilingLogger.Logger, memberService, memberTypeService, memberGroupService, membershipProvider, externalLoginStore)
+            : this(Current.ProfilingLogger, memberService, memberTypeService, memberGroupService, membershipProvider, externalLoginStore)
         {
         }
 
@@ -467,7 +468,7 @@ namespace UmbracoIdentity
             //the stamp cannot be null, so if it is currently null then we'll just return a hash of the password
             return Task.FromResult(user.SecurityStamp.IsNullOrWhiteSpace()
                 //ensure that the stored password is not empty either! it shouldn't be but just in case we'll return a new guid
-                ? (user.StoredPassword.IsNullOrWhiteSpace() ? Guid.NewGuid().ToString() : user.StoredPassword.ToMd5())
+                ? (user.StoredPassword.IsNullOrWhiteSpace() ? Guid.NewGuid().ToString() : user.StoredPassword.GenerateHash())
                 : user.SecurityStamp);
         }
 
@@ -512,7 +513,7 @@ namespace UmbracoIdentity
             var builtIns = Umbraco.Core.Constants.Conventions.Member.GetStandardPropertyTypeStubs()
                 .Select(x => x.Key).ToArray();
 
-            var memberType = member.ContentType;
+            var memberType = _memberTypeService.Get(member.ContentTypeId);
 
             var viewProperties = new List<UmbracoProperty>();
 
@@ -521,9 +522,9 @@ namespace UmbracoIdentity
                 var value = string.Empty;
 
                 var propValue = member.Properties[prop.Alias];
-                if (propValue != null && propValue.Value != null)
+                if (propValue != null && propValue.GetValue() != null)
                 {
-                    value = propValue.Value.ToString();
+                    value = propValue.GetValue().ToString();
                 }
 
                 var viewProperty = new UmbracoProperty
@@ -579,27 +580,29 @@ namespace UmbracoIdentity
             if (memberSecurityStamp != null && memberSecurityStamp != user.SecurityStamp)
             {
                 anythingChanged = true;
-                member.Properties[UmbracoIdentityConstants.SecurityStampProperty].Value = user.SecurityStamp;
+                member.Properties[UmbracoIdentityConstants.SecurityStampProperty].SetValue(user.SecurityStamp);
             }
 
             if (user.MemberProperties != null)
             {
+                var memberType = _memberTypeService.Get(member.ContentTypeId);
+
                 foreach (var property in user.MemberProperties
                     //ensure the property they are posting exists
-                    .Where(p => member.ContentType.PropertyTypeExists(p.Alias))
+                    .Where(p => memberType.PropertyTypeExists(p.Alias))
                     .Where(p => member.Properties.Contains(p.Alias))
                     //needs to be editable
-                    .Where(p => member.ContentType.MemberCanEditProperty(p.Alias))
+                    .Where(p => memberType.MemberCanEditProperty(p.Alias))
                     //needs to be different
                     .Where(p =>
                     {
-                        var mPropAsString = member.Properties[p.Alias].Value == null ? string.Empty : member.Properties[p.Alias].Value.ToString();
+                        var mPropAsString = member.Properties[p.Alias].GetValue() == null ? string.Empty : member.Properties[p.Alias].GetValue().ToString();
                         var uPropAsString = p.Value ?? string.Empty;
                         return mPropAsString != uPropAsString;
                     }))
                 {
                     anythingChanged = true;
-                    member.Properties[property.Alias].Value = property.Value;
+                    member.Properties[property.Alias].SetValue(property.Value);
                 }
             }
             

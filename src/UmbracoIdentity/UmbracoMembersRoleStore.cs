@@ -12,7 +12,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace UmbracoIdentity
 {
-    public class UmbracoMembersRoleStore<T> : DisposableObject, IRoleStore<T, int>
+    public class UmbracoMembersRoleStore<T> : DisposableObjectSlim, IRoleStore<T, int>
         where T : UmbracoIdentityRole, IRole<int>,  new ()
     {
         private readonly IMemberGroupService _memberGroupService;
