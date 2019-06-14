@@ -11,10 +11,10 @@ using UmbracoIdentity.Web.Models.UmbracoIdentity;
 using UmbracoIdentity.Web;
 using Owin;
 using Umbraco.Web;
-using Umbraco.Web.Security.Identity;
-using UmbracoIdentity.Models;
+using Umbraco.Web.Security;
+using Umbraco.Core.Services;
 
-[assembly: OwinStartup("UmbracoIdentityStartup", typeof(UmbracoIdentityStartup))]
+[assembly: OwinStartup("UmbracoIdentityStartup", typeof(UmbracoIdentityOwinStartup))]
 
 namespace UmbracoIdentity.Web
 {
@@ -22,15 +22,15 @@ namespace UmbracoIdentity.Web
     /// <summary>
     /// OWIN Startup class for UmbracoIdentity 
     /// </summary>
-    public class UmbracoIdentityStartup : UmbracoDefaultOwinStartup
+    public class UmbracoIdentityOwinStartup : UmbracoIdentityOwinStartupBase
     {
         /// <summary>
         /// Configures services to be created in the OWIN context (CreatePerOwinContext)
         /// </summary>
         /// <param name="app"/>
-        protected override void ConfigureServices(IAppBuilder app)
+        protected override void ConfigureServices(IAppBuilder app, ServiceContext services)
         {
-            base.ConfigureServices(app);
+            base.ConfigureServices(app, services);
 
             //Single method to configure the Identity user manager for use with Umbraco
             app.ConfigureUserManagerForUmbracoMembers<UmbracoApplicationMember>();
@@ -48,27 +48,27 @@ namespace UmbracoIdentity.Web
             //Ensure owin is configured for Umbraco back office authentication. If you have any front-end OWIN
             // cookie configuration, this must be declared after it.
             app
-                .UseUmbracoBackOfficeCookieAuthentication(ApplicationContext, PipelineStage.Authenticate)
-                .UseUmbracoBackOfficeExternalCookieAuthentication(ApplicationContext, PipelineStage.Authenticate);
+                .UseUmbracoBackOfficeCookieAuthentication(UmbracoContextAccessor, RuntimeState, Services.UserService, GlobalSettings, UmbracoSettings.Security, PipelineStage.Authenticate)
+                .UseUmbracoBackOfficeExternalCookieAuthentication(UmbracoContextAccessor, RuntimeState, GlobalSettings, PipelineStage.Authenticate);
 
             // Enable the application to use a cookie to store information for the 
             // signed in user and to use a cookie to temporarily store information 
             // about a user logging in with a third party login provider 
             // Configure the sign in cookie
-            app.UseCookieAuthentication(new FrontEndCookieAuthenticationOptions
+            var cookieOptions = CreateFrontEndCookieAuthenticationOptions();
+            cookieOptions.Provider = new CookieAuthenticationProvider
             {
-                Provider = new CookieAuthenticationProvider
-                {
-                    // Enables the application to validate the security stamp when the user 
-                    // logs in. This is a security feature which is used when you 
-                    // change a password or add an external login to your account.  
-                    OnValidateIdentity = SecurityStampValidator
+                // Enables the application to validate the security stamp when the user 
+                // logs in. This is a security feature which is used when you 
+                // change a password or add an external login to your account.  
+                OnValidateIdentity = SecurityStampValidator
                         .OnValidateIdentity<UmbracoMembersUserManager<UmbracoApplicationMember>, UmbracoApplicationMember, int>(
                             TimeSpan.FromMinutes(30),
                             (manager, user) => user.GenerateUserIdentityAsync(manager),
                             identity => identity.GetUserId<int>())
-                }
-            }, PipelineStage.Authenticate);
+            };
+
+            app.UseCookieAuthentication(cookieOptions, PipelineStage.Authenticate);
 
             // Uncomment the following lines to enable logging in with third party login providers
 
@@ -121,7 +121,7 @@ namespace UmbracoIdentity.Web
 
             //Lasty we need to ensure that the preview Middleware is registered, this must come after
             // all of the authentication middleware:
-            app.UseUmbracoPreviewAuthentication(ApplicationContext, PipelineStage.Authorize);
+            app.UseUmbracoPreviewAuthentication(UmbracoContextAccessor, RuntimeState, GlobalSettings, UmbracoSettings.Security, PipelineStage.Authorize);
 
             base.ConfigureMiddleware(app);
         }

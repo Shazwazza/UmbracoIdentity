@@ -14,6 +14,10 @@ using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 using UmbracoIdentity.Models;
 using UmbracoIdentity;
+using Umbraco.Core.Cache;
+using Umbraco.Core.Logging;
+using Umbraco.Core.Persistence;
+using Umbraco.Core.Services;
 
 namespace UmbracoIdentity.Web.Controllers 
 {
@@ -23,27 +27,34 @@ namespace UmbracoIdentity.Web.Controllers
         private UmbracoMembersUserManager<UmbracoApplicationMember> _userManager;
         private UmbracoMembersRoleManager<UmbracoApplicationRole> _roleManager;
 
-        public UmbracoIdentityAccountController(UmbracoContext umbracoContext, UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager) : base(umbracoContext)
+        public UmbracoIdentityAccountController(
+            UmbracoMembersUserManager<UmbracoApplicationMember> userManager,
+            UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager,
+            IUmbracoContextAccessor umbracoContextAccessor, IUmbracoDatabaseFactory databaseFactory, ServiceContext services, AppCaches appCaches, ILogger logger, IProfilingLogger profilingLogger, UmbracoHelper umbracoHelper)
+            : base(umbracoContextAccessor, databaseFactory, services, appCaches, logger, profilingLogger, umbracoHelper)
         {
             _userManager = userManager;
             _roleManager = roleManager;
         }
 
-        public UmbracoIdentityAccountController(UmbracoContext umbracoContext, UmbracoHelper umbracoHelper, UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager) : base(umbracoContext, umbracoHelper)
-        {
-            _userManager = userManager;
-            _roleManager = roleManager;
-        }
+        //public UmbracoIdentityAccountController(UmbracoContext umbracoContext, UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager)
+        //    : base(umbracoContext)
+        //{
+        //    _userManager = userManager;
+        //    _roleManager = roleManager;
+        //}
 
-        public UmbracoIdentityAccountController(UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager)
-        {
-            _userManager = userManager;
-            _roleManager = roleManager;
-        }
+        //public UmbracoIdentityAccountController(UmbracoContext umbracoContext, UmbracoHelper umbracoHelper, UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager) : base(umbracoContext, umbracoHelper)
+        //{
+        //    _userManager = userManager;
+        //    _roleManager = roleManager;
+        //}
 
-        public UmbracoIdentityAccountController()
-        {
-        }
+        //public UmbracoIdentityAccountController(UmbracoMembersUserManager<UmbracoApplicationMember> userManager, UmbracoMembersRoleManager<UmbracoApplicationRole> roleManager)
+        //{
+        //    _userManager = userManager;
+        //    _roleManager = roleManager;
+        //}
 
         protected IOwinContext OwinContext
         {
