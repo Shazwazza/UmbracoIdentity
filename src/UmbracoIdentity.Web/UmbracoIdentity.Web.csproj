@@ -431,6 +431,7 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
+    <Compile Include="App_Start\UmbracoIdentityUserComposer.cs" />
     <Compile Include="App_Start\Controllers\UmbracoIdentityAccountController.cs" />
     <Compile Include="App_Start\Models\UmbracoIdentity\ExternalLoginListViewModel.cs" />
     <Compile Include="App_Start\Models\UmbracoIdentity\ForgotPasswordViewModel.cs" />
@@ -483,8 +484,8 @@
     <Content Include="Views\UmbracoIdentityAccount\ResetPasswordConfirmation.cshtml" />
     <Content Include="Views\UmbracoIdentityAccount\ShowRoles.cshtml" />
     <Content Include="Views\UmbracoIdentityAccount\_ViewStart.cshtml" />
-    <Content Include="Views\Account.cshtml" />
     <Content Include="Views\AccountLayout.cshtml" />
+    <Content Include="Views\Account.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

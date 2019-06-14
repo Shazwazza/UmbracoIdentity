@@ -1,4 +1,6 @@
+using Microsoft.Owin;
 using System.Linq;
+using System.Web;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
 

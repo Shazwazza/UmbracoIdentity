@@ -13,6 +13,7 @@ using Owin;
 using Umbraco.Web;
 using Umbraco.Web.Security;
 using Umbraco.Core.Services;
+using System.Configuration;
 
 [assembly: OwinStartup("UmbracoIdentityStartup", typeof(UmbracoIdentityOwinStartup))]
 
@@ -114,8 +115,8 @@ namespace UmbracoIdentity.Web
                    appSecret: "YOURAPPSECRET");
 
             app.UseGoogleAuthentication(
-             clientId: "YOURCLIENTID.apps.googleusercontent.com",
-             clientSecret: "YOURCLIENTSECRET"); 
+             clientId: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Google.ClientId"],
+             clientSecret: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Google.Secret"]); 
 #endif
 
 
