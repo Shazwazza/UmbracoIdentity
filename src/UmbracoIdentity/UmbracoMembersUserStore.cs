@@ -12,12 +12,18 @@ using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using Umbraco.Web;
 using Umbraco.Web.Models;
 using UmbracoIdentity.Models;
 using Task = System.Threading.Tasks.Task;
 
 namespace UmbracoIdentity
 {
+    public class UmbracoIdentityOwinStartupBase : UmbracoDefaultOwinStartup
+    {
+        protected FrontEndCookieAuthenticationOptions CreateFrontEndCookieAuthenticationOptions() => Umbraco.Core.Composing.Current.Factory.GetInstance<FrontEndCookieAuthenticationOptions>();
+    }
+
     /// <summary>
     /// A custom user store that uses Umbraco member data
     /// </summary>
@@ -38,7 +44,7 @@ namespace UmbracoIdentity
         private readonly IExternalLoginStore _externalLoginStore;
         private bool _disposed = false;
 
-        private const string EmptyPasswordPrefix = "___UIDEMPTYPWORD__";
+        private const string _emptyPasswordPrefix = "___UIDEMPTYPWORD__";
 
         public UmbracoMembersUserStore(
             ILogger logger,
@@ -48,35 +54,17 @@ namespace UmbracoIdentity
             IdentityEnabledMembersMembershipProvider membershipProvider,
             IExternalLoginStore externalLoginStore)
         {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (memberService == null) throw new ArgumentNullException("memberService");
-            if (memberGroupService == null) throw new ArgumentNullException(nameof(memberGroupService));
-            if (membershipProvider == null) throw new ArgumentNullException("membershipProvider");
-            if (externalLoginStore == null) throw new ArgumentNullException("externalLoginStore");
-
-            _logger = logger;
-            _memberService = memberService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _memberService = memberService ?? throw new ArgumentNullException("memberService");
             _memberTypeService = memberTypeService;
-            _memberGroupService = memberGroupService;
-            _membershipProvider = membershipProvider;
-            _externalLoginStore = externalLoginStore;
+            _memberGroupService = memberGroupService ?? throw new ArgumentNullException(nameof(memberGroupService));
+            _membershipProvider = membershipProvider ?? throw new ArgumentNullException("membershipProvider");
+            _externalLoginStore = externalLoginStore ?? throw new ArgumentNullException("externalLoginStore");
 
             if (_membershipProvider.PasswordFormat != MembershipPasswordFormat.Hashed)
             {
                 throw new InvalidOperationException("Cannot use ASP.Net Identity with UmbracoMembersUserStore when the password format is not Hashed");
             }
-        }
-
-        [Obsolete("Use the ctor specifying all parameters")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public UmbracoMembersUserStore(
-            IMemberService memberService, 
-            IMemberTypeService memberTypeService,
-            IMemberGroupService memberGroupService,
-            IdentityEnabledMembersMembershipProvider membershipProvider, 
-            IExternalLoginStore externalLoginStore)
-            : this(Current.ProfilingLogger, memberService, memberTypeService, memberGroupService, membershipProvider, externalLoginStore)
-        {
         }
 
         public virtual async Task CreateAsync(TMember user)
@@ -98,7 +86,7 @@ namespace UmbracoIdentity
             {
                 //this will hash the guid with a salt so should be nicely random
                 var aspHasher = new PasswordHasher();
-                member.RawPasswordValue = EmptyPasswordPrefix +
+                member.RawPasswordValue = _emptyPasswordPrefix +
                     aspHasher.HashPassword(Guid.NewGuid().ToString("N"));
 
             }
@@ -618,7 +606,7 @@ namespace UmbracoIdentity
         /// <returns></returns>
         private string GetPasswordHash(string storedPass)
         {
-            return storedPass.StartsWith(EmptyPasswordPrefix) ? null : storedPass;
+            return storedPass.StartsWith(_emptyPasswordPrefix) ? null : storedPass;
         }
 
         /// <summary>

@@ -17,6 +17,7 @@ namespace UmbracoIdentity
     public class UmbracoMembersUserManager<TUser> : UserManager<TUser, int>
         where TUser : UmbracoIdentityMember, IUser<int>, new()
     {
+
         public UmbracoMembersUserManager(IUserStore<TUser, int> store)
             : base(store)
         {
@@ -94,6 +95,8 @@ namespace UmbracoIdentity
             IMemberService memberService,
             IMemberTypeService memberTypeService,
             IMemberGroupService memberGroupService,
+            IProfilingLogger profilingLogger,
+            IScopeProvider scopeProvider,
             IExternalLoginStore externalLoginStore = null,
             IdentityEnabledMembersMembershipProvider membershipProvider = null)
         {
@@ -107,15 +110,13 @@ namespace UmbracoIdentity
 
             if (externalLoginStore == null)
             {
-                //we need to rely on singletons here due to backwards compat
-
                 //use the default
                 externalLoginStore = new ExternalLoginStore(
-                    Current.ProfilingLogger,
-                    Current.ScopeProvider);
+                    profilingLogger,
+                    scopeProvider);
             }
 
-            return Create(options, new UmbracoMembersUserStore<TUser>(Current.ProfilingLogger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
+            return Create(options, new UmbracoMembersUserStore<TUser>(profilingLogger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
         }
 
         /// <summary>

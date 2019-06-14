@@ -4,19 +4,19 @@ using Owin;
 
 namespace UmbracoIdentity
 {
-    /// <summary>
-    /// Used to enable the normal Umbraco back office authentication to operate
-    /// </summary>
-    public class UmbracoBackOfficeAuthenticationMiddleware : AuthenticationMiddleware<UmbracoBackOfficeAuthenticationOptions>
-    {
-        public UmbracoBackOfficeAuthenticationMiddleware(OwinMiddleware next, IAppBuilder app, UmbracoBackOfficeAuthenticationOptions options)
-            : base(next, options) 
-        {
-        }
+    ///// <summary>
+    ///// Used to enable the normal Umbraco back office authentication to operate
+    ///// </summary>
+    //public class UmbracoBackOfficeAuthenticationMiddleware : AuthenticationMiddleware<UmbracoBackOfficeAuthenticationOptions>
+    //{
+    //    public UmbracoBackOfficeAuthenticationMiddleware(OwinMiddleware next, IAppBuilder app, UmbracoBackOfficeAuthenticationOptions options)
+    //        : base(next, options) 
+    //    {
+    //    }
 
-        protected override AuthenticationHandler<UmbracoBackOfficeAuthenticationOptions> CreateHandler()
-        {
-            return new UmbracoBackOfficeAuthenticationHandler();
-        }
-    }
+    //    protected override AuthenticationHandler<UmbracoBackOfficeAuthenticationOptions> CreateHandler()
+    //    {
+    //        return new UmbracoBackOfficeAuthenticationHandler();
+    //    }
+    //}
 }

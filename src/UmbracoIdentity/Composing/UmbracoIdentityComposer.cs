@@ -8,10 +8,13 @@ namespace UmbracoIdentity.Composing
     {
         public void Compose(Composition composition)
         {
-            //composition.Register<IdentityComponent>();
+            composition.Components().Append<UmbracoIdentityComponent>();
+
             composition.Register<IExternalLoginStore, ExternalLoginStore>();
 
-            composition.Components().Append<UmbracoIdentityComponent>();
+            composition.RegisterUnique<FrontEndCookieManager>();
+            composition.Register<FrontEndCookieAuthenticationOptions>();
+
         }
     }
 }

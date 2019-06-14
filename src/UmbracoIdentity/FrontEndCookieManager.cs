@@ -17,7 +17,7 @@ namespace UmbracoIdentity
     /// Umbraco's back office cookie is read for specific paths, for the front-end we only want to read cookies for paths that Umbraco is
     /// not going to authenticate for. By doing this we ensure that only one cookie authenticator is executed for a request.
     /// </remarks>
-    internal class FrontEndCookieManager : ChunkingCookieManager, ICookieManager
+    public class FrontEndCookieManager : ChunkingCookieManager, ICookieManager
     {
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
         private readonly IRuntimeState _runtime;
@@ -25,9 +25,9 @@ namespace UmbracoIdentity
 
         public FrontEndCookieManager(IUmbracoContextAccessor umbracoContextAccessor, IRuntimeState runtime, IGlobalSettings globalSettings)
         {
-            _umbracoContextAccessor = umbracoContextAccessor;
-            _runtime = runtime;
-            _globalSettings = globalSettings;
+            _umbracoContextAccessor = umbracoContextAccessor ?? throw new ArgumentNullException(nameof(umbracoContextAccessor));
+            _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
+            _globalSettings = globalSettings ?? throw new ArgumentNullException(nameof(globalSettings));
         }
 
         /// <summary>

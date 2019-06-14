@@ -16,11 +16,8 @@ namespace UmbracoIdentity
         /// <returns></returns>
         public static string GetSecurityStamp(this IMember member, out bool propertyExists)
         {
-            propertyExists = Current.Services.MemberTypeService.Get(member.ContentTypeId).PropertyTypeExists(UmbracoIdentityConstants.SecurityStampProperty);
+            propertyExists = member.Properties.Contains(UmbracoIdentityConstants.SecurityStampProperty);
             if (!propertyExists)
-                return null;
-
-            if (!member.Properties.Contains(UmbracoIdentityConstants.SecurityStampProperty))
                 return null;
 
             return member.Properties[UmbracoIdentityConstants.SecurityStampProperty]?.GetValue()?.ToString() ?? string.Empty;

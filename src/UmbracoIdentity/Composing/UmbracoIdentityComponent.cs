@@ -10,6 +10,13 @@ namespace UmbracoIdentity.Composing
 {
     public class UmbracoIdentityComponent : IComponent
     {
+        private readonly ILogger _logger;
+
+        public UmbracoIdentityComponent(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public void Initialize()
         {
             //var upgrader = new Upgrader(new IdentityMigrationPlan());
@@ -27,14 +34,14 @@ namespace UmbracoIdentity.Composing
         /// Listen for when Members is being saved, check if it is a
         /// new item and fill in some default data.
         /// </summary>
-        private static void MemberService_Saving(IMemberService sender, SaveEventArgs<IMember> e)
+        private void MemberService_Saving(IMemberService sender, SaveEventArgs<IMember> e)
         {
             foreach (var member in e.SavedEntities)
             {
                 var securityStamp = member.GetSecurityStamp(out var propertyTypeExists);
                 if (!propertyTypeExists)
                 {
-                    Current.Logger.Warn<UmbracoIdentityComponent>($"The {UmbracoIdentityConstants.SecurityStampProperty} does not exist on the member type {member.ContentType.Alias}, see docs on how to fix: https://github.com/Shazwazza/UmbracoIdentity/wiki");
+                    _logger.Warn<UmbracoIdentityComponent>($"The {UmbracoIdentityConstants.SecurityStampProperty} does not exist on the member type {member.ContentType.Alias}, see docs on how to fix: https://github.com/Shazwazza/UmbracoIdentity/wiki");
                 }
                 else
                 {

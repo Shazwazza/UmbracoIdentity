@@ -423,6 +423,8 @@
     <Content Include="config\Lang\zh-CN.user.xml" />
     <Content Include="config\logviewer.searches.config.js" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\foundation.form.validation.js" />
+    <Content Include="Scripts\jquery.validate.hooks.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -481,6 +483,8 @@
     <Content Include="Views\UmbracoIdentityAccount\ResetPasswordConfirmation.cshtml" />
     <Content Include="Views\UmbracoIdentityAccount\ShowRoles.cshtml" />
     <Content Include="Views\UmbracoIdentityAccount\_ViewStart.cshtml" />
+    <Content Include="Views\Account.cshtml" />
+    <Content Include="Views\AccountLayout.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -22,11 +22,6 @@ namespace UmbracoIdentity
             IdentityEnabledMembersMembershipProvider membershipProvider = null)
             where T : UmbracoIdentityMember, new()
         {
-            //Don't proceed if the app is not ready
-            //if (!appContext.IsConfigured
-            //    || appContext.DatabaseContext == null
-            //    || !appContext.DatabaseContext.IsDatabaseConfigured) return;
-
             //Configure Umbraco user manager to be created per request
             app.CreatePerOwinContext<UmbracoMembersUserManager<T>>(
                 (o, c) => UmbracoMembersUserManager<T>.Create(
@@ -55,11 +50,6 @@ namespace UmbracoIdentity
             IdentityEnabledMembersMembershipProvider membershipProvider = null)
             where T : UmbracoIdentityMember, new()
         {            
-            //Don't proceed if the app is not ready
-            //if (!appContext.IsConfigured
-            //    || appContext.DatabaseContext == null
-            //    || !appContext.DatabaseContext.IsDatabaseConfigured) return;
-
             //Configure Umbraco user manager to be created per request
             app.CreatePerOwinContext<UmbracoMembersUserManager<T>>(
                 (o, c) => UmbracoMembersUserManager<T>.Create(
@@ -85,12 +75,7 @@ namespace UmbracoIdentity
             where TUser : UmbracoIdentityMember, new()
         {
             if (userManager == null) throw new ArgumentNullException("userManager");
-
-            //Don't proceed if the app is not ready
-            //if (appContext.IsConfigured == false
-            //    || appContext.DatabaseContext == null
-            //    || appContext.DatabaseContext.IsDatabaseConfigured == false) return;
-
+            
             //Configure Umbraco user manager to be created per request
             app.CreatePerOwinContext<TManager>(userManager);
         }
@@ -104,11 +89,6 @@ namespace UmbracoIdentity
         public static void ConfigureRoleManagerForUmbracoMembers<T>(
             this IAppBuilder app) where T : UmbracoIdentityRole, new()
         {
-            //Don't proceed if the app is not ready
-            //if (!appContext.IsConfigured
-            //    || appContext.DatabaseContext == null
-            //    || !appContext.DatabaseContext.IsDatabaseConfigured) return;
-
             //Configure Umbraco members role manager to be created per request
             app.CreatePerOwinContext<UmbracoMembersRoleManager<T>>(((o, c) => UmbracoMembersRoleManager<T>.Create(
                 o,

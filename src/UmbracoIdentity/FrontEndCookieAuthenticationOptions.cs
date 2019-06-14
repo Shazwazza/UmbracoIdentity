@@ -8,9 +8,9 @@ namespace UmbracoIdentity
     /// </summary>
     public class FrontEndCookieAuthenticationOptions : CookieAuthenticationOptions
     {
-        public FrontEndCookieAuthenticationOptions()
+        public FrontEndCookieAuthenticationOptions(FrontEndCookieManager frontEndCookieManager)
         {
-            CookieManager = new FrontEndCookieManager();
+            CookieManager = frontEndCookieManager;
             AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie;
         }
     }
