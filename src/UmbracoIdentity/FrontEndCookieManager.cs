@@ -5,7 +5,7 @@ using System.Web;
 using Microsoft.Owin;
 using Microsoft.Owin.Infrastructure;
 using Umbraco.Core;
-using Umbraco.Core.IO;
+using Umbraco.Core.Configuration;
 using Umbraco.Web;
 
 namespace UmbracoIdentity
@@ -19,6 +19,17 @@ namespace UmbracoIdentity
     /// </remarks>
     internal class FrontEndCookieManager : ChunkingCookieManager, ICookieManager
     {
+        private readonly IUmbracoContextAccessor _umbracoContextAccessor;
+        private readonly IRuntimeState _runtime;
+        private readonly IGlobalSettings _globalSettings;
+
+        public FrontEndCookieManager(IUmbracoContextAccessor umbracoContextAccessor, IRuntimeState runtime, IGlobalSettings globalSettings)
+        {
+            _umbracoContextAccessor = umbracoContextAccessor;
+            _runtime = runtime;
+            _globalSettings = globalSettings;
+        }
+
         /// <summary>
         /// Explicitly implement this so that we filter the request
         /// </summary>
@@ -27,7 +38,7 @@ namespace UmbracoIdentity
         /// <returns></returns>
         string ICookieManager.GetRequestCookie(IOwinContext context, string key)
         {
-            if (UmbracoContext.Current == null || IsClientSideRequest(context.Request.Uri))
+            if (_umbracoContextAccessor.UmbracoContext == null || IsClientSideRequest(context.Request.Uri))
             {
                 return null;
             }
@@ -49,9 +60,9 @@ namespace UmbracoIdentity
             return toInclude.Any(ext.InvariantEquals) == false;
         }
 
-        private static bool IsBackOfficeRequest(IOwinRequest request)
+        private static bool IsBackOfficeRequest(IOwinRequest request, IGlobalSettings globalSettings)
         {
-            return (bool) typeof (UriExtensions).CallStaticMethod("IsBackOfficeRequest", request.Uri, HttpRuntime.AppDomainAppVirtualPath);
+            return (bool) typeof (UriExtensions).CallStaticMethod("IsBackOfficeRequest", request.Uri, HttpRuntime.AppDomainAppVirtualPath, globalSettings);
         }
 
         private static bool IsInstallerRequest(IOwinRequest request)
@@ -72,10 +83,13 @@ namespace UmbracoIdentity
         /// </remarks>
         private bool ShouldAuthForBackOfficeRequest(IOwinContext ctx)
         {
+            if (_runtime.Level == RuntimeLevel.Install)
+                return false;
+
             var request = ctx.Request;
             
             if (//check back office
-                IsBackOfficeRequest(request)
+                IsBackOfficeRequest(request, _globalSettings)
                     //check installer
                 || IsInstallerRequest(request))
             {

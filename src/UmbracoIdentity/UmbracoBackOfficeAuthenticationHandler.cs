@@ -6,7 +6,8 @@ using System.Web.Security;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Infrastructure;
-using Umbraco.Core.Configuration;
+using Umbraco.Core;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Security;
 using Umbraco.Web;
 
@@ -31,7 +32,7 @@ namespace UmbracoIdentity
         {
             if (ShouldAuthRequest())
             {
-                var authTicket = GetAuthTicket(Request, UmbracoConfig.For.UmbracoSettings().Security.AuthCookieName);
+                var authTicket = GetAuthTicket(Request, Current.Configs.Settings().Security.AuthCookieName);
                 if (authTicket != null)
                 {
                     return Task.FromResult(new AuthenticationTicket(new UmbracoBackOfficeIdentity(authTicket), new AuthenticationProperties()));                    

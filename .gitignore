@@ -181,3 +181,4 @@ src/**/bin/*.dll
 src/**/bin/*.xml
 src/UmbracoIdentity.Web/bin/amd64/*
 src/UmbracoIdentity.Web/bin/x86/*
+.vs/
