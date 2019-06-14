@@ -4,6 +4,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Umbraco.Core;
 using Umbraco.Core.Services;
+using Umbraco.Core.Services.Implement;
 using UmbracoIdentity.Models;
 
 namespace UmbracoIdentity
@@ -11,7 +12,7 @@ namespace UmbracoIdentity
     /// <summary>
     /// Binds to Umbraco member events for each OwinContext
     /// </summary>
-    public sealed class MembersEventHandler<T> : DisposableObject
+    public sealed class MembersEventHandler<T> : DisposableObjectSlim
          where T : UmbracoIdentityMember, new()
     {
         private readonly IOwinContext _owinContext;

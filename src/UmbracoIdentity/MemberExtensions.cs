@@ -1,4 +1,5 @@
 using System.Linq;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
 
 namespace UmbracoIdentity
@@ -15,14 +16,14 @@ namespace UmbracoIdentity
         /// <returns></returns>
         public static string GetSecurityStamp(this IMember member, out bool propertyExists)
         {
-            propertyExists = member.ContentType.PropertyTypes.Any(x => x.Alias == UmbracoIdentityConstants.SecurityStampProperty);
+            propertyExists = Current.Services.MemberTypeService.Get(member.ContentTypeId).PropertyTypeExists(UmbracoIdentityConstants.SecurityStampProperty);
             if (!propertyExists)
                 return null;
 
             if (!member.Properties.Contains(UmbracoIdentityConstants.SecurityStampProperty))
                 return null;
 
-            return member.Properties[UmbracoIdentityConstants.SecurityStampProperty].Value?.ToString() ?? string.Empty;
+            return member.Properties[UmbracoIdentityConstants.SecurityStampProperty]?.GetValue()?.ToString() ?? string.Empty;
         }
     }
 }
