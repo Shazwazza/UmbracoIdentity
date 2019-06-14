@@ -75,7 +75,7 @@ namespace UmbracoIdentity
                 throw new InvalidOperationException("In order to use " + typeof(UmbracoMembersUserManager<>) + " the Umbraco members membership provider must be of type " + typeof(IdentityEnabledMembersMembershipProvider));
             }
             
-            var externalLoginStore = new ExternalLoginStore(logger, scopeProvider);
+            var externalLoginStore = new ExternalLoginStore(scopeProvider);
 
             return Create(options, new UmbracoMembersUserStore<TUser>(logger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
         }
@@ -111,9 +111,7 @@ namespace UmbracoIdentity
             if (externalLoginStore == null)
             {
                 //use the default
-                externalLoginStore = new ExternalLoginStore(
-                    profilingLogger,
-                    scopeProvider);
+                externalLoginStore = new ExternalLoginStore(scopeProvider);
             }
 
             return Create(options, new UmbracoMembersUserStore<TUser>(profilingLogger, memberService, memberTypeService, memberGroupService, provider, externalLoginStore), membershipProvider);
