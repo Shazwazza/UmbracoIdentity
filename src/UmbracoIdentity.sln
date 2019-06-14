@@ -39,6 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{12D5F68D
 		..\appveyor.build.yml = ..\appveyor.build.yml
 		..\appveyor.yml = ..\appveyor.yml
 		..\build\Build-Release.ps1 = ..\build\Build-Release.ps1
+		..\build\build.xml = ..\build\build.xml
 		..\build\Readme.txt = ..\build\Readme.txt
 		SolutionInfo.cs = SolutionInfo.cs
 		..\build\UmbracoIdentity.Core.nuspec = ..\build\UmbracoIdentity.Core.nuspec
@@ -73,5 +74,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{29C8E9D9-B30E-4EDA-AF5F-4899A1CFDFFD} = {12D5F68D-7BD0-444A-9D3B-D2FB833CDD64}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C0A528D3-8FEC-433A-8676-DD14E9A49872}
 	EndGlobalSection
 EndGlobal

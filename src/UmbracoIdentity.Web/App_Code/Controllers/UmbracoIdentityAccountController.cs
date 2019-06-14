@@ -13,6 +13,7 @@ using Umbraco.Core;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 using UmbracoIdentity.Models;
+using UmbracoIdentity;
 
 namespace UmbracoIdentity.Web.Controllers 
 {

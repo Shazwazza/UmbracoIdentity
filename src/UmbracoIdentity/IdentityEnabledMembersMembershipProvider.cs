@@ -1,3 +1,4 @@
+using System.Web.Security;
 using Umbraco.Web.Security.Providers;
 
 namespace UmbracoIdentity
@@ -9,16 +10,18 @@ namespace UmbracoIdentity
     /// </summary>
     public class IdentityEnabledMembersMembershipProvider : MembersMembershipProvider
     {
-        public string HashPasswordForStorage(string password)
+        public new string HashPasswordForStorage(string password)
         {
             string salt;
             var hashed = EncryptOrHashNewPassword(password, out salt);
             return FormatPasswordForStorage(hashed, salt);
         }
 
-        public bool VerifyPassword(string password, string hashedPassword)
+        public new bool VerifyPassword(string password, string hashedPassword)
         {
             return CheckPassword(password, hashedPassword);
         }
+
+        public override MembershipPasswordFormat PasswordFormat => MembershipPasswordFormat.Hashed;
     }
 }

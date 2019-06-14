@@ -66,10 +66,10 @@ namespace UmbracoIdentity.Web
                         .OnValidateIdentity<UmbracoMembersUserManager<UmbracoApplicationMember>, UmbracoApplicationMember, int>(
                             TimeSpan.FromMinutes(30),
                             (manager, user) => user.GenerateUserIdentityAsync(manager),
-                            UmbracoIdentity.IdentityExtensions.GetUserId<int>)
+                            identity => identity.GetUserId<int>())
                 }
             }, PipelineStage.Authenticate);
-            
+
             // Uncomment the following lines to enable logging in with third party login providers
 
             //app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
