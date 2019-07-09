@@ -276,6 +276,7 @@
     <Compile Include="Models\UmbracoIdentityMember.cs" />
     <Compile Include="Models\UmbracoIdentityRole.cs" />
     <Compile Include="UmbracoIdentityConstants.cs" />
+    <Compile Include="UmbracoIdentityOwinStartupBase.cs" />
     <Compile Include="UmbracoMembersRoleStore.cs" />
     <Compile Include="UmbracoMembersRoleManager.cs" />
     <Compile Include="UmbracoMembersUserManager.cs" />

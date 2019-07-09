@@ -33,9 +33,7 @@ namespace UmbracoIdentity.Composing
 
         public void Initialize()
         {
-            // migrate database schema
-            var upgrader = new Upgrader(new UmbracoIdentityMigrationPlan());
-            upgrader.Execute(_scopeProvider, _migrationBuilder, _keyValueService, _logger);
+            EnsureDatabaseSchema();
 
             MemberService.Saving += MemberService_Saving;
         }
@@ -43,6 +41,28 @@ namespace UmbracoIdentity.Composing
         public void Terminate()
         {
 
+        }
+
+        /// <summary>
+        /// Executes a db migration to install the UmbracoIdentity DB schema if required
+        /// </summary>
+        private void EnsureDatabaseSchema()
+        {
+            // migrate database schema
+            var upgrader = new Upgrader(new UmbracoIdentityMigrationPlan());
+
+            // check if we need to execute
+            // TODO: This logic should be better built into Umbraco (i.e. Package Migrations)
+            var stateValueKey = upgrader.StateValueKey;
+            var currMigrationState = _keyValueService.GetValue(stateValueKey);
+            var finalMigrationState = upgrader.Plan.FinalState;
+            var needsUpgrade = currMigrationState != finalMigrationState;
+            _logger.Debug<UmbracoIdentityComponent>("Final upgrade state is {FinalMigrationState}, database contains {DatabaseState}, needs upgrade? {NeedsUpgrade}", finalMigrationState, currMigrationState ?? "<null>", needsUpgrade);
+
+            if (needsUpgrade)
+            {
+                upgrader.Execute(_scopeProvider, _migrationBuilder, _keyValueService, _logger);
+            }
         }
 
         /// <summary>

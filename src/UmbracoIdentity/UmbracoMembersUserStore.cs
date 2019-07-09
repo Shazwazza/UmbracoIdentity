@@ -11,7 +11,6 @@ using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
-using Umbraco.Web;
 using Umbraco.Web.Composing;
 using Umbraco.Web.Models;
 using UmbracoIdentity.Models;
@@ -19,14 +18,6 @@ using Task = System.Threading.Tasks.Task;
 
 namespace UmbracoIdentity
 {
-    public class UmbracoIdentityOwinStartupBase : UmbracoDefaultOwinStartup
-    {
-        //protected FrontEndCookieAuthenticationOptions CreateFrontEndCookieAuthenticationOptions() => Umbraco.Core.Composing.Current.Factory.GetInstance<FrontEndCookieAuthenticationOptions>();
-        protected FrontEndCookieAuthenticationOptions CreateFrontEndCookieAuthenticationOptions() => new FrontEndCookieAuthenticationOptions(new FrontEndCookieManager(
-            Current.UmbracoContextAccessor,
-            Current.RuntimeState,
-            Current.Configs.Global()));
-    }
 
     /// <summary>
     /// A custom user store that uses Umbraco member data

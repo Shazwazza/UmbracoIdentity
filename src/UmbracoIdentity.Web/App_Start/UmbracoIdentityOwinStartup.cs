@@ -5,6 +5,7 @@ using Microsoft.Owin.Security.Cookies;
 using Owin;
 using System;
 using System.Configuration;
+using System.Linq;
 using UmbracoIdentity.Web;
 using UmbracoIdentity.Web.Models.UmbracoIdentity;
 
@@ -79,8 +80,10 @@ namespace UmbracoIdentity.Web
             //  clientSecret: "");
 
 #if DEBUG
-             
+
             //NOTE: THIS block gets removed during the build process, this is for internal dev purposes
+
+            bool HasConfig(params string[] keys) => keys.All(x => ConfigurationManager.AppSettings[x] != null);
 
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
@@ -97,14 +100,16 @@ namespace UmbracoIdentity.Web
             //app.UseTwoFactorRememberBrowserCookie(
             //    DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
 
-            app.UseFacebookAuthentication(
-                   appId: "YOURAPPID",
-                   appSecret: "YOURAPPSECRET");
+            if (HasConfig("UmbracoIdentity.OAuth.Facebook.AppId", "UmbracoIdentity.OAuth.Facebook.AppSecret"))
+                app.UseFacebookAuthentication(
+                    appId: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Facebook.AppId"],
+                    appSecret: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Facebook.AppSecret"]);
 
-            app.UseGoogleAuthentication(
-             clientId: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Google.ClientId"],
-             clientSecret: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Google.Secret"]);
+            if (HasConfig("UmbracoIdentity.OAuth.Google.ClientId", "UmbracoIdentity.OAuth.Google.Secret"))
+                app.UseGoogleAuthentication(
+                    clientId: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Google.ClientId"],
+                    clientSecret: ConfigurationManager.AppSettings["UmbracoIdentity.OAuth.Google.Secret"]);
 #endif
-        }        
+        }
     }
 }
