@@ -2,25 +2,40 @@
 using Umbraco.Core.Composing;
 using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
+using Umbraco.Core.Migrations;
+using Umbraco.Core.Migrations.Upgrade;
 using Umbraco.Core.Models;
+using Umbraco.Core.Scoping;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using UmbracoIdentity.Migrations;
 
 namespace UmbracoIdentity.Composing
 {
     public class UmbracoIdentityComponent : IComponent
     {
+        private readonly IScopeProvider _scopeProvider;
+        private readonly IMigrationBuilder _migrationBuilder;
+        private readonly IKeyValueService _keyValueService;
         private readonly ILogger _logger;
 
-        public UmbracoIdentityComponent(ILogger logger)
+        public UmbracoIdentityComponent(
+            IScopeProvider scopeProvider,
+            IMigrationBuilder migrationBuilder,
+            IKeyValueService keyValueService,
+            ILogger logger)
         {
+            _scopeProvider = scopeProvider ?? throw new ArgumentNullException(nameof(scopeProvider));
+            _migrationBuilder = migrationBuilder ?? throw new ArgumentNullException(nameof(migrationBuilder));
+            _keyValueService = keyValueService ?? throw new ArgumentNullException(nameof(keyValueService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void Initialize()
         {
-            //var upgrader = new Upgrader(new IdentityMigrationPlan());
-            //upgrader.Execute(_scopeProvider, _migrationBuilder, _keyValueService, _logger);
+            // migrate database schema
+            var upgrader = new Upgrader(new UmbracoIdentityMigrationPlan());
+            upgrader.Execute(_scopeProvider, _migrationBuilder, _keyValueService, _logger);
 
             MemberService.Saving += MemberService_Saving;
         }

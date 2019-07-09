@@ -264,6 +264,8 @@
     <Compile Include="MemberExtensions.cs" />
     <Compile Include="MembersEventHandler.cs" />
     <Compile Include="MembershipPasswordHasher.cs" />
+    <Compile Include="Migrations\MigrationInitial.cs" />
+    <Compile Include="Migrations\UmbracoIdentityMigrationPlan.cs" />
     <Compile Include="Models\IdentityRole.cs" />
     <Compile Include="Models\IdentityMember.cs" />
     <Compile Include="Models\IdentityMemberClaim.cs" />
@@ -271,9 +273,6 @@
     <Compile Include="Models\IdentityMemberLogin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionHelper.cs" />
-    <Compile Include="UmbracoBackOfficeAuthenticationHandler.cs" />
-    <Compile Include="UmbracoBackOfficeAuthenticationMiddleware.cs" />
-    <Compile Include="UmbracoBackOfficeAuthenticationOptions.cs" />
     <Compile Include="Models\UmbracoIdentityMember.cs" />
     <Compile Include="Models\UmbracoIdentityRole.cs" />
     <Compile Include="UmbracoIdentityConstants.cs" />
