@@ -137,7 +137,7 @@ Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Views\UmbracoIdentityAccount\*.csht
 
 # COPY THE APP_STARTUP OVER
 $AppStartDestFolder = Join-Path -Path $ReleaseFolder -ChildPath "App_Start";
-Copy-Item "$AppStartFolder\UmbracoIdentityOwinStartup.cs" -Destination (New-Item ($AppStartDestFolder) -Type directory);
+Copy-Item "$AppStartFolder\UmbracoIdentity*.cs" -Destination (New-Item ($AppStartDestFolder) -Type directory);
 
 # COPY THE JS OVER
 Copy-Item "$SolutionRoot\UmbracoIdentity.Web\Scripts\" -Destination $ReleaseFolder -recurse -Container -Filter *.js;

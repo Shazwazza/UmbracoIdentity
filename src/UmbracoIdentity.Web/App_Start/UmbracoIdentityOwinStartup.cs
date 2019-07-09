@@ -6,6 +6,7 @@ using Owin;
 using System;
 using System.Configuration;
 using System.Linq;
+using UmbracoIdentity; 
 using UmbracoIdentity.Web;
 using UmbracoIdentity.Web.Models.UmbracoIdentity;
 

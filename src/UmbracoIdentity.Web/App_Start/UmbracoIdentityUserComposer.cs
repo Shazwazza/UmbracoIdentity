@@ -3,6 +3,7 @@ using System.Web;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Web;
+using UmbracoIdentity;
 using UmbracoIdentity.Web.Models.UmbracoIdentity;
 
 namespace UmbracoIdentity.Web
