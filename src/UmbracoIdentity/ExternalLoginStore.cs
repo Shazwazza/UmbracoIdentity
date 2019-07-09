@@ -99,15 +99,14 @@ namespace UmbracoIdentity
 
         [TableName(TableName)]
         [ExplicitColumns]
-        [PrimaryKey("UserId,LoginProvider,ProviderKey")]
+        [PrimaryKey("ExternalLoginId")]
         internal class ExternalLoginDto
         {
-            //[Column("ExternalLoginId")]
-            //[PrimaryKeyColumn(Name = "PK_ExternalLoginId")]
-            //public int ExternalLoginId { get; set; }
+            [Column("ExternalLoginId")]
+            [PrimaryKeyColumn(Name = "PK_ExternalLoginId")]
+            public int ExternalLoginId { get; set; }
 
             [Column("UserId")]
-            [PrimaryKeyColumn(Name = "PK_UserId_LoginProvider_ProviderKey", AutoIncrement = false, OnColumns = "UserId,LoginProvider,ProviderKey")]
             public int UserId { get; set; }
 
             [Column("LoginProvider")]

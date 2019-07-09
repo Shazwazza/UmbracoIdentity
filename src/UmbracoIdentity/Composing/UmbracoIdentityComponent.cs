@@ -53,6 +53,8 @@ namespace UmbracoIdentity.Composing
 
             // check if we need to execute
             // TODO: This logic should be better built into Umbraco (i.e. Package Migrations)
+            // NOTE: The actual migration logic will not execute if the final migration step is detected from within upgrader.Execute, however getting to that point
+            // allocates more objects than we need so it's actually slightly faster to do this up-front check first
             var stateValueKey = upgrader.StateValueKey;
             var currMigrationState = _keyValueService.GetValue(stateValueKey);
             var finalMigrationState = upgrader.Plan.FinalState;
