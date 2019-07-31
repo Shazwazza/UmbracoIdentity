@@ -152,9 +152,9 @@ namespace UmbracoIdentity
             {
                 RequiredLength = provider.MinRequiredPasswordLength,
                 RequireNonLetterOrDigit = provider.MinRequiredNonAlphanumericCharacters > 0,
-                RequireDigit = false,
-                RequireLowercase = false,
-                RequireUppercase = false
+                RequireDigit = provider.PasswordRequiresDigit,
+                RequireLowercase = provider.PasswordRequiresLowercase,
+                RequireUppercase = provider.PasswordRequiresUppercase
             };
 
             //use a custom hasher based on our membership provider
@@ -182,6 +182,7 @@ namespace UmbracoIdentity
             {
                 manager.UserTokenProvider = new DataProtectorTokenProvider<TUser, int>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
+
             return manager;
         }
         
