@@ -5,6 +5,9 @@ using Umbraco.Core;
 
 namespace UmbracoIdentity
 {
+    /// <summary>
+    /// Duplicate of internal Umbraco.Core.NameValueCollectionExtensions
+    /// </summary>
     internal static class NameValueCollectionExtensions
     {
         public static IEnumerable<KeyValuePair<string, string>> AsEnumerable(this NameValueCollection nvc)

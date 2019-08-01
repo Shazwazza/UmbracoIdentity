@@ -143,8 +143,8 @@ namespace UmbracoIdentity
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<TUser, int>(manager)
             {
-                AllowOnlyAlphanumericUserNames = false,
-                RequireUniqueEmail = true
+                AllowOnlyAlphanumericUserNames = provider.AllowOnlyAlphanumericUserNames,
+                RequireUniqueEmail = provider.RequiresUniqueEmail
             };
 
             // Configure validation logic for passwords

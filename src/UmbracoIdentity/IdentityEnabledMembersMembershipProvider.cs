@@ -13,6 +13,13 @@ namespace UmbracoIdentity
     public class IdentityEnabledMembersMembershipProvider : MembersMembershipProvider
     {
         /// <summary>
+        /// Gets a value indicating whether member usernames are only alphanumeric.
+        /// </summary>
+        /// <value></value>
+        /// <returns>true if a usernames are only alphanumeric; otherwise, false. The default is false.</returns>
+        public bool AllowOnlyAlphanumericUserNames { get; private set; }
+
+        /// <summary>
         /// Gets a value indicating whether passwords require a digit.
         /// </summary>
         /// <value></value>
@@ -51,6 +58,7 @@ namespace UmbracoIdentity
         {
             base.Initialize(name, config);
 
+            AllowOnlyAlphanumericUserNames = config.GetValue("allowOnlyAlphanumericUserNames", false);
             PasswordRequiresDigit = config.GetValue("passwordRequiresDigit", false);
             PasswordRequiresLowercase = config.GetValue("passwordRequiresLowercase", false);
             PasswordRequiresUppercase = config.GetValue("passwordRequiresUppercase", false);
@@ -60,6 +68,7 @@ namespace UmbracoIdentity
 		{
 			var result = base.ToString();
 			var sb = new StringBuilder(result);
+			sb.AppendLine("_allowOnlyAlphanumericUserNames=" + AllowOnlyAlphanumericUserNames);
 			sb.AppendLine("_passwordRequiresDigit=" + PasswordRequiresDigit);
 			sb.AppendLine("_passwordRequiresLowercase=" + PasswordRequiresLowercase);
 			sb.AppendLine("_passwordRequiresUppercase=" + PasswordRequiresUppercase);
