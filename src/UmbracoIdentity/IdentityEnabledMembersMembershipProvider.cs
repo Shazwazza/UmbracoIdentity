@@ -1,5 +1,5 @@
 using System.Collections.Specialized;
-using System.Web.Configuration;
+using System.Text;
 using System.Web.Security;
 using Umbraco.Web.Security.Providers;
 
@@ -55,5 +55,15 @@ namespace UmbracoIdentity
             PasswordRequiresLowercase = config.GetValue("passwordRequiresLowercase", false);
             PasswordRequiresUppercase = config.GetValue("passwordRequiresUppercase", false);
         }
-    }
+
+		public override string ToString()
+		{
+			var result = base.ToString();
+			var sb = new StringBuilder(result);
+			sb.AppendLine("_passwordRequiresDigit=" + PasswordRequiresDigit);
+			sb.AppendLine("_passwordRequiresLowercase=" + PasswordRequiresLowercase);
+			sb.AppendLine("_passwordRequiresUppercase=" + PasswordRequiresUppercase);
+			return sb.ToString();
+		}
+	}
 }
