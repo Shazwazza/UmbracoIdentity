@@ -26,5 +26,12 @@ namespace UmbracoIdentity
             CookieSecure = globalSettings.UseHttps ? CookieSecureOption.Always : CookieSecureOption.SameAsRequest;
             CookiePath = "/";
         }
+
+        [Obsolete("Use FrontEndCookieAuthenticationOptions constructor with extended parameters")]
+        public FrontEndCookieAuthenticationOptions(FrontEndCookieManager frontEndCookieManager)
+        {
+            CookieManager = frontEndCookieManager;
+            AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie;
+        }
     }
 }
