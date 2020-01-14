@@ -38,7 +38,15 @@ namespace UmbracoIdentity.Web
             // signed in user and to use a cookie to temporarily store information 
             // about a user logging in with a third party login provider 
             // Configure the sign in cookie
+            
             var cookieOptions = CreateFrontEndCookieAuthenticationOptions();
+
+            // You can change the cookie options here. The cookie options will be automatically set
+            // based on what is configured in the security section of umbracoSettings.config and the web.config.
+            // For example:
+            // cookieOptions.CookieName = "testing";
+            // cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(20);
+
             cookieOptions.Provider = new CookieAuthenticationProvider
             {
                 // Enables the application to validate the security stamp when the user 
