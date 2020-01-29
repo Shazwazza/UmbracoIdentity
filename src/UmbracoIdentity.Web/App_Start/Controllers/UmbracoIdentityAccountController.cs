@@ -312,16 +312,25 @@ namespace UmbracoIdentity.Web.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> HandleLogin([Bind(Prefix = "loginModel")] LoginModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return CurrentUmbracoPage();
+
+            var user = await _userManager.FindAsync(model.Username, model.Password);
+
+            if (user != null)
             {
-                var user = await _userManager.FindAsync(model.Username, model.Password);
-                if (user != null)
+                //member exits but registered with social login.
+                if (user.PasswordHash == null)
                 {
-                    await SignInAsync(user, true);
-                    return RedirectToCurrentUmbracoPage();
+                    ModelState.AddModelError("loginModel", "Social Account registered");
+                    return CurrentUmbracoPage();
                 }
-                ModelState.AddModelError("loginModel", "Invalid username or password");
+
+                await SignInAsync(user, true);
+                return RedirectToCurrentUmbracoPage();
             }
+
+            ModelState.AddModelError("loginModel", "Invalid username or password");
 
             return CurrentUmbracoPage();
         }
