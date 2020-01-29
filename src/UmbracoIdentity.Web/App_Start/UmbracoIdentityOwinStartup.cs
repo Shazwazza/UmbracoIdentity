@@ -6,13 +6,13 @@ using Owin;
 using System;
 using System.Configuration;
 using System.Linq;
-using UmbracoIdentity; 
 using UmbracoIdentity.Web;
-using UmbracoIdentity.Web.Models.UmbracoIdentity;
+
 
 [assembly: OwinStartup("UmbracoIdentityStartup", typeof(UmbracoIdentityOwinStartup))]
 namespace UmbracoIdentity.Web
 {
+    using Models.UmbracoIdentity;
 
     /// <summary>
     /// OWIN Startup class for UmbracoIdentity 
