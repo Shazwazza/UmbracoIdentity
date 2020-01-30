@@ -319,8 +319,8 @@ namespace UmbracoIdentity.Web.Controllers
 
             if (user != null)
             {
-                //member exits but registered with social login.
-                if (user.PasswordHash == null)
+                //member exists but registered with social login.
+                if (user.PasswordHash.IsNullOrWhiteSpace())
                 {
                     ModelState.AddModelError("loginModel", "Social Account registered");
                     return CurrentUmbracoPage();
