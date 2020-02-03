@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Umbraco.Web.Composing;
 using Umbraco.Core;
 using Microsoft.AspNet.Identity;
+using UmbracoIdentity;
 
 namespace UmbracoIdentity.Web.Models.UmbracoIdentity
 {
