@@ -5,6 +5,9 @@
 
 [![NuGet](https://img.shields.io/nuget/v/UmbracoIdentity.svg)](https://www.nuget.org/packages/UmbracoIdentity)
 
+---
+_❤️ If you use and like UmbracoIdentity please consider [becoming a GitHub Sponsor](https://github.com/sponsors/Shazwazza/) ❤️_
+
 Allows for using OWIN &amp; ASP.Net Identity in Umbraco for front-end members
 
 This project will allow the use of ASP.Net Identity and OWIN to work for Umbraco members on your front-end website. It is compatible with your current members and how passwords are currently hashed - so long as your membership provider is configured for hashing passwords (default) and not encrypting them.
