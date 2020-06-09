@@ -258,7 +258,7 @@ namespace UmbracoIdentity
             return Task.FromResult(user.Email);
         }
 
-        public Task<bool> GetEmailConfirmedAsync(TMember user)
+        public virtual Task<bool> GetEmailConfirmedAsync(TMember user)
         {
             ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
@@ -266,7 +266,7 @@ namespace UmbracoIdentity
             throw new NotImplementedException();
         }
 
-        public Task SetEmailConfirmedAsync(TMember user, bool confirmed)
+        public virtual Task SetEmailConfirmedAsync(TMember user, bool confirmed)
         {
             ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException("user");
