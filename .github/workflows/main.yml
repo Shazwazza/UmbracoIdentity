@@ -27,7 +27,7 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Build
-      run: .\Build\Build-Release.ps1 -ReleaseVersionNumber $UMB_IDENTITY_VERSION -PreReleaseName build.$GITHUB_RUN_NUMBER -IsBuildServer 0
+      run: .\Build\Build-Release.ps1 -ReleaseVersionNumber ${{env.umb_identity_version}} -PreReleaseName build.${{github.run_number}} -IsBuildServer 0
       shell: powershell
   
     - uses: actions/upload-artifact@v2
