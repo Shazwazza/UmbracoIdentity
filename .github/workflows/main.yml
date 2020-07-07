@@ -2,6 +2,9 @@
 
 name: CI
 
+env:
+  umb_identity_version: 7.1.1
+
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
@@ -22,10 +25,11 @@ jobs:
       
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-      
+     
+    # TODO: Make this work
     # Get the latest v* tag name to set the version build number
-    - run: |
-        echo ::set-env name=UMB_IDENTITY_VERSION::$(git -C ${{github.workspace}} tag -l v* | tail -n1 )
+    # - run: |
+    #    echo ::set-env name=UMB_IDENTITY_VERSION::$(git -C ${{github.workspace}} tag -l v* | tail -n1 )
     
     # Runs a single command using the runners shell
     - name: Build
