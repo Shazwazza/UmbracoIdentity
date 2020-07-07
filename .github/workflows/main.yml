@@ -19,14 +19,14 @@ jobs:
     
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    
-    # Get the latest v* tag name to set the version build number
-    - run: |
-        echo ::set-env name=UMB_IDENTITY_VERSION::$(git tag -l v* | tail -n1 )
       
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
       
+    # Get the latest v* tag name to set the version build number
+    - run: |
+        echo ::set-env name=UMB_IDENTITY_VERSION::$(git -C ${{github.workspace}} tag -l v* | tail -n1 )
+    
     # Runs a single command using the runners shell
     - name: Build
       run: .\Build\Build-Release.ps1 -ReleaseVersionNumber ${{env.umb_identity_version}}-build.${{github.run_number}} -IsBuildServer 0
