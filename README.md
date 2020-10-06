@@ -16,7 +16,9 @@ There are some **[known issues and limitations](https://github.com/Shandem/Umbra
 
 ## Minimum Requirements:
 
-This package requires **Umbraco 7.6.0+**. 
+Package version support: 
+  * __Umbraco 8.0.0+__ with UmbracoIdentity v7.x and above
+  * __Umbraco 7.6.0+__ with UmbracoIdentity v6.x
 
 *[If you are upgrading UmbracoIdentity to a new major version you will need to read these instructions!](https://github.com/Shazwazza/UmbracoIdentity/wiki/Upgrading)*
 
