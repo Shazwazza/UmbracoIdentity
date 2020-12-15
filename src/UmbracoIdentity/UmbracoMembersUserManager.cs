@@ -23,30 +23,6 @@ namespace UmbracoIdentity
         {
         }        
 
-        //TODO: Support this
-        public override bool SupportsQueryableUsers
-        {
-            get { return false; }
-        }
-
-        //TODO: Support this
-        public override bool SupportsUserLockout
-        {
-            get { return false;  }
-        }
-        
-        public override bool SupportsUserSecurityStamp => true;
-
-        public override bool SupportsUserTwoFactor
-        {
-            get { return false; }
-        }
-
-        public override bool SupportsUserPhoneNumber
-        {
-            get { return false; }
-        }
-
         /// <summary>
         /// Default method to create a user manager
         /// </summary>
@@ -129,7 +105,6 @@ namespace UmbracoIdentity
           UmbracoMembersUserStore<TUser> customUserStore,
           IdentityEnabledMembersMembershipProvider membershipProvider = null)
         {
-
             //we'll grab some settings from the membership provider
             var provider = membershipProvider ?? Membership.Providers["UmbracoMembershipProvider"] as IdentityEnabledMembersMembershipProvider;
 
@@ -140,6 +115,14 @@ namespace UmbracoIdentity
 
             var manager = new UmbracoMembersUserManager<TUser>(customUserStore);
 
+            Configure(manager, provider, options);
+
+            return manager;
+        }
+
+        public static void Configure<TUserManager>(TUserManager manager, IdentityEnabledMembersMembershipProvider provider, IdentityFactoryOptions<TUserManager> options)
+            where TUserManager : UmbracoMembersUserManager<TUser>
+        {
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<TUser, int>(manager)
             {
@@ -182,10 +165,8 @@ namespace UmbracoIdentity
             {
                 manager.UserTokenProvider = new DataProtectorTokenProvider<TUser, int>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
-
-            return manager;
         }
-        
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
