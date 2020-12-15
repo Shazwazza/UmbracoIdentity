@@ -11,7 +11,7 @@ using UmbracoIdentity.Models;
 namespace UmbracoIdentity
 {
     /// <summary>
-    /// We are using a custom sqlce db to store this information
+    /// The storage to store external login info
     /// </summary>
     public class ExternalLoginStore :  IExternalLoginStore
     {

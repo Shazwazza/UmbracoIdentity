@@ -78,6 +78,10 @@ namespace UmbracoIdentity
             
             //Configure Umbraco user manager to be created per request
             app.CreatePerOwinContext<TManager>(userManager);
+
+            //Configure Umbraco member event handler to be created per request - this will ensure that the
+            // external logins are kept in sync if members are deleted from Umbraco
+            app.CreatePerOwinContext<MembersEventHandler<TUser>>((options, context) => new MembersEventHandler<TUser>(context));
         }
 
 
