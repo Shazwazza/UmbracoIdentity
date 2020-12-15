@@ -460,7 +460,12 @@ namespace UmbracoIdentity
             _disposed = true;
         }
 
-        private TMember MapFromMember(IMember member)
+        /// <summary>
+        /// Maps the data from <see cref="IMember"/> back to the <see cref="TMember"/> when retreived from the data source
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        protected virtual TMember MapFromMember(IMember member)
         {
             var result = new TMember
             {
