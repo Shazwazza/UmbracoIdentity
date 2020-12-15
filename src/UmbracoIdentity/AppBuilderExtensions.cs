@@ -5,6 +5,7 @@ using Umbraco.Core;
 using Microsoft.AspNet.Identity.Owin;
 using Umbraco.Core.Composing;
 using UmbracoIdentity.Models;
+using System.ComponentModel;
 
 namespace UmbracoIdentity
 {
@@ -38,13 +39,8 @@ namespace UmbracoIdentity
             app.CreatePerOwinContext<MembersEventHandler<T>>((options, context) => new MembersEventHandler<T>(context));
         }
 
-        /// <summary>
-        /// Configure identity User Manager for Umbraco with custom user store
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="app"></param>
-        /// <param name="customUserStore"></param>
-        /// <param name="membershipProvider"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This overload will cause problems and cannot be used")]
         public static void ConfigureUserManagerForUmbracoMembers<T>(this IAppBuilder app,
             UmbracoMembersUserStore<T> customUserStore,
             IdentityEnabledMembersMembershipProvider membershipProvider = null)
