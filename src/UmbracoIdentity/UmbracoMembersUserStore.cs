@@ -522,8 +522,13 @@ namespace UmbracoIdentity
             return viewProperties;
         }
 
-
-        private bool UpdateMemberProperties(IMember member, TMember user)
+        /// <summary>
+        /// Called to update the <see cref="IMember"/> instance to be persisted from the <see cref="TMember"/>
+        /// </summary>
+        /// <param name="member"></param>
+        /// <param name="user"></param>
+        /// <returns>Returns true if any property values were changed</returns>
+        protected virtual bool UpdateMemberProperties(IMember member, TMember user)
         {
             var anythingChanged = false;
             //don't assign anything if nothing has changed as this will trigger
