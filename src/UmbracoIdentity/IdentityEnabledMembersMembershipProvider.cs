@@ -49,6 +49,9 @@ namespace UmbracoIdentity
 
         public new bool VerifyPassword(string password, string hashedPassword)
         {
+            if (hashedPassword == null)
+                return true;
+
             return CheckPassword(password, hashedPassword);
         }
 

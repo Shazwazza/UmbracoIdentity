@@ -318,6 +318,13 @@ namespace UmbracoIdentity.Web.Controllers
                 var user = await _userManager.FindAsync(model.Username, model.Password);
                 if (user != null)
                 {
+
+                    if (user.PasswordHash == null)
+                    {
+                        ModelState.AddModelError("loginModel", "Social Account registered but no website password");
+                        return CurrentUmbracoPage();
+                    }
+
                     await SignInAsync(user, true);
                     return RedirectToCurrentUmbracoPage();
                 }
