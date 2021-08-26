@@ -38,6 +38,6 @@ See docs for further details, integration notes, examples, usage, etc...
 
 ## Copyright & Licence
 
-&copy; 2020 by Shannon Deminick
+&copy; 2021 by Shannon Deminick
 
 This is free software and is licensed under the [MIT License](http://opensource.org/licenses/MIT)
