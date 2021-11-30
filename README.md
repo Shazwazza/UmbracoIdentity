@@ -17,8 +17,10 @@ There are some **[known issues and limitations](https://github.com/Shandem/Umbra
 ## Minimum Requirements:
 
 Package version support: 
-  * __Umbraco 8.0.0+__ with UmbracoIdentity v7.x and above
-  * __Umbraco 7.6.0+__ with UmbracoIdentity v6.x
+  * __Umbraco 8.0.0+ && < 9.0.0__ with UmbracoIdentity v7.x and above
+  * __Umbraco 7.6.0+ && < 8.0.0__ with UmbracoIdentity v6.x
+
+**[UmbracoIdentity is not suitable and will not work with Umbraco 9+. Please see this ticket #145 for more info.](https://github.com/Shazwazza/UmbracoIdentity/issues/145)**
 
 *[If you are upgrading UmbracoIdentity to a new major version you will need to read these instructions!](https://github.com/Shazwazza/UmbracoIdentity/wiki/Upgrading)*
 
