@@ -49,6 +49,10 @@ namespace UmbracoIdentity
 
         public new bool VerifyPassword(string password, string hashedPassword)
         {
+            //member exits but registered with social login.
+            if (hashedPassword == null)
+               return true;
+
             return CheckPassword(password, hashedPassword);
         }
 

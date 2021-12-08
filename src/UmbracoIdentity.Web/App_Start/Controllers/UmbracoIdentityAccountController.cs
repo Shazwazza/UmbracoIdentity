@@ -1,26 +1,25 @@
-﻿using System;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.Owin;
+using Microsoft.Owin.Security;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin;
-using Microsoft.Owin.Security;
-using UmbracoIdentity.Web.Models.UmbracoIdentity;
-using Umbraco.Web;
 using Umbraco.Core;
-using Umbraco.Web.Models;
-using Umbraco.Web.Mvc;
-using UmbracoIdentity.Models;
-using UmbracoIdentity;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Persistence;
 using Umbraco.Core.Services;
+using Umbraco.Web;
+using Umbraco.Web.Models;
+using Umbraco.Web.Mvc;
+using UmbracoIdentity.Models;
 
-namespace UmbracoIdentity.Web.Controllers 
+namespace UmbracoIdentity.Web.Controllers
 {
+    using Models.UmbracoIdentity;
+
     [Authorize]
     public class UmbracoIdentityAccountController : SurfaceController
     {
@@ -313,16 +312,25 @@ namespace UmbracoIdentity.Web.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> HandleLogin([Bind(Prefix = "loginModel")] LoginModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return CurrentUmbracoPage();
+
+            var user = await _userManager.FindAsync(model.Username, model.Password);
+
+            if (user != null)
             {
-                var user = await _userManager.FindAsync(model.Username, model.Password);
-                if (user != null)
+                //member exists but registered with social login.
+                if (user.PasswordHash.IsNullOrWhiteSpace())
                 {
-                    await SignInAsync(user, true);
-                    return RedirectToCurrentUmbracoPage();
+                    ModelState.AddModelError("loginModel", "Social Account registered");
+                    return CurrentUmbracoPage();
                 }
-                ModelState.AddModelError("loginModel", "Invalid username or password");
+
+                await SignInAsync(user, true);
+                return RedirectToCurrentUmbracoPage();
             }
+
+            ModelState.AddModelError("loginModel", "Invalid username or password");
 
             return CurrentUmbracoPage();
         }
